@@ -1,0 +1,69 @@
+<?php
+use App\Core\View;
+use App\Helpers\Lang;
+
+$pageTitle = 'Applications';
+$base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+$statuses = [
+    '' => 'all',
+    'pending' => 'pending',
+    'under_review' => 'under_review',
+    'approved' => 'approved',
+    'rejected' => 'rejected',
+];
+?>
+<div class="mb-3"><?php \App\Core\View::heading('application_management', 'h5', 'file-earmark-text'); ?></div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="btn-group btn-group-sm flex-wrap">
+        <?php foreach ($statuses as $val => $key):
+            $label = Lang::ui($key);
+        ?>
+        <a href="?status=<?= $val ?>" class="btn btn-outline-primary bilingual-btn <?= ($currentStatus ?? '') === $val ? 'active' : '' ?>">
+            <span class="label-ta"><?= View::escape($label['ta']) ?></span>
+            <span class="label-en"><?= View::escape($label['en']) ?></span>
+        </a>
+        <?php endforeach; ?>
+    </div>
+</div>
+
+<div class="member-cards">
+    <?php if (empty($applications['data'])): ?>
+    <div class="text-center py-5 text-muted bilingual-text bilingual-block">
+        <?php View::text('no_applications', 'p', true); ?>
+    </div>
+    <?php else: ?>
+    <?php foreach ($applications['data'] as $app): ?>
+    <div class="member-card" onclick="location.href='<?= $base ?>/applications/<?= $app['id'] ?>'">
+        <div class="card-top">
+            <span class="badge bg-<?= match($app['status']) { 'approved' => 'success', 'rejected' => 'danger', 'pending' => 'warning', default => 'info' } ?>">
+                <?php $st = \App\Helpers\Lang::ui($app['status']); ?>
+                <?= View::escape(is_array($st) ? $st['ta'] : $st) ?>
+            </span>
+            <small class="text-muted"><?= date('d M Y', strtotime($app['created_at'])) ?></small>
+        </div>
+        <h6 class="mb-1"><?= View::escape($app['full_name_tamil'] ?: $app['full_name_english']) ?></h6>
+        <?php if ($app['full_name_english'] && $app['full_name_tamil']): ?>
+        <p class="text-muted small mb-1"><?= View::escape($app['full_name_english']) ?></p>
+        <?php endif; ?>
+        <p class="text-primary small mb-1"><?= View::escape($app['application_number']) ?></p>
+        <div class="card-meta">
+            <span><i class="bi bi-telephone"></i> <?= View::escape($app['mobile']) ?></span>
+            <span><i class="bi bi-card-checklist"></i> <?= View::escape($app['membership_type_name'] ?? '') ?></span>
+        </div>
+    </div>
+    <?php endforeach; ?>
+    <?php endif; ?>
+</div>
+
+<?php if (($applications['total_pages'] ?? 1) > 1): ?>
+<nav class="mt-3">
+    <ul class="pagination pagination-sm justify-content-center">
+        <?php for ($i = 1; $i <= $applications['total_pages']; $i++): ?>
+        <li class="page-item <?= $i === $applications['page'] ? 'active' : '' ?>">
+            <a class="page-link" href="?status=<?= $currentStatus ?? '' ?>&page=<?= $i ?>"><?= $i ?></a>
+        </li>
+        <?php endfor; ?>
+    </ul>
+</nav>
+<?php endif; ?>

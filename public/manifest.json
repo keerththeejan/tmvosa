@@ -1,0 +1,28 @@
+{
+    "name": "OSA Alumni Membership",
+    "short_name": "OSA Alumni",
+    "description": "Kilinochchi / Thiruvaiyaru Maha Vidyalayam Old Students' Association Membership System",
+    "start_url": "apply",
+    "display": "standalone",
+    "background_color": "#1a5276",
+    "theme_color": "#1a5276",
+    "orientation": "portrait-primary",
+    "scope": "./",
+    "lang": "en",
+    "icons": [
+        {
+            "src": "assets/img/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "assets/img/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": ["education", "productivity"],
+    "screenshots": []
+}

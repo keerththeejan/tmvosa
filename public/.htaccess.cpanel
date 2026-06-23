@@ -1,0 +1,15 @@
+# cPanel: use this when public/ is your domain document root.
+# Rename to .htaccess (replace the existing file) after upload.
+
+RewriteEngine On
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
+
+# PHP settings (adjust in cPanel MultiPHP INI Editor if needed)
+<IfModule mod_php.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 12M
+    php_value max_execution_time 120
+</IfModule>
