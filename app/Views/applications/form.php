@@ -14,6 +14,12 @@ $pageTitle = 'Membership Application';
     </div>
 
     <div class="px-3 pb-5" id="applicationFormSection">
+        <script>
+        window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
+            'blockDuplicateMobile' => false,
+            'blockDuplicateEmail' => false,
+        ], JSON_UNESCAPED_UNICODE) ?>;
+        </script>
         <?php View::partial('application-wizard', compact('countries', 'membershipTypes')); ?>
     </div>
 </div>

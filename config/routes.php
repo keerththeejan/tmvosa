@@ -12,6 +12,7 @@ $router->post('/login', ['AuthController', 'login']);
 $router->get('/logout', ['AuthController', 'logout'], ['AuthMiddleware']);
 $router->get('/apply', ['ApplicationController', 'form']);
 $router->post('/apply', ['ApplicationController', 'submit']);
+$router->post('/apply/validate-field', ['ApplicationController', 'validateField']);
 $router->post('/track', ['ApplicationController', 'track']);
 $router->get('/verify/{number}', ['CardController', 'verify']);
 $router->get('/files/{folder}/{filename}', ['FileController', 'serve'], ['AuthMiddleware']);
@@ -22,6 +23,7 @@ $router->get('/api/chart-data', ['DashboardController', 'chartData'], ['AuthMidd
 
 // Applications (Secretary+)
 $router->get('/applications', ['ApplicationController', 'index'], ['AuthMiddleware']);
+$router->get('/applications/duplicates', ['ApplicationController', 'duplicates'], ['AuthMiddleware']);
 $router->get('/applications/{id}', ['ApplicationController', 'show'], ['AuthMiddleware']);
 $router->post('/applications/{id}/approve', ['ApplicationController', 'approve'], ['AuthMiddleware']);
 $router->post('/applications/{id}/reject', ['ApplicationController', 'reject'], ['AuthMiddleware']);

@@ -18,6 +18,24 @@
     const DRAFT_RESTORE_MSG_EN = 'Draft information restored successfully';
     const DRAFT_FILE_HINT_TA = 'முந்தைய கோப்பு: ';
     const DRAFT_FILE_HINT_EN = 'Previous file: ';
+    const DECLARATION_REQUIRED_MSG = 'உறுதிமொழியை ஏற்றுக்கொள்ள வேண்டும்.<br>You must accept the declaration before submitting the application.';
+    const FIELD_VALIDATE_DELAY = 1000;
+
+    const validationSettings = window.APP_VALIDATION_CONFIG || {
+        blockDuplicateMobile: false,
+        blockDuplicateEmail: false
+    };
+
+    const validationState = {
+        nic: { status: 'idle', block: false },
+        mobile: { status: 'idle', block: false, warning: false },
+        email: { status: 'idle', block: false, warning: false }
+    };
+
+    const fieldValidateTimers = {};
+    let nicValidateRequest = null;
+    let mobileValidateRequest = null;
+    let emailValidateRequest = null;
 
     let draftSaveTimer = null;
     let isRestoringDraft = false;
@@ -312,7 +330,258 @@
                 return false;
             }
         }
+        if (!validateDeclaration(false)) {
+            return false;
+        }
+        if (!isSubmissionAllowed()) {
+            Swal.fire({
+                title: 'சரிபார்ப்பு தேவை / Validation Required',
+                html: 'தயவுசெய்து படிவத்தின் சரிபார்ப்பு பிழைகளை சரிசெய்யவும்.<br>Please resolve the validation messages before submitting.',
+                icon: 'warning'
+            });
+            return false;
+        }
         return true;
+    }
+
+    function validateDeclaration(showAlert) {
+        if ($('#agreeTerms').is(':checked')) {
+            return true;
+        }
+        if (showAlert !== false) {
+            Swal.fire({
+                title: 'தேவை / Required',
+                html: DECLARATION_REQUIRED_MSG,
+                icon: 'warning'
+            });
+        }
+        return false;
+    }
+
+    function isSubmissionAllowed() {
+        if (validationState.nic.status === 'duplicate' || validationState.nic.block) {
+            return false;
+        }
+        if (validationState.nic.status === 'checking') {
+            return false;
+        }
+        if (validationState.mobile.block) {
+            return false;
+        }
+        if (validationState.email.block) {
+            return false;
+        }
+        return true;
+    }
+
+    function updateSubmitButtonState() {
+        const declarationOk = $('#agreeTerms').is(':checked');
+        const allowed = declarationOk && isSubmissionAllowed();
+        $('#submitBtn').prop('disabled', !allowed);
+    }
+
+    function renderFieldFeedback($input, $feedback, result) {
+        if (!$feedback.length) return;
+
+        $input.removeClass('is-valid is-invalid');
+        $feedback.removeClass('text-success text-danger text-warning').addClass('d-none').empty();
+
+        if (!result || result.status === 'idle' || result.status === 'empty' || result.status === 'checking') {
+            if (result && result.status === 'checking') {
+                $feedback.removeClass('d-none').addClass('text-muted').html(
+                    '<span class="label-ta">சரிபார்க்கப்படுகிறது...</span><br>' +
+                    '<span class="label-en">Checking...</span>'
+                );
+            }
+            return;
+        }
+
+        const isSuccess = result.status === 'available';
+        const isWarning = result.status === 'duplicate' && result.warning;
+        const isError = result.status === 'duplicate' && !result.warning || result.status === 'invalid';
+
+        $feedback.removeClass('d-none');
+        if (isSuccess) {
+            $input.addClass('is-valid');
+            $feedback.addClass('text-success').html(
+                '<span class="label-ta">&#10003; ' + escapeHtml(result.message_ta || '') + '</span><br>' +
+                '<span class="label-en">&#10003; ' + escapeHtml(result.message_en || '') + '</span>'
+            );
+        } else if (isWarning) {
+            $input.addClass('is-invalid');
+            $feedback.addClass('text-warning').html(
+                '<span class="label-ta">&#9888; ' + escapeHtml(result.message_ta || '') + '</span><br>' +
+                '<span class="label-en">&#9888; ' + escapeHtml(result.message_en || '') + '</span>'
+            );
+        } else if (isError) {
+            $input.addClass('is-invalid');
+            $feedback.addClass('text-danger').html(
+                '<span class="label-ta">&#10007; ' + escapeHtml(result.message_ta || '') + '</span><br>' +
+                '<span class="label-en">&#10007; ' + escapeHtml(result.message_en || '') + '</span>'
+            );
+        }
+    }
+
+    function escapeHtml(text) {
+        return $('<div>').text(text || '').html();
+    }
+
+    function setValidationState(field, result) {
+        validationState[field] = {
+            status: result.status || 'idle',
+            block: !!result.block,
+            warning: !!result.warning
+        };
+        updateSubmitButtonState();
+    }
+
+    function checkFieldRemote(field, value, $input, $feedback) {
+        const apiField = field === 'nic' ? 'nic_number' : field;
+        let activeRequest = null;
+
+        if (field === 'nic' && nicValidateRequest) {
+            nicValidateRequest.abort();
+        } else if (field === 'mobile' && mobileValidateRequest) {
+            mobileValidateRequest.abort();
+        } else if (field === 'email' && emailValidateRequest) {
+            emailValidateRequest.abort();
+        }
+
+        const checking = { status: 'checking' };
+        setValidationState(field, checking);
+        renderFieldFeedback($input, $feedback, checking);
+
+        activeRequest = $.ajax({
+            url: BASE_URL + '/apply/validate-field',
+            method: 'POST',
+            dataType: 'json',
+            data: {
+                field: apiField,
+                value: value,
+                _csrf_token: CSRF_TOKEN
+            }
+        });
+
+        if (field === 'nic') {
+            nicValidateRequest = activeRequest;
+        } else if (field === 'mobile') {
+            mobileValidateRequest = activeRequest;
+        } else if (field === 'email') {
+            emailValidateRequest = activeRequest;
+        }
+
+        activeRequest.done(function(res) {
+            if (!res || !res.success) return;
+            setValidationState(field, res);
+            renderFieldFeedback($input, $feedback, res);
+        }).fail(function(_xhr, status) {
+            if (status === 'abort') return;
+            const failed = { status: 'idle', block: false };
+            setValidationState(field, failed);
+            renderFieldFeedback($input, $feedback, null);
+        }).always(function() {
+            if (field === 'nic' && nicValidateRequest === activeRequest) {
+                nicValidateRequest = null;
+            } else if (field === 'mobile' && mobileValidateRequest === activeRequest) {
+                mobileValidateRequest = null;
+            } else if (field === 'email' && emailValidateRequest === activeRequest) {
+                emailValidateRequest = null;
+            }
+        });
+
+        return activeRequest;
+    }
+
+    function scheduleFieldValidation(field, $input, $feedback) {
+        const value = ($input.val() || '').trim();
+        clearTimeout(fieldValidateTimers[field]);
+        fieldValidateTimers[field] = setTimeout(function() {
+            if (!value) {
+                setValidationState(field, { status: 'idle', block: false });
+                renderFieldFeedback($input, $feedback, null);
+                return;
+            }
+            checkFieldRemote(field, value, $input, $feedback);
+        }, FIELD_VALIDATE_DELAY);
+    }
+
+    function initFieldValidation() {
+        const $nic = $('#nicNumberInput');
+        const $mobile = $('#mobileInput');
+        const $email = $('#emailInput');
+
+        $nic.on('blur', function() {
+            const value = ($(this).val() || '').trim();
+            clearTimeout(fieldValidateTimers.nic);
+            if (!value) {
+                setValidationState('nic', { status: 'idle', block: false });
+                renderFieldFeedback($nic, $('#nicValidationFeedback'), null);
+                return;
+            }
+            checkFieldRemote('nic', value, $nic, $('#nicValidationFeedback'));
+        }).on('input', function() {
+            scheduleFieldValidation('nic', $nic, $('#nicValidationFeedback'));
+        });
+
+        $mobile.on('blur', function() {
+            const value = ($(this).val() || '').trim();
+            clearTimeout(fieldValidateTimers.mobile);
+            if (!value) {
+                setValidationState('mobile', { status: 'idle', block: false });
+                renderFieldFeedback($mobile, $('#mobileValidationFeedback'), null);
+                return;
+            }
+            checkFieldRemote('mobile', value, $mobile, $('#mobileValidationFeedback'));
+        }).on('input', function() {
+            scheduleFieldValidation('mobile', $mobile, $('#mobileValidationFeedback'));
+        });
+
+        $email.on('blur', function() {
+            const value = ($(this).val() || '').trim();
+            clearTimeout(fieldValidateTimers.email);
+            if (!value) {
+                setValidationState('email', { status: 'idle', block: false });
+                renderFieldFeedback($email, $('#emailValidationFeedback'), null);
+                return;
+            }
+            checkFieldRemote('email', value, $email, $('#emailValidationFeedback'));
+        }).on('input', function() {
+            scheduleFieldValidation('email', $email, $('#emailValidationFeedback'));
+        });
+
+        $('#agreeTerms').on('change', updateSubmitButtonState);
+    }
+
+    function ensureRemoteValidationBeforeSubmit() {
+        const deferred = $.Deferred();
+        const checks = [];
+        const $nic = $('#nicNumberInput');
+        const nicVal = ($nic.val() || '').trim();
+        if (nicVal) {
+            checks.push(checkFieldRemote('nic', nicVal, $nic, $('#nicValidationFeedback')));
+        }
+        const $mobile = $('#mobileInput');
+        const mobileVal = ($mobile.val() || '').trim();
+        if (mobileVal) {
+            checks.push(checkFieldRemote('mobile', mobileVal, $mobile, $('#mobileValidationFeedback')));
+        }
+        const $email = $('#emailInput');
+        const emailVal = ($email.val() || '').trim();
+        if (emailVal) {
+            checks.push(checkFieldRemote('email', emailVal, $email, $('#emailValidationFeedback')));
+        }
+
+        if (!checks.length) {
+            deferred.resolve();
+            return deferred.promise();
+        }
+
+        $.when.apply($, checks).always(function() {
+            setTimeout(function() {
+                deferred.resolve();
+            }, 50);
+        });
+        return deferred.promise();
     }
 
     function initSinglePageUI() {
@@ -320,6 +589,7 @@
         $('#wizardProgress').addClass('d-none');
         $('#startBtn, #navButtons').addClass('d-none');
         $('#submitBtn').removeClass('d-none').addClass('w-100');
+        updateSubmitButtonState();
     }
 
     function openDraftFileDb() {
@@ -625,6 +895,12 @@
 
         Promise.all(fileRestorePromises).finally(function() {
             isRestoringDraft = false;
+            $('#nicNumberInput, #mobileInput, #emailInput').each(function() {
+                if (($(this).val() || '').trim()) {
+                    $(this).trigger('blur');
+                }
+            });
+            updateSubmitButtonState();
             showDraftRestoreNotice();
             saveDraftNow();
         });
@@ -661,6 +937,7 @@
         $('#prevBtn').toggleClass('d-none', step <= 1);
         $('#nextBtn').toggleClass('d-none', step <= 1 || step >= totalSteps);
         $('#submitBtn').toggleClass('d-none', step !== totalSteps);
+        updateSubmitButtonState();
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -786,42 +1063,55 @@
         if (!validateAllFormSteps()) return;
 
         const $btn = $('#submitBtn');
+        const $form = $(this);
         $btn.prop('disabled', true);
 
-        $.ajax({
-            url: BASE_URL + '/apply',
-            method: 'POST',
-            data: new FormData(this),
-            processData: false,
-            contentType: false,
-            success: function(res) {
-                if (res.success) {
-                    Swal.fire({
-                        title: 'விண்ணப்பம் சமர்ப்பிக்கப்பட்டது! / Application Submitted!',
-                        html: 'உங்கள் விண்ணப்ப இலக்கம் / Application number:<br><strong>' + res.application_number + '</strong>',
-                        icon: 'success',
-                        confirmButtonText: 'சரி / OK'
-                    }).then(function() {
-                        clearApplicationDraft();
-                        $('#applicationForm')[0].reset();
-                        $('#dateOfBirthHidden').val('');
-                        resetAllUploads();
-                        initSinglePageUI();
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    });
-                } else {
-                    Swal.fire('பிழை / Error', res.message || 'Submission failed.', 'error');
-                }
-            },
-            error: function(xhr) {
-                const msg = xhr.responseJSON && xhr.responseJSON.message
-                    ? xhr.responseJSON.message
-                    : 'Submission failed. Please try again.';
-                Swal.fire('பிழை / Error', msg, 'error');
-            },
-            complete: function() {
-                $btn.prop('disabled', false);
+        ensureRemoteValidationBeforeSubmit().done(function() {
+            if (!validateDeclaration() || !isSubmissionAllowed()) {
+                updateSubmitButtonState();
+                return;
             }
+
+            $.ajax({
+                url: BASE_URL + '/apply',
+                method: 'POST',
+                data: new FormData($form[0]),
+                processData: false,
+                contentType: false,
+                success: function(res) {
+                    if (res.success) {
+                        Swal.fire({
+                            title: 'விண்ணப்பம் சமர்ப்பிக்கப்பட்டது! / Application Submitted!',
+                            html: 'உங்கள் விண்ணப்ப இலக்கம் / Application number:<br><strong>' + res.application_number + '</strong>',
+                            icon: 'success',
+                            confirmButtonText: 'சரி / OK'
+                        }).then(function() {
+                            clearApplicationDraft();
+                            $form[0].reset();
+                            $('#dateOfBirthHidden').val('');
+                            resetAllUploads();
+                            validationState.nic = { status: 'idle', block: false };
+                            validationState.mobile = { status: 'idle', block: false, warning: false };
+                            validationState.email = { status: 'idle', block: false, warning: false };
+                            $('.field-validation-feedback').addClass('d-none').empty();
+                            $('#nicNumberInput, #mobileInput, #emailInput').removeClass('is-valid is-invalid');
+                            initSinglePageUI();
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        });
+                    } else {
+                        Swal.fire('பிழை / Error', res.message || 'Submission failed.', 'error');
+                    }
+                },
+                error: function(xhr) {
+                    const msg = xhr.responseJSON && xhr.responseJSON.message
+                        ? xhr.responseJSON.message
+                        : 'Submission failed. Please try again.';
+                    Swal.fire('பிழை / Error', msg, 'error');
+                },
+                complete: function() {
+                    updateSubmitButtonState();
+                }
+            });
         });
     });
 
@@ -868,6 +1158,7 @@
 
     initDobInput();
     initUploadAreas();
+    initFieldValidation();
     initSinglePageUI();
     initDraftAutoSave();
 })();

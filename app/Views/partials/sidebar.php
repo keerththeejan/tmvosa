@@ -28,6 +28,7 @@
         <?php if (\App\Core\Auth::hasRole('super_admin')): ?>
         <li class="sidebar-divider"></li>
         <li><a href="<?= $base ?>/admin/users"><i class="bi bi-person-gear"></i> Users</a></li>
+        <li><a href="<?= $base ?>/applications/duplicates"><i class="bi bi-exclamation-triangle"></i> Duplicate NICs</a></li>
         <li><a href="<?= $base ?>/admin/settings"><i class="bi bi-gear"></i> Settings</a></li>
         <li><a href="<?= $base ?>/admin/email-settings"><i class="bi bi-envelope-at"></i> Email Settings</a></li>
         <li><a href="<?= $base ?>/admin/audit-logs"><i class="bi bi-journal-text"></i> Audit Logs</a></li>

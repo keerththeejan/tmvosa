@@ -65,8 +65,10 @@ use App\Helpers\Lang;
                     </div>
                     <div class="mb-3">
                         <?php View::label('nic_number', true); ?>
-                        <input type="text" name="nic_number" class="form-control" required
-                               placeholder="<?= View::escape(View::placeholder('nic_number')) ?>">
+                        <input type="text" name="nic_number" id="nicNumberInput" class="form-control" required
+                               placeholder="<?= View::escape(View::placeholder('nic_number')) ?>"
+                               autocomplete="off">
+                        <div id="nicValidationFeedback" class="field-validation-feedback mt-1 small d-none" role="alert"></div>
                     </div>
                     <div class="mb-3">
                         <?php View::label('current_address', true); ?>
@@ -90,8 +92,10 @@ use App\Helpers\Lang;
                     <div class="row g-3 mb-0">
                         <div class="col-12 col-sm-6">
                             <?php View::label('mobile', true); ?>
-                            <input type="tel" name="mobile" class="form-control" required
-                                   placeholder="<?= View::escape(View::placeholder('mobile')) ?>">
+                            <input type="tel" name="mobile" id="mobileInput" class="form-control" required
+                                   placeholder="<?= View::escape(View::placeholder('mobile')) ?>"
+                                   autocomplete="tel">
+                            <div id="mobileValidationFeedback" class="field-validation-feedback mt-1 small d-none" role="alert"></div>
                         </div>
                         <div class="col-12 col-sm-6">
                             <?php View::label('whatsapp', false); ?>
@@ -100,8 +104,10 @@ use App\Helpers\Lang;
                         </div>
                         <div class="col-12">
                             <?php View::label('email', false); ?>
-                            <input type="email" name="email" class="form-control"
-                                   placeholder="<?= View::escape(View::placeholder('email')) ?>">
+                            <input type="email" name="email" id="emailInput" class="form-control"
+                                   placeholder="<?= View::escape(View::placeholder('email')) ?>"
+                                   autocomplete="email">
+                            <div id="emailValidationFeedback" class="field-validation-feedback mt-1 small d-none" role="alert"></div>
                         </div>
                     </div>
                 </div>
@@ -245,7 +251,7 @@ use App\Helpers\Lang;
                 </div>
                 <div class="card-body">
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                        <input type="checkbox" class="form-check-input" id="agreeTerms" name="agree_declaration" value="1">
                         <label class="form-check-label declaration-text bilingual-label" for="agreeTerms">
                             <?php $decl = Lang::field('declaration'); ?>
                             <span class="label-ta"><?= View::escape($decl['ta']) ?> <span class="text-danger">*</span></span>
@@ -277,7 +283,7 @@ use App\Helpers\Lang;
                     <span class="label-en"><?= View::escape(Lang::ui('next')['en']) ?></span>
                 </button>
             </div>
-            <button type="submit" class="btn btn-success btn-lg w-100 bilingual-btn" id="submitBtn">
+            <button type="submit" class="btn btn-success btn-lg w-100 bilingual-btn" id="submitBtn" disabled>
                 <span class="label-ta"><i class="bi bi-send"></i> <?= View::escape(Lang::ui('submit')['ta']) ?></span>
                 <span class="label-en"><?= View::escape(Lang::ui('submit')['en']) ?></span>
             </button>

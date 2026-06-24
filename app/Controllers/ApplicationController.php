@@ -14,6 +14,8 @@ use App\Helpers\NumberGenerator;
 use App\Helpers\FileUploader;
 use App\Helpers\Mailer;
 use App\Helpers\DateParser;
+use App\Helpers\ApplicationValidation;
+use App\Models\Setting;
 
 class ApplicationController extends Controller
 {
@@ -21,7 +23,25 @@ class ApplicationController extends Controller
     {
         $countries = Database::fetchAll("SELECT * FROM countries WHERE is_active = 1 ORDER BY name");
         $membershipTypes = Database::fetchAll("SELECT * FROM membership_types WHERE is_active = 1");
-        $this->view('applications/form', compact('countries', 'membershipTypes') + ['pageScript' => 'application-wizard.js']);
+        $validationConfig = [
+            'blockDuplicateMobile' => Setting::get('block_duplicate_mobile', '0') === '1',
+            'blockDuplicateEmail' => Setting::get('block_duplicate_email', '0') === '1',
+        ];
+        $this->view('applications/form', compact('countries', 'membershipTypes', 'validationConfig') + ['pageScript' => 'application-wizard.js']);
+    }
+
+    public function validateField(): void
+    {
+        $field = Security::sanitize($this->input('field', ''));
+        $value = $this->input('value', '');
+        $allowed = ['nic_number', 'mobile', 'email'];
+
+        if (!in_array($field, $allowed, true)) {
+            $this->json(['success' => false, 'message' => 'Invalid field.'], 422);
+        }
+
+        $result = ApplicationValidation::checkField($field, $value);
+        $this->json(['success' => true] + $result);
     }
 
     public function submit(): void
@@ -35,6 +55,7 @@ class ApplicationController extends Controller
         $data['date_of_birth'] = DateParser::parseDob($rawDob);
         $errors = $this->validateApplicationData($data, $rawDob);
         $errors = array_merge($errors, $this->validateRequiredDocuments());
+        $errors = array_merge($errors, $this->validateUniqueness($data));
         if ($errors) {
             $this->json(['success' => false, 'message' => implode(' ', $errors)], 422);
         }
@@ -95,7 +116,25 @@ class ApplicationController extends Controller
         foreach ($documents as $doc) {
             $documentsByType[$doc['document_type']] = $doc;
         }
-        $this->view('applications/show', compact('application', 'documents', 'documentsByType'));
+        $duplicates = ApplicationValidation::findDuplicatesForNic($application['nic_number'] ?? '');
+        $this->view('applications/show', compact('application', 'documents', 'documentsByType', 'duplicates'));
+    }
+
+    public function duplicates(): void
+    {
+        if (!Auth::hasRole('super_admin')) {
+            http_response_code(403);
+            echo 'Unauthorized';
+            return;
+        }
+
+        $summary = ApplicationValidation::getDuplicateNicSummary();
+        $details = [];
+        foreach ($summary as $row) {
+            $details[$row['nic_key']] = ApplicationValidation::findDuplicatesForNic($row['nic_key']);
+        }
+
+        $this->view('applications/duplicates', compact('summary', 'details'));
     }
 
     public function uploadDocument(string $id): void
@@ -274,7 +313,7 @@ class ApplicationController extends Controller
             'full_name_tamil' => $tamil,
             'full_name_english' => $english !== '' ? $english : $tamil,
             'gender' => $this->input('gender'),
-            'nic_number' => Security::sanitize($this->input('nic_number', '')),
+            'nic_number' => ApplicationValidation::normalizeNic(Security::sanitize($this->input('nic_number', ''))),
             'current_address' => Security::sanitize($this->input('current_address', '')),
             'permanent_address' => Security::sanitize($this->input('permanent_address', '')),
             'country_id' => (int) $this->input('country_id') ?: null,
@@ -332,6 +371,38 @@ class ApplicationController extends Controller
 
         if (!empty($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
             $errors[] = 'Please enter a valid email address.';
+        }
+
+        if (!$this->input('agree_declaration')) {
+            $errors[] = 'உறுதிமொழியை ஏற்றுக்கொள்ள வேண்டும். You must accept the declaration before submitting the application.';
+        }
+
+        return $errors;
+    }
+
+    private function validateUniqueness(array $data): array
+    {
+        $errors = [];
+
+        if (!empty($data['nic_number'])) {
+            $nicCheck = ApplicationValidation::checkNic($data['nic_number']);
+            if ($nicCheck['block']) {
+                $errors[] = $nicCheck['message_ta'] . ' ' . $nicCheck['message_en'];
+            }
+        }
+
+        if (!empty($data['mobile'])) {
+            $mobileCheck = ApplicationValidation::checkMobile($data['mobile']);
+            if ($mobileCheck['block']) {
+                $errors[] = $mobileCheck['message_ta'] . ' ' . $mobileCheck['message_en'];
+            }
+        }
+
+        if (!empty($data['email'])) {
+            $emailCheck = ApplicationValidation::checkEmail($data['email']);
+            if ($emailCheck['block']) {
+                $errors[] = $emailCheck['message_ta'] . ' ' . $emailCheck['message_en'];
+            }
         }
 
         return $errors;

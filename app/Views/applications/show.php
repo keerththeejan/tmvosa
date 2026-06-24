@@ -10,7 +10,38 @@ if ($appBase === '/' || $appBase === '.') {
 }
 $docTypes = ['payment_slip', 'nic_copy', 'passport_photo'];
 $documentsByType = $documentsByType ?? [];
+$duplicates = $duplicates ?? ['members' => [], 'applications' => []];
+$relatedMembers = array_filter($duplicates['members'] ?? [], fn($m) => true);
+$relatedApplications = array_filter($duplicates['applications'] ?? [], fn($a) => (int) $a['id'] !== (int) $application['id']);
+$hasDuplicates = count($relatedMembers) > 0 || count($relatedApplications) > 0;
 ?>
+<?php if ($hasDuplicates && \App\Core\Auth::hasRole('super_admin')): ?>
+<div class="alert alert-warning border-warning mb-3">
+    <h6 class="alert-heading mb-2"><i class="bi bi-exclamation-triangle"></i> Duplicate NIC Detected</h6>
+    <p class="small mb-2">This NIC matches other member or application records. You may still approve this application if appropriate.</p>
+    <?php if ($relatedMembers): ?>
+    <p class="small mb-1"><strong>Members:</strong>
+        <?php foreach ($relatedMembers as $member): ?>
+        <a href="<?= $base ?>/members/<?= (int) $member['id'] ?>" class="badge text-bg-light text-decoration-none me-1">
+            <?= View::escape($member['membership_number'] ?? ('#' . $member['id'])) ?>
+        </a>
+        <?php endforeach; ?>
+    </p>
+    <?php endif; ?>
+    <?php if ($relatedApplications): ?>
+    <p class="small mb-0"><strong>Other applications:</strong>
+        <?php foreach ($relatedApplications as $app): ?>
+        <a href="<?= $base ?>/applications/<?= (int) $app['id'] ?>" class="badge text-bg-light text-decoration-none me-1">
+            <?= View::escape($app['application_number']) ?> (<?= View::escape($app['status']) ?>)
+        </a>
+        <?php endforeach; ?>
+    </p>
+    <?php endif; ?>
+    <div class="mt-2">
+        <a href="<?= $base ?>/applications/duplicates" class="btn btn-sm btn-outline-warning">View All Duplicates</a>
+    </div>
+</div>
+<?php endif; ?>
 <div class="card mb-3">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><?= View::escape($application['application_number']) ?></span>
