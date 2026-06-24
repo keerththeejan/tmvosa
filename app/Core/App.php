@@ -16,17 +16,20 @@ class App
         ini_set('display_errors', self::$config['app']['debug'] ? '1' : '0');
 
         if (session_status() === PHP_SESSION_NONE) {
-            $cookiePath = self::sessionCookiePath();
+            $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+                || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+
             session_set_cookie_params([
                 'lifetime' => 0,
-                'path' => $cookiePath,
+                'path' => '/',
                 'httponly' => true,
                 'samesite' => 'Lax',
-                'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+                'secure' => $isSecure,
             ]);
             session_start([
                 'cookie_httponly' => true,
                 'cookie_samesite' => 'Lax',
+                'cookie_path' => '/',
                 'use_strict_mode' => true,
             ]);
         }
@@ -36,34 +39,7 @@ class App
 
     public static function sessionCookiePath(): string
     {
-        $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
-        $runtimePath = ($scriptDir === '/' || $scriptDir === '' || $scriptDir === '.')
-            ? '/'
-            : rtrim($scriptDir, '/');
-
-        $appUrl = $_ENV['APP_URL'] ?? getenv('APP_URL') ?: '';
-        if ($appUrl !== '' && preg_match('#https?://[^/]+(/.*)?$#', $appUrl, $matches)) {
-            $configPath = $matches[1] ?? '/';
-            $configPath = ($configPath === '' || $configPath === '/') ? '/' : rtrim($configPath, '/');
-
-            // Document root is public/ but APP_URL still ends with /public — cookie path must be /
-            if ($runtimePath === '/' && preg_match('#/public$#', $configPath)) {
-                return '/';
-            }
-
-            // Runtime path matches how the site is actually accessed
-            if ($runtimePath !== '/' && str_ends_with($configPath, $runtimePath)) {
-                return $runtimePath;
-            }
-
-            return $configPath;
-        }
-
-        if (str_ends_with($runtimePath, '/public')) {
-            return dirname($runtimePath) ?: '/';
-        }
-
-        return $runtimePath;
+        return '/';
     }
 
     public static function config(string $key, mixed $default = null): mixed

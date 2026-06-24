@@ -71,9 +71,10 @@ class Session
         $lastActivity = self::get('last_activity');
 
         if ($lastActivity && (time() - $lastActivity > $timeout)) {
+            $wasLoggedIn = Auth::check();
             self::destroy();
-            if (!str_contains($_SERVER['REQUEST_URI'] ?? '', '/login')) {
-                header('Location: ' . self::baseUrl() . '/login?timeout=1');
+            if ($wasLoggedIn && !str_contains($_SERVER['REQUEST_URI'] ?? '', '/login')) {
+                header('Location: ' . App::routeUrl('login') . '?timeout=1');
                 exit;
             }
         }

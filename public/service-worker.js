@@ -1,8 +1,7 @@
-const CACHE_NAME = 'osa-alumni-v5';
+const CACHE_NAME = 'osa-alumni-v6';
 const OFFLINE_URL = 'offline.html';
 
 const PRECACHE_URLS = [
-    'apply',
     'assets/css/app.css',
     'assets/js/app.js',
     'assets/js/application-wizard.js',
@@ -12,6 +11,22 @@ const PRECACHE_URLS = [
     'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js',
     'https://cdn.jsdelivr.net/npm/sweetalert2@11'
 ];
+
+function isStaticAsset(url) {
+    if (url.origin !== self.location.origin) {
+        return PRECACHE_URLS.some(function(entry) {
+            return entry.startsWith('http') && entry === url.href;
+        });
+    }
+
+    return url.pathname.includes('/assets/')
+        || url.pathname.endsWith('.css')
+        || url.pathname.endsWith('.js')
+        || url.pathname.endsWith('.png')
+        || url.pathname.endsWith('.jpg')
+        || url.pathname.endsWith('.webp')
+        || url.pathname.endsWith('.woff2');
+}
 
 self.addEventListener('install', function(event) {
     event.waitUntil(
@@ -37,10 +52,27 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-    if (event.request.method !== 'GET') return;
+    if (event.request.method !== 'GET') {
+        return;
+    }
 
     const url = new URL(event.request.url);
+
     if (url.pathname.includes('/admin/') || url.pathname.includes('/api/') || url.pathname.includes('/login')) {
+        return;
+    }
+
+    // Never cache HTML pages — they contain CSRF tokens that must stay fresh.
+    if (event.request.mode === 'navigate'
+        || (event.request.headers.get('accept') || '').includes('text/html')
+        || !isStaticAsset(url)) {
+        event.respondWith(
+            fetch(event.request).catch(function() {
+                if (event.request.mode === 'navigate') {
+                    return caches.match(OFFLINE_URL);
+                }
+            })
+        );
         return;
     }
 
@@ -54,11 +86,6 @@ self.addEventListener('fetch', function(event) {
                     });
                 }
                 return response;
-            }).catch(function() {
-                if (cached) return cached;
-                if (event.request.mode === 'navigate') {
-                    return caches.match(OFFLINE_URL);
-                }
             });
             return cached || fetchPromise;
         })
