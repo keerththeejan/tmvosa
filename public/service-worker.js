@@ -1,4 +1,4 @@
-const CACHE_NAME = 'osa-alumni-v6';
+const CACHE_NAME = 'osa-alumni-v7';
 const OFFLINE_URL = 'offline.html';
 
 const PRECACHE_URLS = [

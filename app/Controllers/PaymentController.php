@@ -64,6 +64,9 @@ class PaymentController extends Controller
                 'full_name' => $member['full_name_english'],
                 'amount' => number_format($payment['amount'], 2),
                 'receipt_number' => $receiptNumber,
+            ], $member['full_name_english'], [
+                'related_type' => 'payments',
+                'related_id' => (int) $id,
             ]);
         }
 

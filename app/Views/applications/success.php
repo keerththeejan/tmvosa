@@ -14,7 +14,7 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
         </div>
     </div>
 
-    <div class="px-3 pb-5">
+    <div class="px-3 pb-4 mb-3">
         <div class="card border-0 shadow-sm application-success-card mx-auto">
             <div class="card-body text-center p-4">
                 <p class="bilingual-text bilingual-block mb-3">

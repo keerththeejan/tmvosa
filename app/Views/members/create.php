@@ -65,8 +65,8 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
                 <input type="tel" name="whatsapp" class="form-control">
             </div>
             <div class="mb-3">
-                <?php View::label('email', false); ?>
-                <input type="email" name="email" class="form-control">
+                <?php View::label('email', true); ?>
+                <input type="email" name="email" class="form-control" required autocomplete="email">
             </div>
             <div class="mb-3">
                 <?php View::label('country', false); ?>
@@ -123,16 +123,3 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
         <span class="label-en"><?= View::escape(Lang::ui('add_member')['en']) ?></span>
     </button>
 </form>
-
-<script>
-$('#memberForm').on('submit', function(e) {
-    e.preventDefault();
-    const fd = new FormData(this);
-    $.ajax({ url: BASE_URL + '/members', method: 'POST', data: fd, processData: false, contentType: false,
-        success: function(res) {
-            if (res.success) Swal.fire('வெற்றி / Success', res.message, 'success').then(() => location.href = BASE_URL + '/members/' + res.id);
-            else Swal.fire('பிழை / Error', res.message, 'error');
-        }
-    });
-});
-</script>

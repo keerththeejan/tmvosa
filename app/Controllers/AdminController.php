@@ -281,7 +281,10 @@ class AdminController extends Controller
                 'full_name' => $member['full_name_english'],
                 'membership_number' => $member['membership_number'],
                 'expiry_date' => date('d M Y', strtotime($member['membership_expiry_date'])),
-            ], $member['full_name_english']);
+            ], $member['full_name_english'], [
+                'related_type' => 'members',
+                'related_id' => (int) $member['id'],
+            ]);
             if ($ok) {
                 $sent++;
             }

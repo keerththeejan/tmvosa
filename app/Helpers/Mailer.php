@@ -17,17 +17,19 @@ class Mailer
         return self::$lastError;
     }
 
-    public static function send(string $to, string $subject, string $body, ?string $toName = null): bool
+    public static function send(string $to, string $subject, string $body, ?string $toName = null, array $logContext = []): bool
     {
         self::$lastError = null;
 
         if (!class_exists(PHPMailer::class)) {
             self::$lastError = 'PHPMailer is not installed. Upload the vendor/ folder or run composer install on the server.';
+            self::recordSendLog($to, $subject, false, self::$lastError, $logContext);
             return false;
         }
 
         if (empty($to) || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
             self::$lastError = 'Invalid recipient email address.';
+            self::recordSendLog($to, $subject, false, self::$lastError, $logContext);
             return false;
         }
 
@@ -35,6 +37,7 @@ class Mailer
         $configError = self::validateConfiguration($settings);
         if ($configError) {
             self::$lastError = $configError;
+            self::recordSendLog($to, $subject, false, self::$lastError, $logContext);
             return false;
         }
 
@@ -54,6 +57,7 @@ class Mailer
                 $mail->AltBody = strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $body));
 
                 if ($mail->send()) {
+                    self::recordSendLog($to, $subject, true, 'OK via ' . $lastHost, $logContext);
                     return true;
                 }
 
@@ -70,10 +74,12 @@ class Mailer
             error_log('Mail error (' . $lastHost . '): ' . self::$lastError);
         }
 
+        self::recordSendLog($to, $subject, false, self::$lastError ?? 'Send failed.', $logContext);
+
         return false;
     }
 
-    public static function sendTemplate(string $to, string $templateName, array $vars = [], ?string $toName = null): bool
+    public static function sendTemplate(string $to, string $templateName, array $vars = [], ?string $toName = null, array $logContext = []): bool
     {
         $template = Database::fetch(
             "SELECT * FROM email_templates WHERE name = ? AND is_active = 1",
@@ -83,13 +89,37 @@ class Mailer
         if (!$template) {
             self::$lastError = 'Email template not found: ' . $templateName;
             error_log(self::$lastError);
+            self::recordSendLog($to, $templateName, false, self::$lastError, array_merge($logContext, [
+                'template' => $templateName,
+            ]));
             return false;
         }
 
         $subject = self::replaceVars($template['subject'], $vars);
         $body = self::replaceVars($template['body'], $vars);
 
-        return self::send($to, $subject, $body, $toName);
+        return self::send($to, $subject, $body, $toName, array_merge($logContext, [
+            'template' => $templateName,
+            'subject' => $subject,
+        ]));
+    }
+
+    private static function recordSendLog(
+        string $to,
+        string $subject,
+        bool $sent,
+        ?string $response,
+        array $context
+    ): void {
+        \App\Models\EmailLog::record(
+            $to,
+            $sent,
+            $response,
+            $context['template'] ?? null,
+            $context['subject'] ?? $subject,
+            $context['related_type'] ?? null,
+            isset($context['related_id']) ? (int) $context['related_id'] : null
+        );
     }
 
     public static function sendTest(string $to): array

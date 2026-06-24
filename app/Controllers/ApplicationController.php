@@ -319,25 +319,37 @@ class ApplicationController extends Controller
 
             AuditLog::log('approve_application', 'member_applications', (int) $id);
 
-            if (!empty($application['email'])) {
-                Mailer::sendTemplate($application['email'], 'application_approved', [
-                    'full_name' => $application['full_name_english'],
-                    'membership_number' => $membershipNumber,
-                ], $application['full_name_english']);
+            Database::commit();
 
-                Mailer::sendTemplate($application['email'], 'membership_activated', [
-                    'full_name' => $application['full_name_english'],
+            $member = Member::findById($memberId);
+            $notifyEmail = $member['email'] ?? $application['email'] ?? '';
+
+            if (!empty($notifyEmail)) {
+                $mailContext = [
+                    'related_type' => 'member_applications',
+                    'related_id' => (int) $id,
+                ];
+                $name = $application['full_name_english'];
+
+                Mailer::sendTemplate($notifyEmail, 'application_approved', [
+                    'full_name' => $name,
+                    'membership_number' => $membershipNumber,
+                ], $name, $mailContext);
+
+                Mailer::sendTemplate($notifyEmail, 'membership_activated', [
+                    'full_name' => $name,
                     'membership_number' => $membershipNumber,
                     'expiry_date' => date('d M Y', strtotime($expiryDate)),
-                ], $application['full_name_english']);
+                ], $name, $mailContext);
 
-                Mailer::sendTemplate($application['email'], 'welcome_email', [
-                    'full_name' => $application['full_name_english'],
+                Mailer::sendTemplate($notifyEmail, 'welcome_email', [
+                    'full_name' => $name,
                     'membership_number' => $membershipNumber,
-                ], $application['full_name_english']);
+                ], $name, $mailContext);
+            } else {
+                error_log('Application approve: no member email for application id=' . $id);
             }
 
-            Database::commit();
             $this->json(['success' => true, 'message' => 'Application approved.', 'membership_number' => $membershipNumber]);
         } catch (\Exception $e) {
             Database::rollback();

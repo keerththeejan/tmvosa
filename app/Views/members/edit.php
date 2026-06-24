@@ -1,5 +1,5 @@
 <?php $pageTitle = 'Edit Member'; $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'); ?>
-<form id="editMemberForm" enctype="multipart/form-data">
+<form id="editMemberForm" class="member-edit-form" enctype="multipart/form-data" data-member-id="<?= (int) $member['id'] ?>">
     <input type="hidden" name="_csrf_token" value="<?= $csrfToken ?>">
     <div class="card mb-3"><div class="card-body">
         <div class="mb-3"><label class="form-label">Full Name (English)</label><input type="text" name="full_name_english" class="form-control" value="<?= \App\Core\View::escape($member['full_name_english']) ?>" required></div>
@@ -10,7 +10,7 @@
         </div>
         <div class="mb-3"><label class="form-label">NIC</label><input type="text" name="nic_number" class="form-control" value="<?= \App\Core\View::escape($member['nic_number'] ?? '') ?>"></div>
         <div class="mb-3"><label class="form-label">Mobile</label><input type="tel" name="mobile" class="form-control" value="<?= \App\Core\View::escape($member['mobile']) ?>"></div>
-        <div class="mb-3"><label class="form-label">Email</label><input type="email" name="email" class="form-control" value="<?= \App\Core\View::escape($member['email'] ?? '') ?>"></div>
+        <div class="mb-3"><label class="form-label">Email <span class="text-danger">*</span></label><input type="email" name="email" class="form-control" value="<?= \App\Core\View::escape($member['email'] ?? '') ?>" required autocomplete="email"></div>
         <div class="mb-3"><label class="form-label">Country</label><select name="country_id" class="form-select"><option value="">Select</option><?php foreach ($countries as $c): ?><option value="<?= $c['id'] ?>" <?= $member['country_id']==$c['id']?'selected':'' ?>><?= \App\Core\View::escape($c['name']) ?></option><?php endforeach; ?></select></div>
         <div class="mb-3"><label class="form-label">Occupation</label><input type="text" name="occupation" class="form-control" value="<?= \App\Core\View::escape($member['occupation'] ?? '') ?>"></div>
         <div class="mb-3"><label class="form-label">Membership Type</label><select name="membership_type_id" class="form-select"><?php foreach ($membershipTypes as $t): ?><option value="<?= $t['id'] ?>" <?= $member['membership_type_id']==$t['id']?'selected':'' ?>><?= \App\Core\View::escape($t['name']) ?></option><?php endforeach; ?></select></div>
@@ -18,11 +18,3 @@
     </div></div>
     <button type="submit" class="btn btn-primary btn-lg w-100">Save Changes</button>
 </form>
-<script>
-$('#editMemberForm').on('submit', function(e) {
-    e.preventDefault();
-    $.ajax({ url: BASE_URL + '/members/<?= $member['id'] ?>/update', method: 'POST', data: new FormData(this), processData: false, contentType: false,
-        success: function(res) { if (res.success) Swal.fire('Saved', res.message, 'success').then(() => location.href = BASE_URL + '/members/<?= $member['id'] ?>'); }
-    });
-});
-</script>

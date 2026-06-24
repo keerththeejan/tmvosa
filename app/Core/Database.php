@@ -37,6 +37,9 @@ class Database
 
     public static function query(string $sql, array $params = []): \PDOStatement
     {
+        if (App::config('debug')) {
+            error_log('SQL: ' . $sql . ' | params=' . json_encode($params));
+        }
         $stmt = self::getInstance()->prepare($sql);
         $stmt->execute($params);
         return $stmt;

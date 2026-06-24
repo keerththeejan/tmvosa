@@ -11,6 +11,8 @@ use App\Models\Document;
 use App\Models\AuditLog;
 use App\Helpers\NumberGenerator;
 use App\Helpers\FileUploader;
+use App\Helpers\MemberEmail;
+use App\Helpers\Mailer;
 
 class MemberController extends Controller
 {
@@ -52,13 +54,20 @@ class MemberController extends Controller
     {
         $countries = Database::fetchAll("SELECT * FROM countries WHERE is_active = 1 ORDER BY name");
         $membershipTypes = Database::fetchAll("SELECT * FROM membership_types WHERE is_active = 1");
-        $this->view('members/create', compact('countries', 'membershipTypes'));
+        $this->view('members/create', compact('countries', 'membershipTypes') + [
+            'pageScript' => 'members-create.js',
+        ]);
     }
 
     public function store(): void
     {
         if (!$this->validateCsrf()) {
-            $this->json(['success' => false, 'message' => 'Invalid request.'], 403);
+            $this->rejectCsrf('member_store');
+        }
+
+        $emailResult = MemberEmail::parse((string) $this->input('email', ''));
+        if (isset($emailResult['error'])) {
+            $this->json(['success' => false, 'message' => $emailResult['error']], 422);
         }
 
         $membershipNumber = $this->input('membership_number') ?: NumberGenerator::membershipNumber();
@@ -78,7 +87,7 @@ class MemberController extends Controller
             'country_id' => (int) $this->input('country_id') ?: null,
             'mobile' => Security::sanitize($this->input('mobile', '')),
             'whatsapp' => Security::sanitize($this->input('whatsapp', '')),
-            'email' => filter_var($this->input('email', ''), FILTER_SANITIZE_EMAIL),
+            'email' => $emailResult['value'],
             'studied_from_year' => $this->input('studied_from_year'),
             'studied_to_year' => $this->input('studied_to_year'),
             'grade_stream' => Security::sanitize($this->input('grade_stream', '')),
@@ -91,6 +100,8 @@ class MemberController extends Controller
             'membership_expiry_date' => date('Y-m-d', strtotime("+{$durationYears} years")),
             'created_by' => Auth::id(),
         ];
+
+        error_log('Member store email=' . $data['email']);
 
         $memberId = Member::create($data);
         AuditLog::log('add_member', 'members', $memberId, null, $data);
@@ -114,50 +125,88 @@ class MemberController extends Controller
         }
         $countries = Database::fetchAll("SELECT * FROM countries WHERE is_active = 1 ORDER BY name");
         $membershipTypes = Database::fetchAll("SELECT * FROM membership_types WHERE is_active = 1");
-        $this->view('members/edit', compact('member', 'countries', 'membershipTypes'));
+        $this->view('members/edit', compact('member', 'countries', 'membershipTypes') + [
+            'pageScript' => 'members-edit.js',
+        ]);
     }
 
     public function update(string $id): void
     {
         if (!$this->validateCsrf()) {
-            $this->json(['success' => false, 'message' => 'Invalid request.'], 403);
+            $this->rejectCsrf('member_update');
         }
 
-        $oldMember = Member::findById((int) $id);
+        $memberId = (int) $id;
+        $oldMember = Member::findById($memberId);
         if (!$oldMember) {
             $this->json(['success' => false, 'message' => 'Member not found.'], 404);
+        }
+
+        $emailResult = MemberEmail::parse((string) $this->input('email', ''));
+        if (isset($emailResult['error'])) {
+            $this->json(['success' => false, 'message' => $emailResult['error']], 422);
         }
 
         $data = [
             'full_name_tamil' => Security::sanitize($this->input('full_name_tamil', '')),
             'full_name_english' => Security::sanitize($this->input('full_name_english', '')),
             'gender' => $this->input('gender'),
-            'date_of_birth' => $this->input('date_of_birth'),
+            'date_of_birth' => $this->input('date_of_birth') ?: null,
             'nic_number' => Security::sanitize($this->input('nic_number', '')),
             'current_address' => Security::sanitize($this->input('current_address', '')),
             'permanent_address' => Security::sanitize($this->input('permanent_address', '')),
             'country_id' => (int) $this->input('country_id') ?: null,
             'mobile' => Security::sanitize($this->input('mobile', '')),
             'whatsapp' => Security::sanitize($this->input('whatsapp', '')),
-            'email' => filter_var($this->input('email', ''), FILTER_SANITIZE_EMAIL),
+            'email' => $emailResult['value'],
             'occupation' => Security::sanitize($this->input('occupation', '')),
             'company' => Security::sanitize($this->input('company', '')),
             'membership_type_id' => (int) $this->input('membership_type_id'),
             'status' => $this->input('status'),
         ];
 
-        Member::update((int) $id, $data);
-        AuditLog::log('edit_member', 'members', (int) $id, $oldMember, $data);
-        AuditLog::log('profile_updated', 'members', (int) $id, $oldMember, $data);
+        error_log('Member update id=' . $memberId . ' POST=' . json_encode($_POST) . ' email=' . $data['email']);
+
+        $rows = Member::update($memberId, $data);
+        error_log('Member update rows=' . $rows . ' id=' . $memberId);
+
+        $saved = Member::findById($memberId);
+        if (!$saved || empty($saved['email'])) {
+            error_log('Member update verification failed for id=' . $memberId);
+            $this->json(['success' => false, 'message' => 'Email could not be saved. Please try again.'], 500);
+        }
+
+        AuditLog::log('edit_member', 'members', $memberId, $oldMember, $data);
+        AuditLog::log('profile_updated', 'members', $memberId, $oldMember, $data);
 
         if (!empty($_FILES['photo']['name'])) {
             $result = FileUploader::upload($_FILES['photo'], 'photos');
             if (!isset($result['errors'])) {
-                Member::update((int) $id, ['photo' => $result['file_path']]);
+                Member::update($memberId, ['photo' => $result['file_path']]);
             }
         }
 
-        $this->json(['success' => true, 'message' => 'Member updated.']);
+        $emailNotice = null;
+        $sent = Mailer::sendTemplate($saved['email'], 'profile_updated', [
+            'full_name' => $saved['full_name_english'],
+            'membership_number' => $saved['membership_number'],
+            'email' => $saved['email'],
+        ], $saved['full_name_english'], [
+            'related_type' => 'members',
+            'related_id' => $memberId,
+        ]);
+
+        if (!$sent) {
+            $emailNotice = 'Profile saved, but confirmation email could not be sent: ' . (Mailer::getLastError() ?? 'unknown error');
+            error_log('Member profile email failed id=' . $memberId . ' ' . (Mailer::getLastError() ?? ''));
+        }
+
+        $this->json([
+            'success' => true,
+            'message' => 'Member updated successfully.',
+            'email' => $saved['email'],
+            'email_notice' => $emailNotice,
+        ]);
     }
 
     private function isAjax(): bool
