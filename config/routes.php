@@ -13,6 +13,7 @@ $router->post('/login', ['AuthController', 'login']);
 $router->get('/logout', ['AuthController', 'logout'], ['AuthMiddleware']);
 $router->get('/apply', ['ApplicationController', 'form']);
 $router->post('/apply', ['ApplicationController', 'submit']);
+$router->get('/apply/success', ['ApplicationController', 'success']);
 $router->post('/apply/validate-field', ['ApplicationController', 'validateField']);
 $router->post('/track', ['ApplicationController', 'track']);
 $router->get('/verify/{number}', ['CardController', 'verify']);

@@ -3,9 +3,11 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
+use App\Core\App;
 use App\Core\Auth;
 use App\Core\Security;
 use App\Core\Database;
+use App\Core\Session;
 use App\Models\Member;
 use App\Models\Application;
 use App\Models\Document;
@@ -47,7 +49,7 @@ class ApplicationController extends Controller
     public function submit(): void
     {
         if (!$this->validateCsrf()) {
-            $this->json(['success' => false, 'message' => 'Invalid request.'], 403);
+            $this->rejectCsrf('application_submit');
         }
 
         $rawDob = trim($this->input('date_of_birth', ''));
@@ -73,7 +75,74 @@ class ApplicationController extends Controller
             }
             $this->handleDocumentUploads($appId);
             Database::commit();
+        } catch (\PDOException $e) {
+            if (Database::getInstance()->inTransaction()) {
+                Database::rollback();
+            }
+            error_log('Application submit database error: ' . $e->getMessage());
+            if ((int) $e->getCode() === 23000 || str_contains($e->getMessage(), 'uq_member_applications_nic_number')) {
+                $this->json([
+                    'success' => false,
+                    'message' => 'இந்த தேசிய அடையாள அட்டை இலக்கத்துடன் ஏற்கனவே ஒரு விண்ணப்பம் பதிவு செய்யப்பட்டுள்ளது. Application already exists for this NIC number.',
+                ], 422);
+            }
+            $this->json([
+                'success' => false,
+                'message' => 'Could not save your application. Please try again or contact the secretary.',
+            ], 500);
+        } catch (\Throwable $e) {
+            if (Database::getInstance()->inTransaction()) {
+                Database::rollback();
+            }
+            error_log('Application submit failed: ' . $e->getMessage());
+            $this->json([
+                'success' => false,
+                'message' => 'Could not save your application. Please try again or contact the secretary.',
+            ], 500);
+        }
 
+        $this->sendSubmissionEmails($data);
+
+        Session::set('application_submitted', [
+            'application_number' => $data['application_number'],
+            'full_name' => $data['full_name_english'],
+            'submitted_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        $successUrl = App::routeUrl('apply/success');
+        $payload = [
+            'success' => true,
+            'message' => 'Application submitted successfully!',
+            'application_number' => $data['application_number'],
+            'redirect' => $successUrl,
+        ];
+
+        if ($this->wantsJson()) {
+            $this->json($payload);
+        }
+
+        $this->redirect($successUrl);
+    }
+
+    public function success(): void
+    {
+        $submission = Session::get('application_submitted');
+        if (!$submission || empty($submission['application_number'])) {
+            $this->redirect(App::routeUrl(''));
+            return;
+        }
+
+        Session::remove('application_submitted');
+        $this->view('applications/success', [
+            'applicationNumber' => $submission['application_number'],
+            'fullName' => $submission['full_name'] ?? '',
+            'submittedAt' => $submission['submitted_at'] ?? '',
+        ]);
+    }
+
+    private function sendSubmissionEmails(array $data): void
+    {
+        try {
             if (!empty($data['email'])) {
                 $sent = Mailer::sendTemplate($data['email'], 'application_received', [
                     'full_name' => $data['full_name_english'],
@@ -93,18 +162,8 @@ class ApplicationController extends Controller
             if (!$notified) {
                 error_log('Admin notification email failed: ' . (Mailer::getLastError() ?? 'unknown'));
             }
-
-            $this->json([
-                'success' => true,
-                'message' => 'Application submitted successfully!',
-                'application_number' => $data['application_number'],
-            ]);
-        } catch (\Exception $e) {
-            if (Database::getInstance()->inTransaction()) {
-                Database::rollback();
-            }
-            error_log('Application submit failed: ' . $e->getMessage());
-            $this->json(['success' => false, 'message' => 'Submission failed. Please try again.'], 500);
+        } catch (\Throwable $e) {
+            error_log('Application submit email error: ' . $e->getMessage());
         }
     }
 

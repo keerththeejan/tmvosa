@@ -728,37 +728,41 @@
             $.ajax({
                 url: BASE_URL + '/apply',
                 method: 'POST',
-                data: new FormData($form[0]),
+                data: (function() {
+                    const fd = new FormData($form[0]);
+                    const token = $form.find('input[name="_csrf_token"]').val() || CSRF_TOKEN;
+                    if (token && !fd.get('_csrf_token')) {
+                        fd.set('_csrf_token', token);
+                    }
+                    return fd;
+                })(),
                 processData: false,
                 contentType: false,
                 dataType: 'json',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-Token': $form.find('input[name="_csrf_token"]').val() || CSRF_TOKEN
+                },
                 success: function(res) {
                     if (res.success) {
-                        Swal.fire({
-                            title: 'விண்ணப்பம் சமர்ப்பிக்கப்பட்டது! / Application Submitted!',
-                            html: 'உங்கள் விண்ணப்ப இலக்கம் / Application number:<br><strong>' + res.application_number + '</strong>',
-                            icon: 'success',
-                            confirmButtonText: 'சரி / OK'
-                        }).then(function() {
-                            $form[0].reset();
-                            $('#dateOfBirthHidden').val('');
-                            resetAllUploads();
-                            validationState.nic = { status: 'idle', block: false };
-                            validationState.mobile = { status: 'idle', block: false, warning: false };
-                            validationState.email = { status: 'idle', block: false, warning: false };
-                            $('.field-validation-feedback').addClass('d-none').empty();
-                            $('#nicNumberInput, #mobileInput, #emailInput').removeClass('is-valid is-invalid');
-                            initSinglePageUI();
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                        });
-                    } else {
-                        Swal.fire('பிழை / Error', res.message || 'Submission failed.', 'error');
+                        const redirectUrl = res.redirect
+                            || (BASE_URL + '/apply/success');
+                        window.location.href = redirectUrl;
+                        return;
                     }
+                    Swal.fire('பிழை / Error', res.message || 'Submission failed.', 'error');
                 },
                 error: function(xhr) {
-                    const msg = xhr.responseJSON && xhr.responseJSON.message
-                        ? xhr.responseJSON.message
-                        : 'Submission failed. Please try again.';
+                    let msg = 'Submission failed. Please try again.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        msg = xhr.responseJSON.message;
+                    } else if (xhr.status === 403) {
+                        msg = 'Your session has expired. Please refresh the page and submit again.';
+                    } else if (xhr.status === 422) {
+                        msg = xhr.responseJSON && xhr.responseJSON.message
+                            ? xhr.responseJSON.message
+                            : 'Please check the form and try again.';
+                    }
                     Swal.fire('பிழை / Error', msg, 'error');
                 },
                 complete: function() {

@@ -135,7 +135,7 @@ window.APP_VALIDATION_CONFIG = {"blockDuplicateMobile":false,"blockDuplicateEmai
     </div>
 
     <form id="applicationForm" enctype="multipart/form-data" class="application-form-single pb-3" novalidate>
-        <input type="hidden" name="_csrf_token" value="963f233ddab53fc8fb4af97b8d9290796f902c7c2c7c27d5b9355614d787722d">
+        <input type="hidden" name="_csrf_token" value="f166a669a08f8177b8ac5241c3d91a23f55896fa7e3f12005200db761fd58685">
 
         <!-- Bank details at top -->
         <div class="wizard-step wizard-step--always-active active" data-step="1">
@@ -778,31 +778,26 @@ window.APP_VALIDATION_CONFIG = {"blockDuplicateMobile":false,"blockDuplicateEmai
 </div>
     <footer class="site-footer">
     <div class="site-footer-inner">
-        <div class="site-footer-contact bilingual-text bilingual-block mb-2">
-            <span class="label-ta">
-                <a href="tel:0778870135">📞 077 887 0135</a>
-                &nbsp;|&nbsp;
-                <a href="mailto:tmvosa@vkitnet.info">📧 tmvosa@vkitnet.info</a>
-            </span>
-            <span class="label-en">
-                <a href="tel:0778870135">📞 077 887 0135</a>
-                &nbsp;|&nbsp;
-                <a href="mailto:tmvosa@vkitnet.info">📧 tmvosa@vkitnet.info</a>
-            </span>
+        <div class="site-footer-contact">
+            <a class="site-footer-contact-link" href="tel:0778870135">
+                📞 077 887 0135            </a>
+            <a class="site-footer-contact-link" href="mailto:tmvosa@vkitnet.info">
+                📧 tmvosa@vkitnet.info            </a>
         </div>
-        <p class="site-footer-copy mb-1 bilingual-text bilingual-block">
-            <span class="label-ta">&copy; 2026 கிளிநொச்சி / திருவையாறு மகா வித்தியாலயம் பழைய மாணவர் சங்கம். அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை.</span>
-            <span class="label-en">&copy; 2026 Kilinochchi / Thiruvaiyaru Maha Vidyalayam OSA. All rights reserved.</span>
-        </p>
-        <p class="site-footer-dev mb-1 bilingual-text bilingual-block">
-            <span class="label-ta">வடிவமைப்பு:                <a href="https://vkitnet.info" target="_blank" rel="noopener noreferrer">vkitnet.info</a>
-            </span>
-            <span class="label-en">Developed by                <a href="https://vkitnet.info" target="_blank" rel="noopener noreferrer">vkitnet.info</a>
-            </span>
-        </p>
-                <p class="site-footer-clear mb-0 small">
-            <a href="/osa/clear-site-data" class="text-muted">Clear cookies &amp; saved form data</a>
-        </p>
+
+        <div class="site-footer-copyright">
+            <p class="site-footer-year">&copy; 2026</p>
+            <p class="site-footer-ta">கிளிநொச்சி / திருவையாறு மகா வித்தியாலயம்<br>பழைய மாணவர் சங்கம்</p>
+            <p class="site-footer-en">Kilinochchi / Thiruvaiyaru Maha Vidyalayam<br>Old Students' Association</p>
+            <p class="site-footer-ta site-footer-rights">அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை.</p>
+            <p class="site-footer-en site-footer-rights">All Rights Reserved.</p>
+        </div>
+
+        <div class="site-footer-credit">
+            <p class="site-footer-website-label">🌐 Website</p>
+            <a class="site-footer-website-link" href="https://vkitnet.info" target="_blank" rel="noopener noreferrer">vkitnet.info</a>
+            <p class="site-footer-en site-footer-dev">Developed by VKITNET</p>
+        </div>
     </div>
 </footer>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
@@ -810,7 +805,7 @@ window.APP_VALIDATION_CONFIG = {"blockDuplicateMobile":false,"blockDuplicateEmai
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         const BASE_URL = '/osa/public';
-        const CSRF_TOKEN = '963f233ddab53fc8fb4af97b8d9290796f902c7c2c7c27d5b9355614d787722d';
+        const CSRF_TOKEN = 'f166a669a08f8177b8ac5241c3d91a23f55896fa7e3f12005200db761fd58685';
     </script>
     <script src="/osa/public/assets/js/app.js"></script>
             <script src="/osa/public/assets/js/application-wizard.js"></script>

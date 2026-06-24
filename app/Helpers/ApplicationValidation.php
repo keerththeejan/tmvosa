@@ -78,7 +78,7 @@ class ApplicationValidation
                 ? 'இந்த தேசிய அடையாள அட்டை இலக்கத்துடன் ஏற்கனவே ஒரு விண்ணப்பம் பதிவு செய்யப்பட்டுள்ளது.'
                 : 'தேசிய அடையாள அட்டை இலக்கம் பயன்படுத்தக் கிடைக்கிறது.',
             'message_en' => $exists
-                ? 'An application already exists with this NIC Number.'
+                ? 'Application already exists for this NIC number.'
                 : 'NIC Number is available.',
         ];
     }

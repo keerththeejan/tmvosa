@@ -36,25 +36,34 @@ class App
 
     public static function sessionCookiePath(): string
     {
-        $appUrl = getenv('APP_URL') ?: '';
+        $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+        $runtimePath = ($scriptDir === '/' || $scriptDir === '' || $scriptDir === '.')
+            ? '/'
+            : rtrim($scriptDir, '/');
+
+        $appUrl = $_ENV['APP_URL'] ?? getenv('APP_URL') ?: '';
         if ($appUrl !== '' && preg_match('#https?://[^/]+(/.*)?$#', $appUrl, $matches)) {
-            $path = $matches[1] ?? '/';
-            if ($path === '' || $path === '/') {
+            $configPath = $matches[1] ?? '/';
+            $configPath = ($configPath === '' || $configPath === '/') ? '/' : rtrim($configPath, '/');
+
+            // Document root is public/ but APP_URL still ends with /public — cookie path must be /
+            if ($runtimePath === '/' && preg_match('#/public$#', $configPath)) {
                 return '/';
             }
-            return rtrim($path, '/');
+
+            // Runtime path matches how the site is actually accessed
+            if ($runtimePath !== '/' && str_ends_with($configPath, $runtimePath)) {
+                return $runtimePath;
+            }
+
+            return $configPath;
         }
 
-        $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
-        if (str_ends_with($scriptDir, '/public')) {
-            $scriptDir = dirname($scriptDir);
+        if (str_ends_with($runtimePath, '/public')) {
+            return dirname($runtimePath) ?: '/';
         }
 
-        if ($scriptDir === '/' || $scriptDir === '.' || $scriptDir === '') {
-            return '/';
-        }
-
-        return rtrim($scriptDir, '/');
+        return $runtimePath;
     }
 
     public static function config(string $key, mixed $default = null): mixed
