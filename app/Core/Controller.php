@@ -33,4 +33,30 @@ class Controller
         $token = $_POST[App::config('app.csrf_token_name')] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
         return Security::validateCsrf($token);
     }
+
+    protected function wantsJson(): bool
+    {
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH'])
+            && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+            return true;
+        }
+
+        $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
+        return str_contains($accept, 'application/json');
+    }
+
+    protected function respond(array $payload, int $code = 200, ?string $redirectOnSuccess = null): void
+    {
+        if ($this->wantsJson()) {
+            $this->json($payload, $code);
+        }
+
+        if (!empty($payload['success'])) {
+            Session::flash('success', $payload['message'] ?? 'Success.');
+            $this->redirect($redirectOnSuccess ?? App::baseUrl() . '/dashboard');
+        }
+
+        Session::flash('error', $payload['message'] ?? 'Request failed.');
+        $this->redirect(App::baseUrl() . '/settings/password');
+    }
 }

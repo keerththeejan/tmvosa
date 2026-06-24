@@ -29,8 +29,11 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
                 </p>
                 <?php endif; ?>
 
-                <form id="changePasswordForm">
+                <form id="changePasswordForm" method="post" action="<?= View::escape($base) ?>/settings/password" autocomplete="off">
                     <input type="hidden" name="_csrf_token" value="<?= $csrfToken ?>">
+                    <div class="alert alert-light border small mb-3">
+                        Fill in the fields below and click <strong>Update Password</strong>. Do not put passwords in the browser address bar.
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">Current Password <span class="text-danger">*</span></label>
                         <input type="password" name="current_password" class="form-control" required autocomplete="current-password">
@@ -58,21 +61,3 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
         <?php endif; ?>
     </div>
 </div>
-
-<script>
-$('#changePasswordForm').on('submit', function(e) {
-    e.preventDefault();
-    $.post(BASE_URL + '/settings/password', $(this).serialize(), function(res) {
-        if (res.success) {
-            Swal.fire('Success', res.message, 'success').then(function() {
-                window.location.href = res.redirect || (BASE_URL + '/dashboard');
-            });
-        } else {
-            Swal.fire('Error', res.message || 'Unable to update password.', 'error');
-        }
-    }).fail(function(xhr) {
-        const msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Unable to update password.';
-        Swal.fire('Error', msg, 'error');
-    });
-});
-</script>
