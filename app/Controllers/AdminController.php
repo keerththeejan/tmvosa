@@ -143,8 +143,10 @@ class AdminController extends Controller
         }
 
         $emailSettings = Mailer::getSettings();
+        $mailDiagnostics = Mailer::getDiagnostics();
         $this->view('settings/email', [
             'emailSettings' => $emailSettings,
+            'mailDiagnostics' => $mailDiagnostics,
             'pageScript' => 'email-settings.js',
         ]);
     }
@@ -187,9 +189,21 @@ class AdminController extends Controller
         }
         if (!$to || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
             $this->json(['success' => false, 'message' => 'Please provide a valid test email address.']);
+            return;
         }
 
-        $result = Mailer::sendTest($to);
+        try {
+            $result = Mailer::sendTest($to);
+        } catch (\Throwable $e) {
+            error_log('Email test exception: ' . $e->getMessage());
+            $this->json([
+                'success' => false,
+                'message' => 'Email test error: ' . $e->getMessage(),
+                'error' => $e->getMessage(),
+            ], 500);
+            return;
+        }
+
         AuditLog::log('email_test', 'email_settings', null, null, ['to' => $to, 'success' => $result['success']]);
         $this->json($result, $result['success'] ? 200 : 500);
     }

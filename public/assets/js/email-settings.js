@@ -36,10 +36,22 @@ $(function() {
                 test_email: $('#testEmailAddress').val()
             }
         }).done(function(res) {
-            Swal.fire(res.success ? 'Sent' : 'Failed', res.message, res.success ? 'success' : 'error');
+            Swal.fire(res.success ? 'Sent' : 'Failed', res.message || res.error || 'Unknown error.', res.success ? 'success' : 'error');
         }).fail(function(xhr) {
-            const res = xhr.responseJSON || {};
-            Swal.fire('Failed', res.message || res.error || 'Test email failed.', 'error');
+            let msg = 'Test email failed.';
+            if (xhr.responseJSON && (xhr.responseJSON.message || xhr.responseJSON.error)) {
+                msg = xhr.responseJSON.message || xhr.responseJSON.error;
+            } else if (xhr.responseText && xhr.responseText.indexOf('{') !== -1) {
+                try {
+                    const parsed = JSON.parse(xhr.responseText);
+                    msg = parsed.message || parsed.error || msg;
+                } catch (e) {}
+            } else if (xhr.status === 403) {
+                msg = 'Session expired. Please log in again and retry.';
+            } else if (xhr.status === 500) {
+                msg = 'Server error (500). Check that .env exists on the server with SMTP_PASSWORD set.';
+            }
+            Swal.fire('Failed', msg, 'error');
         }).always(function() {
             $btn.prop('disabled', false);
         });

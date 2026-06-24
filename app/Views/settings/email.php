@@ -15,6 +15,24 @@ $s = $emailSettings ?? [];
     <strong>Security:</strong> SMTP password is stored in <code>.env</code> as <code>SMTP_PASSWORD</code> — never in the database or source code.
 </div>
 
+<?php $diag = $mailDiagnostics ?? []; ?>
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-header bg-white"><h6 class="mb-0">Server mail status</h6></div>
+    <div class="card-body small">
+        <ul class="mb-0">
+            <li><strong>.env file on server:</strong> <?= !empty($diag['env_file_exists']) ? 'Found' : '<span class="text-danger">Missing — upload .env to the project root</span>' ?></li>
+            <li><strong>SMTP password in .env:</strong> <?= !empty($diag['smtp_password_set']) ? 'Set' : '<span class="text-danger">Not set — add SMTP_PASSWORD</span>' ?></li>
+            <li><strong>PHP openssl:</strong> <?= !empty($diag['openssl_loaded']) ? 'Enabled' : '<span class="text-danger">Disabled — enable in cPanel</span>' ?></li>
+            <li><strong>Current host:</strong> <?= View::escape(($diag['smtp_host'] ?? '') . ':' . ($diag['smtp_port'] ?? '')) ?> (<?= View::escape($diag['smtp_encryption'] ?? '') ?>)</li>
+        </ul>
+        <?php if (!empty($diag['config_error'])): ?>
+        <div class="alert alert-danger mt-3 mb-0 py-2"><?= View::escape($diag['config_error']) ?></div>
+        <?php elseif (!empty($diag['cpanel_hint'])): ?>
+        <div class="alert alert-warning mt-3 mb-0 py-2"><?= View::escape($diag['cpanel_hint']) ?></div>
+        <?php endif; ?>
+    </div>
+</div>
+
 <form id="emailSettingsForm" class="card border-0 shadow-sm mb-3">
     <div class="card-header bg-white"><h6 class="mb-0">SMTP Configuration</h6></div>
     <div class="card-body">
@@ -23,7 +41,7 @@ $s = $emailSettings ?? [];
             <div class="col-md-6">
                 <label class="form-label">SMTP Host</label>
                 <input type="text" name="smtp_host" class="form-control" value="<?= View::escape($s['smtp_host'] ?? 'mail.vkitnet.info') ?>" required>
-                <div class="form-text">Use <strong>mail.vkitnet.info</strong> (not vkitnet.info).</div>
+                <div class="form-text">Use <strong>mail.vkitnet.info</strong> or on cPanel try <strong>localhost</strong> with port <strong>587</strong> (TLS).</div>
             </div>
             <div class="col-md-3">
                 <label class="form-label">SMTP Port</label>

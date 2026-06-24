@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Core\App;
 use App\Core\Database;
 use App\Models\Setting;
 use PHPMailer\PHPMailer\PHPMailer;
@@ -32,13 +33,14 @@ class Mailer
             return false;
         }
 
-        $hosts = self::resolveSmtpHosts($settings['smtp_host']);
-        $lastException = null;
+        $profiles = self::connectionProfiles($settings);
+        $lastHost = '';
 
-        foreach ($hosts as $host) {
+        foreach ($profiles as $profile) {
+            $lastHost = $profile['host'] . ':' . $profile['port'];
             $mail = new PHPMailer(true);
             try {
-                self::configureMailer($mail, $settings, $host);
+                self::configureMailer($mail, $settings, $profile);
                 $mail->setFrom($settings['from_email'], $settings['from_name']);
                 $mail->addAddress($to, $toName ?? '');
                 $mail->isHTML(true);
@@ -52,16 +54,15 @@ class Mailer
 
                 self::$lastError = $mail->ErrorInfo ?: 'Unknown mail error.';
             } catch (Exception $e) {
-                $lastException = $e;
                 self::$lastError = $e->getMessage();
-                if (!self::isConnectionError(self::$lastError)) {
+                if (!self::shouldTryNextProfile(self::$lastError)) {
                     break;
                 }
             }
         }
 
-        if ($lastException && self::$lastError) {
-            error_log('Mail error: ' . self::$lastError);
+        if (self::$lastError) {
+            error_log('Mail error (' . $lastHost . '): ' . self::$lastError);
         }
 
         return false;
@@ -102,19 +103,32 @@ class Mailer
             . '<p>If you received this message, email configuration is working correctly.</p>';
 
         $sent = self::send($to, $subject, $body);
-        $error = self::$lastError ?? 'Failed to send test email.';
-
-        if (!$sent && stripos($error, 'authenticate') !== false) {
-            $error = 'SMTP authentication failed. Verify SMTP_USERNAME and SMTP_PASSWORD in your .env file.';
-        } elseif (!$sent && self::isConnectionError($error)) {
-            $error = 'Could not connect to SMTP server. Use host mail.vkitnet.info on port 465 (SSL). '
-                . 'Note: some providers block outbound SMTP from localhost — test again on the live server.';
-        }
+        $error = self::humanizeError(self::$lastError ?? 'Failed to send test email.', $settings);
 
         return [
             'success' => $sent,
             'message' => $sent ? 'Test email sent successfully to ' . $to . '.' : $error,
             'error' => $sent ? null : $error,
+        ];
+    }
+
+    public static function getDiagnostics(): array
+    {
+        $settings = self::getSettings();
+        $envPath = App::basePath() . '/.env';
+
+        return [
+            'env_file_exists' => file_exists($envPath),
+            'env_file_readable' => is_readable($envPath),
+            'smtp_password_set' => !empty($settings['smtp_password']),
+            'openssl_loaded' => extension_loaded('openssl'),
+            'smtp_host' => $settings['smtp_host'],
+            'smtp_port' => (string) $settings['smtp_port'],
+            'smtp_encryption' => $settings['smtp_encryption'],
+            'smtp_username' => $settings['smtp_username'],
+            'from_email' => $settings['from_email'],
+            'config_error' => self::validateConfiguration($settings),
+            'cpanel_hint' => self::isLikelyCpanel() ? 'On cPanel, try SMTP host localhost with port 587 (TLS) if mail.vkitnet.info fails.' : null,
         ];
     }
 
@@ -157,7 +171,13 @@ class Mailer
 
     private static function env(string $key, string $default = ''): string
     {
-        $value = $_ENV[$key] ?? getenv($key);
+        if (isset($_ENV[$key]) && $_ENV[$key] !== '') {
+            return (string) $_ENV[$key];
+        }
+        if (isset($_SERVER[$key]) && $_SERVER[$key] !== '') {
+            return (string) $_SERVER[$key];
+        }
+        $value = getenv($key);
         if ($value === false || $value === null || $value === '') {
             return $default;
         }
@@ -170,39 +190,72 @@ class Mailer
             return 'SMTP host is not configured.';
         }
         if (empty($settings['smtp_username'])) {
-            return 'SMTP username is not configured. Set SMTP_USERNAME in .env.';
+            return 'SMTP username is not configured. Set SMTP_USERNAME in .env on the server.';
         }
         if (empty($settings['smtp_password'])) {
-            return 'SMTP password is not configured. Set SMTP_PASSWORD in your .env file.';
+            return 'SMTP password is not configured. Upload .env to the server and set SMTP_PASSWORD for tmvosa@vkitnet.info.';
         }
         if (in_array($settings['smtp_password'], ['your_smtp_password_here', 'your_password', 'changeme'], true)) {
-            return 'SMTP_PASSWORD in .env is still a placeholder. Set the real mailbox password for tmvosa@vkitnet.info.';
+            return 'SMTP_PASSWORD in .env is still a placeholder. Set the real mailbox password on the server.';
         }
         if (empty($settings['from_email'])) {
             return 'Sender email (from_email) is not configured.';
         }
+        if (!extension_loaded('openssl')) {
+            return 'PHP openssl extension is required for SMTP on port 465/587. Enable it in cPanel MultiPHP INI Editor.';
+        }
         return null;
     }
 
-    private static function configureMailer(PHPMailer $mail, array $settings, string $host): void
+    private static function connectionProfiles(array $settings): array
+    {
+        $primary = [
+            'host' => trim($settings['smtp_host']),
+            'port' => (int) $settings['smtp_port'],
+            'encryption' => strtolower($settings['smtp_encryption']),
+        ];
+
+        $profiles = [$primary];
+        $host = strtolower($primary['host']);
+
+        if (self::isLikelyCpanel() || str_contains($host, 'vkitnet.info')) {
+            $profiles[] = ['host' => 'localhost', 'port' => 587, 'encryption' => 'tls'];
+            $profiles[] = ['host' => 'localhost', 'port' => 465, 'encryption' => 'ssl'];
+            $profiles[] = ['host' => '127.0.0.1', 'port' => 587, 'encryption' => 'tls'];
+        }
+
+        if ($host !== 'mail.vkitnet.info') {
+            $profiles[] = ['host' => 'mail.vkitnet.info', 'port' => 465, 'encryption' => 'ssl'];
+        }
+
+        $unique = [];
+        foreach ($profiles as $profile) {
+            $key = $profile['host'] . ':' . $profile['port'] . ':' . $profile['encryption'];
+            $unique[$key] = $profile;
+        }
+
+        return array_values($unique);
+    }
+
+    private static function configureMailer(PHPMailer $mail, array $settings, array $profile): void
     {
         $mail->isSMTP();
-        $mail->Host = $host;
+        $mail->Host = $profile['host'];
         $mail->SMTPAuth = true;
         $mail->Username = $settings['smtp_username'];
         $mail->Password = $settings['smtp_password'];
         $mail->CharSet = 'UTF-8';
-        $mail->Timeout = 30;
+        $mail->Timeout = 45;
         $mail->SMTPKeepAlive = false;
 
-        self::applyEncryption($mail, $settings);
+        self::applyEncryption($mail, $profile);
         self::applySslOptions($mail);
     }
 
-    private static function applyEncryption(PHPMailer $mail, array $settings): void
+    private static function applyEncryption(PHPMailer $mail, array $profile): void
     {
-        $encryption = $settings['smtp_encryption'];
-        $mail->Port = (int) $settings['smtp_port'];
+        $encryption = $profile['encryption'];
+        $mail->Port = (int) $profile['port'];
 
         if (in_array($encryption, ['ssl', 'smtps'], true)) {
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
@@ -234,20 +287,12 @@ class Mailer
         ];
     }
 
-    private static function resolveSmtpHosts(string $host): array
+    private static function shouldTryNextProfile(string $message): bool
     {
-        $host = trim($host);
-        $hosts = [$host];
-
-        if (!str_starts_with($host, 'mail.') && !str_starts_with($host, 'smtp.')) {
-            $hosts[] = 'mail.' . $host;
-        }
-
-        if ($host === 'vkitnet.info') {
-            $hosts = ['mail.vkitnet.info', 'vkitnet.info'];
-        }
-
-        return array_values(array_unique($hosts));
+        $message = strtolower($message);
+        return self::isConnectionError($message)
+            || str_contains($message, 'authenticate')
+            || str_contains($message, 'could not instantiate mail');
     }
 
     private static function isConnectionError(string $message): bool
@@ -256,7 +301,30 @@ class Mailer
         return str_contains($message, 'connect')
             || str_contains($message, '10060')
             || str_contains($message, 'timed out')
-            || str_contains($message, 'could not connect');
+            || str_contains($message, 'could not connect')
+            || str_contains($message, 'connection refused');
+    }
+
+    private static function isLikelyCpanel(): bool
+    {
+        return isset($_SERVER['DOCUMENT_ROOT'])
+            && (str_contains($_SERVER['DOCUMENT_ROOT'], 'public_html')
+                || str_contains($_SERVER['DOCUMENT_ROOT'], 'home/'));
+    }
+
+    private static function humanizeError(string $error, array $settings): string
+    {
+        if (stripos($error, 'authenticate') !== false) {
+            return 'SMTP authentication failed. On the server .env file, set SMTP_USERNAME=tmvosa@vkitnet.info and the correct SMTP_PASSWORD (use quotes if the password contains special characters).';
+        }
+
+        if (self::isConnectionError($error)) {
+            return 'Could not connect to SMTP server (' . $settings['smtp_host'] . ':' . $settings['smtp_port'] . '). '
+                . 'On cPanel, edit .env and try: SMTP_HOST=localhost, SMTP_PORT=587, SMTP_ENCRYPTION=tls. '
+                . 'Technical detail: ' . $error;
+        }
+
+        return $error;
     }
 
     private static function replaceVars(string $text, array $vars): string
