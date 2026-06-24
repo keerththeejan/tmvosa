@@ -25,6 +25,39 @@ $(function() {
         });
     });
 
+    $('#applyCpanelSmtpBtn').on('click', function() {
+        const $form = $('#emailSettingsForm');
+        $form.find('[name=smtp_host]').val('localhost');
+        $form.find('[name=smtp_port]').val('587');
+        $form.find('[name=smtp_encryption]').val('tls');
+
+        Swal.fire({
+            title: 'cPanel SMTP preset applied',
+            html: 'Host: <strong>localhost</strong><br>Port: <strong>587</strong><br>Encryption: <strong>TLS</strong><br><br>'
+                + 'Also ensure your server <code>.env</code> has:<br>'
+                + '<code>SMTP_HOST=localhost</code><br>'
+                + '<code>SMTP_PORT=587</code><br>'
+                + '<code>SMTP_ENCRYPTION=tls</code><br>'
+                + '<code>SMTP_PASSWORD="your-mailbox-password"</code>',
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: 'Save & test',
+            cancelButtonText: 'Close'
+        }).then(function(result) {
+            if (!result.isConfirmed) return;
+            const $btn = $('#saveEmailSettingsBtn').prop('disabled', true);
+            $.post(BASE_URL + '/admin/email-settings', collectEmailSettings(), function(res) {
+                if (res.success) {
+                    Swal.fire('Saved', res.message, 'success');
+                } else {
+                    Swal.fire('Error', res.message, 'error');
+                }
+            }).always(function() {
+                $btn.prop('disabled', false);
+            });
+        });
+    });
+
     $('#sendTestEmailBtn').on('click', function() {
         const $btn = $(this).prop('disabled', true);
         $.ajax({

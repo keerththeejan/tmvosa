@@ -215,11 +215,17 @@ class Mailer
             'encryption' => strtolower($settings['smtp_encryption']),
         ];
 
-        $profiles = [$primary];
+        $cpanelLocal = ['host' => 'localhost', 'port' => 587, 'encryption' => 'tls'];
         $host = strtolower($primary['host']);
 
+        if (self::isLikelyCpanel()) {
+            // On cPanel, localhost:587 (TLS) is usually the most reliable option.
+            $profiles = [$cpanelLocal, $primary];
+        } else {
+            $profiles = [$primary];
+        }
+
         if (self::isLikelyCpanel() || str_contains($host, 'vkitnet.info')) {
-            $profiles[] = ['host' => 'localhost', 'port' => 587, 'encryption' => 'tls'];
             $profiles[] = ['host' => 'localhost', 'port' => 465, 'encryption' => 'ssl'];
             $profiles[] = ['host' => '127.0.0.1', 'port' => 587, 'encryption' => 'tls'];
         }

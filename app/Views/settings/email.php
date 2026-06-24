@@ -89,6 +89,9 @@ $s = $emailSettings ?? [];
 
 <div class="d-grid gap-2 d-md-flex mb-3">
     <button type="button" class="btn btn-primary" id="saveEmailSettingsBtn">Save Email Settings</button>
+    <button type="button" class="btn btn-outline-secondary" id="applyCpanelSmtpBtn">
+        Use cPanel SMTP (localhost:587 TLS)
+    </button>
 </div>
 
 <div class="card border-0 shadow-sm mb-3">
