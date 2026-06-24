@@ -24,8 +24,13 @@ class NumberGenerator
     private static function next(string $type, string $defaultPrefix): string
     {
         $year = (int) date('Y');
+        $pdo = Database::getInstance();
+        $ownsTransaction = !$pdo->inTransaction();
 
-        Database::beginTransaction();
+        if ($ownsTransaction) {
+            Database::beginTransaction();
+        }
+
         try {
             $seq = Database::fetch(
                 "SELECT * FROM number_sequences WHERE sequence_type = ? AND year = ? FOR UPDATE",
@@ -47,10 +52,15 @@ class NumberGenerator
                 Database::update('number_sequences', ['last_number' => $number], 'id = ?', [$seq['id']]);
             }
 
-            Database::commit();
+            if ($ownsTransaction) {
+                Database::commit();
+            }
+
             return sprintf('%s-%d-%04d', $prefix, $year, $number);
         } catch (\Exception $e) {
-            Database::rollback();
+            if ($ownsTransaction && $pdo->inTransaction()) {
+                Database::rollback();
+            }
             throw $e;
         }
     }

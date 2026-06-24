@@ -60,14 +60,17 @@ class ApplicationController extends Controller
             $this->json(['success' => false, 'message' => implode(' ', $errors)], 422);
         }
 
-        $data['application_number'] = NumberGenerator::applicationNumber();
         $data['status'] = 'pending';
         $data['ip_address'] = Security::getClientIp();
         $data['user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? '';
 
         Database::beginTransaction();
         try {
+            $data['application_number'] = NumberGenerator::applicationNumber();
             $appId = Application::create($data);
+            if ($appId <= 0) {
+                throw new \RuntimeException('Application insert returned no ID.');
+            }
             $this->handleDocumentUploads($appId);
             Database::commit();
 
@@ -97,7 +100,10 @@ class ApplicationController extends Controller
                 'application_number' => $data['application_number'],
             ]);
         } catch (\Exception $e) {
-            Database::rollback();
+            if (Database::getInstance()->inTransaction()) {
+                Database::rollback();
+            }
+            error_log('Application submit failed: ' . $e->getMessage());
             $this->json(['success' => false, 'message' => 'Submission failed. Please try again.'], 500);
         }
     }

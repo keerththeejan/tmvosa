@@ -46,9 +46,29 @@ class Application
         return ['data' => $data, 'total' => (int) $total, 'page' => $page, 'total_pages' => (int) ceil($total / $perPage)];
     }
 
+    private static function insertableColumns(): array
+    {
+        return [
+            'application_number', 'member_id', 'full_name_tamil', 'full_name_english',
+            'gender', 'date_of_birth', 'nic_number', 'current_address', 'permanent_address',
+            'country_id', 'mobile', 'whatsapp', 'email', 'studied_from_year', 'studied_to_year',
+            'grade_stream', 'teacher_name', 'occupation', 'company', 'proposer_name',
+            'proposer_contact', 'membership_type_id', 'amount_paid', 'payment_method',
+            'transaction_number', 'payment_date', 'status', 'rejection_reason', 'reviewed_by',
+            'reviewed_at', 'ip_address', 'user_agent', 'created_at',
+        ];
+    }
+
     public static function create(array $data): int
     {
-        return Database::insert('member_applications', $data);
+        $allowed = array_flip(self::insertableColumns());
+        $payload = array_intersect_key($data, $allowed);
+
+        if (!isset($payload['created_at'])) {
+            $payload['created_at'] = date('Y-m-d H:i:s');
+        }
+
+        return Database::insert('member_applications', $payload);
     }
 
     public static function update(int $id, array $data): int
@@ -70,12 +90,32 @@ class Application
 
     public static function getStatusCounts(): array
     {
-        return Database::fetch(
+        $row = Database::fetch(
             "SELECT
-                SUM(CASE WHEN status IN ('pending','under_review') THEN 1 ELSE 0 END) as pending,
-                SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
-                SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected
+                COALESCE(SUM(CASE WHEN status IN ('pending','under_review') THEN 1 ELSE 0 END), 0) as pending,
+                COALESCE(SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END), 0) as approved,
+                COALESCE(SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END), 0) as rejected
              FROM member_applications"
-        ) ?: ['pending' => 0, 'approved' => 0, 'rejected' => 0];
+        );
+
+        return [
+            'pending' => (int) ($row['pending'] ?? 0),
+            'approved' => (int) ($row['approved'] ?? 0),
+            'rejected' => (int) ($row['rejected'] ?? 0),
+        ];
+    }
+
+    public static function getRecent(int $limit = 5): array
+    {
+        $limit = max(1, min(20, $limit));
+
+        return Database::fetchAll(
+            "SELECT a.id, a.application_number, a.full_name_tamil, a.full_name_english,
+                    a.mobile, a.status, a.created_at, mt.name as membership_type_name
+             FROM member_applications a
+             LEFT JOIN membership_types mt ON a.membership_type_id = mt.id
+             ORDER BY a.created_at DESC
+             LIMIT {$limit}"
+        );
     }
 }

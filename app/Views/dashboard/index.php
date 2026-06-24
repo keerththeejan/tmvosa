@@ -4,13 +4,14 @@ use App\Core\View;
 $pageTitle = 'Dashboard';
 $statCards = [
     ['Total Members', number_format($stats['total'] ?? 0), 'people', 'primary'],
-    ['Pending Applications', number_format($stats['pending'] ?? 0), 'hourglass-split', 'warning'],
-    ['Approved Applications', number_format($stats['approved'] ?? 0), 'check-circle', 'success'],
-    ['Rejected Applications', number_format($stats['rejected'] ?? 0), 'x-circle', 'danger'],
+    ['Pending Applications', number_format($stats['applications_pending'] ?? 0), 'hourglass-split', 'warning'],
+    ['Approved Applications', number_format($stats['applications_approved'] ?? 0), 'check-circle', 'success'],
+    ['Rejected Applications', number_format($stats['applications_rejected'] ?? 0), 'x-circle', 'danger'],
     ['Active Memberships', number_format($stats['active'] ?? 0), 'person-check', 'info'],
     ['Expired Memberships', number_format($stats['expired'] ?? 0), 'calendar-x', 'secondary'],
     ['Total Revenue', 'Rs. ' . number_format($stats['total_revenue'] ?? 0, 0), 'cash-stack', 'dark'],
 ];
+$base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 ?>
 <h5 class="mb-3"><i class="bi bi-speedometer2"></i> Dashboard</h5>
 
@@ -24,6 +25,43 @@ $statCards = [
         </div>
     </div>
     <?php endforeach; ?>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h6 class="mb-0"><i class="bi bi-file-earmark-text"></i> Recent Applications</h6>
+        <a href="<?= $base ?>/applications?status=pending" class="btn btn-sm btn-outline-primary">View pending</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Application No.</th>
+                        <th>Name</th>
+                        <th>Mobile</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($recentApplications)): ?>
+                    <tr><td colspan="5" class="text-center text-muted py-4">No applications yet.</td></tr>
+                    <?php else: ?>
+                    <?php foreach ($recentApplications as $app): ?>
+                    <tr>
+                        <td><a href="<?= $base ?>/applications/<?= (int) $app['id'] ?>"><?= View::escape($app['application_number']) ?></a></td>
+                        <td><?= View::escape($app['full_name_tamil'] ?: $app['full_name_english']) ?></td>
+                        <td><?= View::escape($app['mobile']) ?></td>
+                        <td><span class="badge bg-<?= match($app['status']) { 'approved' => 'success', 'rejected' => 'danger', 'pending' => 'warning', default => 'info' } ?>"><?= ucfirst(str_replace('_', ' ', $app['status'])) ?></span></td>
+                        <td><?= date('d M Y H:i', strtotime($app['created_at'])) ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <div class="card border-0 shadow-sm mb-4">

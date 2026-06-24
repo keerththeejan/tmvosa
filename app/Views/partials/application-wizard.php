@@ -250,8 +250,8 @@ use App\Helpers\Lang;
                     <?php View::heading('step_declaration_card', 'h5', 'check2-square', 'mb-0 form-section-title'); ?>
                 </div>
                 <div class="card-body">
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="agreeTerms" name="agree_declaration" value="1">
+                    <div class="form-check declaration-check">
+                        <input type="checkbox" class="form-check-input declaration-checkbox" id="agreeTerms" name="agree_declaration" value="1">
                         <label class="form-check-label declaration-text bilingual-label" for="agreeTerms">
                             <?php $decl = Lang::field('declaration'); ?>
                             <span class="label-ta"><?= View::escape($decl['ta']) ?> <span class="text-danger">*</span></span>

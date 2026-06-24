@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a5276">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/osa/public/manifest.json">
+    <title>Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="/osa/public/assets/css/app.css" rel="stylesheet">
+</head>
+<body>
+    <div class="auth-page">
+    <div class="auth-container">
+        <section class="osa-hero-section osa-hero-section--compact" aria-label="Kilinochchi / Thiruvaiyaru Maha Vidyalayam Old Students&#039; Association">
+    <div class="osa-hero">
+        <picture class="osa-hero__picture">
+                        <source
+                type="image/webp"
+                srcset="/osa/assets/img/osa-hero-banner.webp"
+                media="(min-width: 1px)">
+                        <img
+                src="/osa/assets/img/osa-hero-banner.jpg"
+                alt="கிளி / திருவையாறு மகா வித்தியாலயம் பழைய மாணவர் சங்கம் — Kilinochchi / Thiruvaiyaru Maha Vidyalayam Old Students&#039; Association"
+                class="osa-hero__img"
+                width="1920"
+                height="600"
+                loading="eager"
+                fetchpriority="high"
+                decoding="async">
+        </picture>
+    </div>
+</section>
+        <div class="card auth-card shadow-sm mt-3">
+            <div class="card-body p-4">
+                <h5 class="bilingual-heading step-title card-title mb-4">
+        <span class="label-ta">உள்நுழைவு</span>
+    <span class="label-en">Sign In</span>
+</h5>
+                <form id="loginForm">
+                    <input type="hidden" name="_csrf_token" value="5dd476e12a7607787b4a78f89077a2d029c355d3eb95711690eca6c2a8e5a716">
+                    <div class="mb-3">
+                        <label class="form-label bilingual-label">
+    <span class="label-ta">பயனர்பெயர் அல்லது மின்னஞ்சல்<span class="text-danger"> *</span></span>
+    <span class="label-en">Username or Email<span class="text-danger"> *</span></span>
+</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input type="text" name="username" class="form-control form-control-lg" required autofocus>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label bilingual-label">
+    <span class="label-ta">கடவுச்சொல்<span class="text-danger"> *</span></span>
+    <span class="label-en">Password<span class="text-danger"> *</span></span>
+</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" name="password" class="form-control form-control-lg" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100 bilingual-btn" id="loginBtn">
+                        <span class="label-ta">உள்நுழைவு</span>
+                        <span class="label-en">Sign In</span>
+                        <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <a href="/osa/public/apply" class="text-decoration-none text-white bilingual-text bilingual-block">
+                <i class="bi bi-file-earmark-plus"></i>
+                <span class="label-ta">உறுப்பினர் விண்ணப்பம்</span>
+                <span class="label-en">Apply Membership</span>
+            </a>
+        </div>
+    </div>
+</div>
+    <footer class="site-footer">
+    <div class="site-footer-inner">
+        <div class="site-footer-contact bilingual-text bilingual-block mb-2">
+            <span class="label-ta">
+                <a href="tel:0778870135">📞 077 887 0135</a>
+                &nbsp;|&nbsp;
+                <a href="mailto:tmvosa@vkitnet.info">📧 tmvosa@vkitnet.info</a>
+            </span>
+            <span class="label-en">
+                <a href="tel:0778870135">📞 077 887 0135</a>
+                &nbsp;|&nbsp;
+                <a href="mailto:tmvosa@vkitnet.info">📧 tmvosa@vkitnet.info</a>
+            </span>
+        </div>
+        <p class="site-footer-copy mb-1 bilingual-text bilingual-block">
+            <span class="label-ta">&copy; 2026 கிளிநொச்சி / திருவையாறு மகா வித்தியாலயம் பழைய மாணவர் சங்கம். அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை.</span>
+            <span class="label-en">&copy; 2026 Kilinochchi / Thiruvaiyaru Maha Vidyalayam OSA. All rights reserved.</span>
+        </p>
+        <p class="site-footer-dev mb-1 bilingual-text bilingual-block">
+            <span class="label-ta">வடிவமைப்பு:                <a href="https://vkitnet.info" target="_blank" rel="noopener noreferrer">vkitnet.info</a>
+            </span>
+            <span class="label-en">Developed by                <a href="https://vkitnet.info" target="_blank" rel="noopener noreferrer">vkitnet.info</a>
+            </span>
+        </p>
+                <p class="site-footer-clear mb-0 small">
+            <a href="/osa/clear-site-data" class="text-muted">Clear cookies &amp; saved form data</a>
+        </p>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const BASE_URL = '/osa/public';
+        const CSRF_TOKEN = '5dd476e12a7607787b4a78f89077a2d029c355d3eb95711690eca6c2a8e5a716';
+    </script>
+    <script src="/osa/public/assets/js/app.js"></script>
+            <script src="/osa/public/assets/js/login.js"></script>
+        <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register(BASE_URL + '/service-worker.js');
+        }
+    </script>
+</body>
+</html>
