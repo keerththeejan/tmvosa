@@ -1,4 +1,4 @@
-const CACHE_NAME = 'osa-alumni-v1';
+const CACHE_NAME = 'osa-alumni-v2';
 const OFFLINE_URL = 'offline.html';
 
 const PRECACHE_URLS = [
@@ -38,6 +38,11 @@ self.addEventListener('activate', function(event) {
 
 self.addEventListener('fetch', function(event) {
     if (event.request.method !== 'GET') return;
+
+    const url = new URL(event.request.url);
+    if (url.pathname.includes('/admin/') || url.pathname.includes('/api/') || url.pathname.includes('/login')) {
+        return;
+    }
 
     event.respondWith(
         caches.match(event.request).then(function(cached) {

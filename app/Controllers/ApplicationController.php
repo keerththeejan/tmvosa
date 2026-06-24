@@ -72,18 +72,24 @@ class ApplicationController extends Controller
             Database::commit();
 
             if (!empty($data['email'])) {
-                Mailer::sendTemplate($data['email'], 'application_received', [
+                $sent = Mailer::sendTemplate($data['email'], 'application_received', [
                     'full_name' => $data['full_name_english'],
                     'application_number' => $data['application_number'],
                 ], $data['full_name_english']);
+                if (!$sent) {
+                    error_log('Application received email failed: ' . (Mailer::getLastError() ?? 'unknown'));
+                }
             }
 
-            Mailer::notifyAdmin('admin_notification', [
+            $notified = Mailer::notifyAdmin('admin_notification', [
                 'application_number' => $data['application_number'],
                 'full_name' => $data['full_name_english'],
                 'mobile' => $data['mobile'],
                 'email' => $data['email'] ?? 'N/A',
             ]);
+            if (!$notified) {
+                error_log('Admin notification email failed: ' . (Mailer::getLastError() ?? 'unknown'));
+            }
 
             $this->json([
                 'success' => true,

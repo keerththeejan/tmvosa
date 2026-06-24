@@ -44,6 +44,6 @@ class AuthController extends Controller
     public function logout(): void
     {
         Auth::logout();
-        $this->redirect(\App\Core\App::routeUrl('login'));
+        $this->redirect(\App\Core\App::routeUrl('clear-site-data'));
     }
 }

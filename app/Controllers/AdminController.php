@@ -131,7 +131,7 @@ class AdminController extends Controller
     {
         $settings = Setting::getAll();
         unset($settings['email']);
-        $this->view('settings/index', compact('settings'));
+        $this->view('settings/index', compact('settings') + ['pageScript' => 'settings-admin.js']);
     }
 
     public function emailSettings(): void
@@ -143,7 +143,10 @@ class AdminController extends Controller
         }
 
         $emailSettings = Mailer::getSettings();
-        $this->view('settings/email', ['emailSettings' => $emailSettings]);
+        $this->view('settings/email', [
+            'emailSettings' => $emailSettings,
+            'pageScript' => 'email-settings.js',
+        ]);
     }
 
     public function updateEmailSettings(): void
@@ -200,7 +203,7 @@ class AdminController extends Controller
         }
 
         $templates = EmailTemplate::getAll();
-        $this->view('settings/email-templates', compact('templates'));
+        $this->view('settings/email-templates', compact('templates') + ['pageScript' => 'email-templates.js']);
     }
 
     public function updateEmailTemplate(string $id): void

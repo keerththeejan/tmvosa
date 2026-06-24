@@ -16,6 +16,14 @@ class App
         ini_set('display_errors', self::$config['app']['debug'] ? '1' : '0');
 
         if (session_status() === PHP_SESSION_NONE) {
+            $cookiePath = self::sessionCookiePath();
+            session_set_cookie_params([
+                'lifetime' => 0,
+                'path' => $cookiePath,
+                'httponly' => true,
+                'samesite' => 'Lax',
+                'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+            ]);
             session_start([
                 'cookie_httponly' => true,
                 'cookie_samesite' => 'Lax',
@@ -24,6 +32,29 @@ class App
         }
 
         Session::checkTimeout();
+    }
+
+    public static function sessionCookiePath(): string
+    {
+        $appUrl = getenv('APP_URL') ?: '';
+        if ($appUrl !== '' && preg_match('#https?://[^/]+(/.*)?$#', $appUrl, $matches)) {
+            $path = $matches[1] ?? '/';
+            if ($path === '' || $path === '/') {
+                return '/';
+            }
+            return rtrim($path, '/');
+        }
+
+        $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+        if (str_ends_with($scriptDir, '/public')) {
+            $scriptDir = dirname($scriptDir);
+        }
+
+        if ($scriptDir === '/' || $scriptDir === '.' || $scriptDir === '') {
+            return '/';
+        }
+
+        return rtrim($scriptDir, '/');
     }
 
     public static function config(string $key, mixed $default = null): mixed

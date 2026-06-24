@@ -59,18 +59,3 @@ $labels = [
 </div>
 <?php endforeach; ?>
 
-<script>
-$('.email-template-form').on('submit', function(e) {
-    e.preventDefault();
-    const $form = $(this);
-    const id = $form.data('id');
-    $.post(BASE_URL + '/admin/email-templates/' + id, {
-        _csrf_token: CSRF_TOKEN,
-        subject: $form.find('[name=subject]').val(),
-        body: $form.find('[name=body]').val(),
-        is_active: $form.find('[name=is_active]').is(':checked') ? 1 : 0
-    }, function(res) {
-        Swal.fire(res.success ? 'Saved' : 'Error', res.message, res.success ? 'success' : 'error');
-    });
-});
-</script>

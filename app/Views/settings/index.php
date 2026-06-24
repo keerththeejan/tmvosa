@@ -55,10 +55,3 @@
     <?php endif; ?>
 </form>
 <a href="<?= $base ?>/admin/backup" class="btn btn-outline-danger w-100"><i class="bi bi-download"></i> Download Database Backup</a>
-<script>
-$('#settingsForm').on('submit', function(e) { e.preventDefault();
-    $.post(BASE_URL + '/admin/settings', $(this).serialize(), function(res) {
-        Swal.fire(res.success ? 'Saved' : 'Error', res.message, res.success ? 'success' : 'error');
-    });
-});
-</script>

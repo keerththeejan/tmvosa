@@ -26,7 +26,31 @@ class Session
 
     public static function destroy(): void
     {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            return;
+        }
+
+        $_SESSION = [];
+        $name = session_name();
+        $params = session_get_cookie_params();
+
+        setcookie($name, '', [
+            'expires' => time() - 42000,
+            'path' => $params['path'] ?: App::sessionCookiePath(),
+            'domain' => $params['domain'] ?? '',
+            'secure' => $params['secure'] ?? false,
+            'httponly' => $params['httponly'] ?? true,
+            'samesite' => $params['samesite'] ?? 'Lax',
+        ]);
+
         session_destroy();
+    }
+
+    public static function regenerate(): void
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
     }
 
     public static function flash(string $type, string $message): void
@@ -59,6 +83,8 @@ class Session
 
     private static function baseUrl(): string
     {
-        return rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+        return App::sessionCookiePath() === '/'
+            ? ''
+            : App::sessionCookiePath();
     }
 }

@@ -4,6 +4,12 @@ use App\Helpers\Lang;
 
 $pageTitle = 'OSA Alumni — Membership';
 ?>
+<script>
+window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
+    'blockDuplicateMobile' => false,
+    'blockDuplicateEmail' => false,
+], JSON_UNESCAPED_UNICODE) ?>;
+</script>
 <div class="public-landing-page">
     <?php View::partial('osa-hero-banner', ['heroEager' => true]); ?>
 

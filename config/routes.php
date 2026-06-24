@@ -7,6 +7,7 @@ $base = '';
 
 // Public routes
 $router->get('/', ['HomeController', 'index']);
+$router->get('/clear-site-data', ['HomeController', 'clearSiteData']);
 $router->get('/login', ['AuthController', 'loginForm']);
 $router->post('/login', ['AuthController', 'login']);
 $router->get('/logout', ['AuthController', 'logout'], ['AuthMiddleware']);

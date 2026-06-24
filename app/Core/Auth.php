@@ -22,6 +22,7 @@ class Auth
         Session::set('user_id', $user['id']);
         Session::set('user_role', $user['role_slug']);
         Session::set('user_name', $user['full_name']);
+        Session::regenerate();
 
         User::updateLastLogin($user['id'], Security::getClientIp());
         AuditLog::log('login', 'users', $user['id']);
