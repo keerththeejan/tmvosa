@@ -21,6 +21,7 @@ $s = $emailSettings ?? [];
     <div class="card-body small">
         <ul class="mb-0">
             <li><strong>.env file on server:</strong> <?= !empty($diag['env_file_exists']) ? 'Found' : '<span class="text-danger">Missing — upload .env to the project root</span>' ?></li>
+            <li><strong>Composer vendor/ (PHPMailer):</strong> <?= !empty($diag['vendor_installed']) ? 'Installed' : '<span class="text-danger">Missing — run composer install or upload vendor/ folder</span>' ?></li>
             <li><strong>SMTP password in .env:</strong> <?= !empty($diag['smtp_password_set']) ? 'Set' : '<span class="text-danger">Not set — add SMTP_PASSWORD</span>' ?></li>
             <li><strong>PHP openssl:</strong> <?= !empty($diag['openssl_loaded']) ? 'Enabled' : '<span class="text-danger">Disabled — enable in cPanel</span>' ?></li>
             <li><strong>Current host:</strong> <?= View::escape(($diag['smtp_host'] ?? '') . ':' . ($diag['smtp_port'] ?? '')) ?> (<?= View::escape($diag['smtp_encryption'] ?? '') ?>)</li>

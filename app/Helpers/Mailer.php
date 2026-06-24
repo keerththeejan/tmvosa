@@ -21,6 +21,11 @@ class Mailer
     {
         self::$lastError = null;
 
+        if (!class_exists(PHPMailer::class)) {
+            self::$lastError = 'PHPMailer is not installed. Upload the vendor/ folder or run composer install on the server.';
+            return false;
+        }
+
         if (empty($to) || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
             self::$lastError = 'Invalid recipient email address.';
             return false;
@@ -120,6 +125,8 @@ class Mailer
         return [
             'env_file_exists' => file_exists($envPath),
             'env_file_readable' => is_readable($envPath),
+            'vendor_installed' => file_exists(App::basePath() . '/vendor/autoload.php'),
+            'phpmailer_installed' => class_exists(PHPMailer::class),
             'smtp_password_set' => !empty($settings['smtp_password']),
             'openssl_loaded' => extension_loaded('openssl'),
             'smtp_host' => $settings['smtp_host'],

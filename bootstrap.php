@@ -38,6 +38,22 @@ function loadEnv(string $path): void
 
 loadEnv(__DIR__ . '/.env');
 
+$vendorAutoload = __DIR__ . '/vendor/autoload.php';
+if (!file_exists($vendorAutoload)) {
+    http_response_code(500);
+    header('Content-Type: text/html; charset=UTF-8');
+    echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Setup required</title></head><body style="font-family:Arial,sans-serif;max-width:640px;margin:40px auto;padding:20px;">';
+    echo '<h1>Composer dependencies missing</h1>';
+    echo '<p>The <code>vendor/</code> folder is not installed. PHPMailer and other libraries are required for email, PDF, and QR features.</p>';
+    echo '<h2>cPanel fix</h2><ol>';
+    echo '<li>Open <strong>Terminal</strong> in cPanel (or upload <code>vendor/</code> from your PC).</li>';
+    echo '<li>Run: <code>cd ~/path/to/osa &amp;&amp; composer install --no-dev</code></li>';
+    echo '<li>Or on your PC run <code>install.bat</code>, then upload the entire <code>vendor/</code> folder via File Manager.</li>';
+    echo '</ol></body></html>';
+    exit;
+}
+require_once $vendorAutoload;
+
 spl_autoload_register(function (string $class): void {
     $prefix = 'App\\';
     if (!str_starts_with($class, $prefix)) {

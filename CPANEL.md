@@ -42,6 +42,30 @@ In cPanel → **MySQL Databases**:
 
 Copy `.env.example` to `.env` and edit:
 
+## 5a. Install Composer dependencies (required)
+
+The `vendor/` folder contains **PHPMailer** (email), **dompdf** (PDF), and other libraries. It is **not** in git — you must install it on the server.
+
+**Option A — cPanel Terminal (recommended):**
+
+```bash
+cd ~/public_html/tmvosa
+# or: cd ~/osa  (your actual project path)
+composer install --no-dev --optimize-autoloader
+```
+
+**Option B — Upload from your PC:**
+
+1. On your PC, in the project folder, run `install.bat` (Windows) or `composer install`
+2. Upload the entire **`vendor/`** folder to the server (same level as `app/`, `public/`)
+3. Confirm `vendor/autoload.php` exists on the server
+
+Without `vendor/`, email test will fail with: `Class "PHPMailer\PHPMailer\PHPMailer" not found`.
+
+## 5b. Environment file
+
+Copy `.env.cpanel` to `.env` and edit:
+
 ```
 DB_HOST=localhost
 DB_NAME=username_osa
