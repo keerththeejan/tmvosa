@@ -30,34 +30,16 @@ $documentsByType = $documentsByType ?? [];
             <div class="col-6"><strong>Country:</strong> <?= View::escape($application['country_name'] ?? '-') ?></div>
             <div class="col-6"><strong>Batch:</strong> <?= View::escape($application['studied_to_year'] ?? '-') ?></div>
             <div class="col-6"><strong>Occupation:</strong> <?= View::escape($application['occupation'] ?? '-') ?></div>
-            <div class="col-6">
-                <div class="bilingual-label mb-1">
-                    <span class="label-ta fw-semibold"><?= View::escape(Lang::field('membership_type')['ta']) ?></span>
-                    <span class="label-en"><?= View::escape(Lang::field('membership_type')['en']) ?></span>
-                </div>
-                <?php
-                $membershipDisplay = Lang::membershipDisplayFromName($application['membership_type_name'] ?? '');
-                ?>
-                <div class="label-ta"><?= View::escape($membershipDisplay['with_validity_ta']) ?></div>
-                <div class="label-en text-muted"><?= View::escape($membershipDisplay['with_validity_en']) ?></div>
-            </div>
-            <div class="col-6">
-                <div class="bilingual-label mb-1">
-                    <span class="label-ta fw-semibold"><?= View::escape(Lang::field('validity_period')['ta']) ?></span>
-                    <span class="label-en"><?= View::escape(Lang::field('validity_period')['en']) ?></span>
-                </div>
-                <div class="label-ta"><?= View::escape($membershipDisplay['validity_ta']) ?></div>
-                <div class="label-en text-muted"><?= View::escape($membershipDisplay['validity_en']) ?></div>
-            </div>
+            <?php $membershipDisplay = Lang::membershipDisplayFromName($application['membership_type_name'] ?? ''); ?>
+            <div class="col-6"><strong>Membership Type:</strong> <?= View::escape($membershipDisplay['with_validity_en']) ?></div>
+            <div class="col-6"><strong>Validity Period:</strong> <?= View::escape($membershipDisplay['validity_en']) ?></div>
             <div class="col-6"><strong>Amount Paid:</strong> Rs. <?= number_format($application['amount_paid'] ?? 0, 2) ?></div>
         </div>
     </div>
 </div>
 
 <div class="card mb-3">
-    <div class="card-header">
-        <?php View::heading('documents', 'h6', 'folder2', 'mb-0'); ?>
-    </div>
+    <div class="card-header"><h6 class="mb-0"><i class="bi bi-folder2"></i> Documents</h6></div>
     <div class="card-body">
         <div class="row g-3">
             <?php foreach ($docTypes as $type):
@@ -67,43 +49,25 @@ $documentsByType = $documentsByType ?? [];
             ?>
             <div class="col-12 col-md-4">
                 <div class="doc-status-card h-100 p-3 border rounded">
-                    <div class="bilingual-label mb-2">
-                        <span class="label-ta fw-semibold"><?= View::escape($label['ta']) ?></span>
-                        <span class="label-en"><?= View::escape($label['en']) ?></span>
-                    </div>
+                    <div class="fw-semibold mb-2"><?= View::escape($label['en']) ?></div>
                     <?php if ($doc): ?>
-                    <span class="badge bg-success mb-2 bilingual-text">
-                        <span class="label-ta"><?= View::escape(Lang::ui('uploaded')['ta']) ?></span>
-                        <span class="label-en"><?= View::escape(Lang::ui('uploaded')['en']) ?></span>
-                    </span>
+                    <span class="badge bg-success mb-2">Uploaded</span>
                     <?php
                     $fileName = basename($doc['file_path']);
                     $fileUrl = $appBase . '/files/documents/' . rawurlencode($fileName);
                     ?>
                     <div>
-                        <a href="<?= View::escape($fileUrl) ?>" target="_blank" class="btn btn-sm btn-outline-primary bilingual-btn">
-                            <span class="label-ta"><?= View::escape(Lang::ui('view_document')['ta']) ?></span>
-                            <span class="label-en"><?= View::escape(Lang::ui('view_document')['en']) ?></span>
-                        </a>
+                        <a href="<?= View::escape($fileUrl) ?>" target="_blank" class="btn btn-sm btn-outline-primary">View Document</a>
                     </div>
                     <?php else: ?>
-                    <span class="badge bg-secondary mb-2 bilingual-text">
-                        <span class="label-ta"><?= View::escape(Lang::ui('not_uploaded')['ta']) ?></span>
-                        <span class="label-en"><?= View::escape(Lang::ui('not_uploaded')['en']) ?></span>
-                    </span>
+                    <span class="badge bg-secondary mb-2">Not Uploaded</span>
                     <?php if ($isOptional): ?>
-                    <p class="small text-muted mb-2 bilingual-text bilingual-block">
-                        <span class="label-ta"><?= View::escape(Lang::ui('upload_later_hint')['ta']) ?></span>
-                        <span class="label-en"><?= View::escape(Lang::ui('upload_later_hint')['en']) ?></span>
-                    </p>
+                    <p class="small text-muted mb-2">Can be uploaded later or requested from the applicant.</p>
                     <?php endif; ?>
                     <?php if (in_array($application['status'], ['pending', 'under_review', 'approved'])): ?>
                     <form class="admin-doc-upload mt-2" data-type="<?= View::escape($type) ?>">
                         <input type="file" name="document" accept="image/*,.pdf" class="form-control form-control-sm mb-2" required>
-                        <button type="submit" class="btn btn-sm btn-primary w-100 bilingual-btn">
-                            <span class="label-ta"><?= View::escape(Lang::ui('upload_document')['ta']) ?></span>
-                            <span class="label-en"><?= View::escape(Lang::ui('upload_document')['en']) ?></span>
-                        </button>
+                        <button type="submit" class="btn btn-sm btn-primary w-100">Upload Document</button>
                     </form>
                     <?php endif; ?>
                     <?php endif; ?>

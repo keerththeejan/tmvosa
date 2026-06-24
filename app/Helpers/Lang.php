@@ -235,6 +235,7 @@ class Lang
     private static array $applicationContact = [
         'phone_display' => '077 887 0135',
         'phone_tel' => '0778870135',
+        'email' => 'tmvosa@vkitnet.info',
     ];
 
     private static array $paymentSteps = [

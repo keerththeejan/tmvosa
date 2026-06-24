@@ -10,7 +10,7 @@ $secretary = Lang::ui('secretary');
 <div class="application-contact-card card border-0 shadow-sm mb-3">
     <div class="card-body text-center">
         <div class="application-contact-icon mb-2" aria-hidden="true">
-            <i class="bi bi-telephone-fill"></i>
+            <i class="bi bi-headset"></i>
         </div>
 
         <div class="bilingual-heading mb-3">
@@ -26,14 +26,20 @@ $secretary = Lang::ui('secretary');
         </p>
 
         <div class="application-contact-secretary">
-            <div class="bilingual-text bilingual-block mb-2">
+            <div class="bilingual-text bilingual-block mb-3">
                 <span class="label-ta application-contact-role"><?= View::escape($secretary['ta']) ?></span>
                 <span class="label-en application-contact-role-en"><?= View::escape($secretary['en']) ?></span>
             </div>
-            <a href="tel:<?= View::escape($contact['phone_tel']) ?>" class="application-contact-phone">
-                <i class="bi bi-telephone-outbound" aria-hidden="true"></i>
-                <?= View::escape($contact['phone_display']) ?>
-            </a>
+            <div class="application-contact-actions d-flex flex-column flex-sm-row gap-2 justify-content-center align-items-center">
+                <a href="tel:<?= View::escape($contact['phone_tel']) ?>" class="application-contact-phone">
+                    <i class="bi bi-telephone-outbound" aria-hidden="true"></i>
+                    <?= View::escape($contact['phone_display']) ?>
+                </a>
+                <a href="mailto:<?= View::escape($contact['email']) ?>" class="application-contact-email">
+                    <i class="bi bi-envelope" aria-hidden="true"></i>
+                    <?= View::escape($contact['email']) ?>
+                </a>
+            </div>
         </div>
     </div>
 </div>

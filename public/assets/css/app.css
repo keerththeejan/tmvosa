@@ -1396,6 +1396,44 @@ html {
     font-size: 1rem;
 }
 
+.application-contact-email {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.55rem 1.1rem;
+    border-radius: 999px;
+    background: #fff;
+    color: var(--primary) !important;
+    border: 2px solid var(--primary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+    word-break: break-all;
+}
+
+.application-contact-email:hover,
+.application-contact-email:focus {
+    background: var(--primary);
+    color: #fff !important;
+}
+
+.site-footer-contact a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.site-footer-contact a:hover {
+    text-decoration: underline;
+}
+
+.site-footer-contact .label-ta,
+.site-footer-contact .label-en {
+    font-size: 0.85rem;
+}
+
 @media (max-width: 414px) {
     .application-contact-card .card-body {
         padding: 1.15rem 0.95rem;
@@ -1406,4 +1444,22 @@ html {
         width: 100%;
         max-width: 280px;
     }
+}
+
+/* Admin panel: English only */
+.admin-panel .label-ta,
+.admin-panel .bilingual-heading .label-ta,
+.admin-panel .bilingual-text .label-ta,
+.admin-panel .bilingual-label .label-ta,
+.admin-panel .bilingual-btn .label-ta {
+    display: none !important;
+}
+
+.admin-panel .bilingual-text:not(.bilingual-block) .label-en::before,
+.admin-panel .bilingual-btn .label-en::before {
+    content: '' !important;
+}
+
+.admin-panel .bilingual-block .label-en {
+    margin-top: 0;
 }

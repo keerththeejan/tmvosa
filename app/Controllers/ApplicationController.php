@@ -54,8 +54,15 @@ class ApplicationController extends Controller
                 Mailer::sendTemplate($data['email'], 'application_received', [
                     'full_name' => $data['full_name_english'],
                     'application_number' => $data['application_number'],
-                ]);
+                ], $data['full_name_english']);
             }
+
+            Mailer::notifyAdmin('admin_notification', [
+                'application_number' => $data['application_number'],
+                'full_name' => $data['full_name_english'],
+                'mobile' => $data['mobile'],
+                'email' => $data['email'] ?? 'N/A',
+            ]);
 
             $this->json([
                 'success' => true,
@@ -153,6 +160,8 @@ class ApplicationController extends Controller
             $type = Database::fetch("SELECT duration_years FROM membership_types WHERE id = ?", [$application['membership_type_id']]);
             $durationYears = $type['duration_years'] ?? 1;
 
+            $expiryDate = date('Y-m-d', strtotime("+{$durationYears} years"));
+
             $memberId = Member::create([
                 'membership_number' => $membershipNumber,
                 'full_name_tamil' => $application['full_name_tamil'],
@@ -175,7 +184,7 @@ class ApplicationController extends Controller
                 'membership_type_id' => $application['membership_type_id'],
                 'status' => 'active',
                 'membership_start_date' => date('Y-m-d'),
-                'membership_expiry_date' => date('Y-m-d', strtotime("+{$durationYears} years")),
+                'membership_expiry_date' => $expiryDate,
                 'approved_by' => Auth::id(),
                 'approved_at' => date('Y-m-d H:i:s'),
             ]);
@@ -198,7 +207,18 @@ class ApplicationController extends Controller
                 Mailer::sendTemplate($application['email'], 'application_approved', [
                     'full_name' => $application['full_name_english'],
                     'membership_number' => $membershipNumber,
-                ]);
+                ], $application['full_name_english']);
+
+                Mailer::sendTemplate($application['email'], 'membership_activated', [
+                    'full_name' => $application['full_name_english'],
+                    'membership_number' => $membershipNumber,
+                    'expiry_date' => date('d M Y', strtotime($expiryDate)),
+                ], $application['full_name_english']);
+
+                Mailer::sendTemplate($application['email'], 'welcome_email', [
+                    'full_name' => $application['full_name_english'],
+                    'membership_number' => $membershipNumber,
+                ], $application['full_name_english']);
             }
 
             Database::commit();

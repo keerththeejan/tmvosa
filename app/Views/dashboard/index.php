@@ -2,47 +2,80 @@
 use App\Core\View;
 
 $pageTitle = 'Dashboard';
-$statKeys = ['total_members', 'active', 'pending_apps', 'monthly_revenue', 'total_revenue', 'expiring_soon'];
-$statValues = [
-    number_format($stats['total'] ?? 0),
-    number_format($stats['active'] ?? 0),
-    number_format($stats['pending_applications'] ?? 0),
-    number_format($stats['monthly_revenue'] ?? 0),
-    number_format($stats['total_revenue'] ?? 0),
-    number_format($stats['expiring'] ?? 0),
+$statCards = [
+    ['Total Members', number_format($stats['total'] ?? 0), 'people', 'primary'],
+    ['Pending Applications', number_format($stats['pending'] ?? 0), 'hourglass-split', 'warning'],
+    ['Approved Applications', number_format($stats['approved'] ?? 0), 'check-circle', 'success'],
+    ['Rejected Applications', number_format($stats['rejected'] ?? 0), 'x-circle', 'danger'],
+    ['Active Memberships', number_format($stats['active'] ?? 0), 'person-check', 'info'],
+    ['Expired Memberships', number_format($stats['expired'] ?? 0), 'calendar-x', 'secondary'],
+    ['Total Revenue', 'Rs. ' . number_format($stats['total_revenue'] ?? 0, 0), 'cash-stack', 'dark'],
 ];
-$statIcons = ['people', 'person-check', 'hourglass-split', 'currency-rupee', 'cash-stack', 'calendar-x'];
-$statColors = ['primary', 'success', 'warning', 'info', 'dark', 'danger'];
 ?>
-<div class="mb-3"><?php \App\Core\View::heading('dashboard', 'h5', 'speedometer2'); ?></div>
+<h5 class="mb-3"><i class="bi bi-speedometer2"></i> Dashboard</h5>
+
 <div class="row g-3 mb-4">
-    <?php foreach ($statKeys as $i => $key): ?>
-    <div class="col-6 col-md-4 col-xl-2">
+    <?php foreach ($statCards as [$label, $value, $icon, $color]): ?>
+    <div class="col-6 col-md-4 col-xl-3">
         <div class="stat-card">
-            <div class="stat-icon bg-<?= $statColors[$i] ?>-subtle text-<?= $statColors[$i] ?>"><i class="bi bi-<?= $statIcons[$i] ?>"></i></div>
-            <div class="stat-value"><?= $statValues[$i] ?></div>
-            <div class="stat-label bilingual-text bilingual-block">
-                <?php View::text($key, 'span', true); ?>
-            </div>
+            <div class="stat-icon bg-<?= $color ?>-subtle text-<?= $color ?>"><i class="bi bi-<?= $icon ?>"></i></div>
+            <div class="stat-value"><?= $value ?></div>
+            <div class="stat-label"><?= View::escape($label) ?></div>
         </div>
     </div>
     <?php endforeach; ?>
 </div>
 
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white">
+        <h6 class="mb-0"><i class="bi bi-receipt"></i> Recent Payments</h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Member Name</th>
+                        <th>Membership Number</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Payment Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($recentPayments)): ?>
+                    <tr><td colspan="5" class="text-center text-muted py-4">No recent payments.</td></tr>
+                    <?php else: ?>
+                    <?php foreach ($recentPayments as $payment): ?>
+                    <tr>
+                        <td><?= View::escape($payment['full_name_english']) ?></td>
+                        <td><?= View::escape($payment['membership_number']) ?></td>
+                        <td>Rs. <?= number_format((float) $payment['amount'], 2) ?></td>
+                        <td><span class="badge bg-<?= match($payment['status']) { 'verified' => 'success', 'rejected' => 'danger', default => 'warning' } ?>"><?= ucfirst($payment['status']) ?></span></td>
+                        <td><?= date('d M Y', strtotime($payment['payment_date'])) ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <div class="row g-3">
     <?php
     $charts = [
-        ['membership_growth', 'growthChart'],
-        ['revenue_growth', 'revenueChart'],
-        ['country_distribution', 'countryChart'],
-        ['membership_types', 'typeChart'],
+        ['Membership Growth', 'growthChart'],
+        ['Revenue Growth', 'revenueChart'],
+        ['Country Distribution', 'countryChart'],
+        ['Membership Types', 'typeChart'],
     ];
-    foreach ($charts as [$key, $canvasId]):
+    foreach ($charts as [$title, $canvasId]):
     ?>
     <div class="col-12 <?= str_contains($canvasId, 'growth') || str_contains($canvasId, 'revenue') ? 'col-lg-6' : 'col-md-6' ?>">
-        <div class="card chart-card">
-            <div class="card-header bilingual-text bilingual-block">
-                <?php View::text($key, 'h6', true, 'mb-0'); ?>
+        <div class="card chart-card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0"><?= View::escape($title) ?></h6>
             </div>
             <div class="card-body"><canvas id="<?= $canvasId ?>" height="200"></canvas></div>
         </div>

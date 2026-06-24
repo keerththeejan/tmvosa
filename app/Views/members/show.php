@@ -1,4 +1,7 @@
-<?php $pageTitle = 'Member Details'; $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'); ?>
+<?php $pageTitle = 'Member Details'; $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+use App\Helpers\Lang;
+$membershipDisplay = Lang::membershipDisplayFromName($member['membership_type_name'] ?? '');
+?>
 <div class="member-profile-card text-center mb-3">
     <div class="profile-avatar mx-auto">
         <?php if ($member['photo']): ?>
@@ -20,29 +23,8 @@
     <div class="info-row"><span>Country</span><strong><?= \App\Core\View::escape($member['country_name'] ?? '-') ?></strong></div>
     <div class="info-row"><span>Batch</span><strong><?= \App\Core\View::escape($member['studied_to_year'] ?? '-') ?></strong></div>
     <div class="info-row"><span>Occupation</span><strong><?= \App\Core\View::escape($member['occupation'] ?? '-') ?></strong></div>
-    <?php
-    $membershipDisplay = \App\Helpers\Lang::membershipDisplayFromName($member['membership_type_name'] ?? '');
-    ?>
-    <div class="info-row">
-        <span class="bilingual-text bilingual-block">
-            <span class="label-ta"><?= \App\Core\View::escape(\App\Helpers\Lang::field('membership_type')['ta']) ?></span>
-            <span class="label-en"><?= \App\Core\View::escape(\App\Helpers\Lang::field('membership_type')['en']) ?></span>
-        </span>
-        <strong class="text-end">
-            <span class="d-block label-ta"><?= \App\Core\View::escape($membershipDisplay['with_validity_ta']) ?></span>
-            <span class="d-block label-en text-muted small"><?= \App\Core\View::escape($membershipDisplay['with_validity_en']) ?></span>
-        </strong>
-    </div>
-    <div class="info-row">
-        <span class="bilingual-text bilingual-block">
-            <span class="label-ta"><?= \App\Core\View::escape(\App\Helpers\Lang::field('validity_period')['ta']) ?></span>
-            <span class="label-en"><?= \App\Core\View::escape(\App\Helpers\Lang::field('validity_period')['en']) ?></span>
-        </span>
-        <strong class="text-end">
-            <span class="d-block label-ta"><?= \App\Core\View::escape($membershipDisplay['validity_ta']) ?></span>
-            <span class="d-block label-en text-muted small"><?= \App\Core\View::escape($membershipDisplay['validity_en']) ?></span>
-        </strong>
-    </div>
+    <div class="info-row"><span>Membership Type</span><strong><?= \App\Core\View::escape($membershipDisplay['with_validity_en']) ?></strong></div>
+    <div class="info-row"><span>Validity Period</span><strong><?= \App\Core\View::escape($membershipDisplay['validity_en']) ?></strong></div>
     <div class="info-row"><span>Expires</span><strong><?= \App\Core\View::escape($member['membership_expiry_date'] ?? 'N/A') ?></strong></div>
 </div></div>
 

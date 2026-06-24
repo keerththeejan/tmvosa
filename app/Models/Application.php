@@ -62,4 +62,15 @@ class Application
             "SELECT COUNT(*) as cnt FROM member_applications WHERE status IN ('pending','under_review')"
         )['cnt'];
     }
+
+    public static function getStatusCounts(): array
+    {
+        return Database::fetch(
+            "SELECT
+                SUM(CASE WHEN status IN ('pending','under_review') THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
+                SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected
+             FROM member_applications"
+        ) ?: ['pending' => 0, 'approved' => 0, 'rejected' => 0];
+    }
 }

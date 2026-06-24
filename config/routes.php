@@ -52,11 +52,23 @@ $router->get('/reports/financial', ['ReportController', 'financial'], ['AuthMidd
 $router->get('/reports/alumni', ['ReportController', 'alumni'], ['AuthMiddleware']);
 
 // Admin
+$router->get('/settings/password', ['PasswordController', 'form'], ['AuthMiddleware']);
+$router->post('/settings/password', ['PasswordController', 'update'], ['AuthMiddleware']);
 $router->get('/admin/users', ['AdminController', 'users'], ['AuthMiddleware']);
 $router->post('/admin/users', ['AdminController', 'createUser'], ['AuthMiddleware']);
+$router->post('/admin/users/{id}/reset-password', ['AdminController', 'resetPassword'], ['AuthMiddleware']);
+$router->post('/admin/users/{id}/force-password-change', ['AdminController', 'forcePasswordChange'], ['AuthMiddleware']);
 $router->get('/admin/settings', ['AdminController', 'settings'], ['AuthMiddleware']);
 $router->post('/admin/settings', ['AdminController', 'updateSettings'], ['AuthMiddleware']);
+$router->get('/admin/email-settings', ['AdminController', 'emailSettings'], ['AuthMiddleware']);
+$router->post('/admin/email-settings', ['AdminController', 'updateEmailSettings'], ['AuthMiddleware']);
+$router->post('/admin/email-settings/test', ['AdminController', 'testEmail'], ['AuthMiddleware']);
+$router->get('/admin/email-templates', ['AdminController', 'emailTemplates'], ['AuthMiddleware']);
+$router->post('/admin/email-templates/{id}', ['AdminController', 'updateEmailTemplate'], ['AuthMiddleware']);
+$router->post('/admin/email/send-expiry-reminders', ['AdminController', 'sendExpiryReminders'], ['AuthMiddleware']);
 $router->get('/admin/audit-logs', ['AdminController', 'auditLogs'], ['AuthMiddleware']);
+$router->get('/admin/password-logs', ['AdminController', 'passwordLogs'], ['AuthMiddleware']);
 $router->get('/admin/backup', ['AdminController', 'backup'], ['AuthMiddleware']);
+$router->get('/membership-cards', ['CardController', 'index'], ['AuthMiddleware']);
 
 return $router;

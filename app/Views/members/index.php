@@ -1,21 +1,23 @@
 <?php
 use App\Core\View;
+use App\Helpers\Lang;
 
 $pageTitle = 'Members';
 $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 ?>
-<div class="mb-3"><?php View::heading('member_management', 'h5', 'people'); ?></div>
+<h5 class="mb-3"><i class="bi bi-people"></i> Member Management</h5>
+
 <div class="search-bar mb-3">
     <form id="searchForm" class="row g-2">
         <div class="col-12">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-search"></i></span>
-                <input type="text" name="search" class="form-control" placeholder="பெயர், NIC, கைபேசி, உறுப்பினர் இலக்கம் / Search name, NIC, mobile..." value="<?= View::escape($filters['search'] ?? '') ?>">
+                <input type="text" name="search" class="form-control" placeholder="Search name, NIC, mobile, membership number..." value="<?= View::escape($filters['search'] ?? '') ?>">
             </div>
         </div>
         <div class="col-6">
             <select name="status" class="form-select form-select-sm">
-                <option value=""><?= View::escape(\App\Helpers\Lang::ui('all_status')['ta']) ?> / <?= View::escape(\App\Helpers\Lang::ui('all_status')['en']) ?></option>
+                <option value="">All Status</option>
                 <?php foreach (['active','pending','under_review','approved','suspended','expired'] as $s): ?>
                 <option value="<?= $s ?>" <?= ($filters['status'] ?? '') === $s ? 'selected' : '' ?>><?= ucfirst(str_replace('_',' ',$s)) ?></option>
                 <?php endforeach; ?>
@@ -23,9 +25,9 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
         </div>
         <div class="col-6">
             <select name="membership_type_id" class="form-select form-select-sm">
-                <option value=""><?= View::escape(\App\Helpers\Lang::ui('all_types')['ta']) ?> / <?= View::escape(\App\Helpers\Lang::ui('all_types')['en']) ?></option>
+                <option value="">All Types</option>
                 <?php foreach ($membershipTypes as $t): ?>
-                <option value="<?= $t['id'] ?>" <?= ($filters['membership_type_id'] ?? '') == $t['id'] ? 'selected' : '' ?>><?= \App\Core\View::escape($t['name']) ?></option>
+                <option value="<?= $t['id'] ?>" <?= ($filters['membership_type_id'] ?? '') == $t['id'] ? 'selected' : '' ?>><?= View::escape($t['name']) ?></option>
                 <?php endforeach; ?>
             </select>
         </div>
@@ -33,13 +35,9 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 </div>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <small class="text-muted bilingual-text bilingual-block">
-        <span class="label-ta"><?= number_format($members['total']) ?> உறுப்பினர்கள்</span>
-        <span class="label-en"><?= number_format($members['total']) ?> members found</span>
-    </small>
-    <a href="<?= $base ?>/members/create" class="btn btn-primary btn-sm bilingual-btn">
-        <span class="label-ta"><i class="bi bi-plus-lg"></i> <?= View::escape(\App\Helpers\Lang::ui('add_member')['ta']) ?></span>
-        <span class="label-en"><?= View::escape(\App\Helpers\Lang::ui('add_member')['en']) ?></span>
+    <small class="text-muted"><?= number_format($members['total']) ?> members found</small>
+    <a href="<?= $base ?>/members/create" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg"></i> Add Member
     </a>
 </div>
 
@@ -54,15 +52,15 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
             <?php endif; ?>
         </div>
         <div class="card-body-content">
-            <h6 class="mb-0"><?= \App\Core\View::escape($m['full_name_english']) ?></h6>
-            <small class="text-primary"><?= \App\Core\View::escape($m['membership_number']) ?></small>
+            <h6 class="mb-0"><?= View::escape($m['full_name_english']) ?></h6>
+            <small class="text-primary"><?= View::escape($m['membership_number']) ?></small>
             <div class="card-meta mt-1">
-                <span><i class="bi bi-telephone"></i> <?= \App\Core\View::escape($m['mobile']) ?></span>
-                <?php if ($m['country_name']): ?><span><i class="bi bi-geo-alt"></i> <?= \App\Core\View::escape($m['country_name']) ?></span><?php endif; ?>
+                <span><i class="bi bi-telephone"></i> <?= View::escape($m['mobile']) ?></span>
+                <?php if ($m['country_name']): ?><span><i class="bi bi-geo-alt"></i> <?= View::escape($m['country_name']) ?></span><?php endif; ?>
             </div>
             <div class="mt-1">
                 <span class="badge bg-<?= $m['status'] === 'active' ? 'success' : 'secondary' ?>"><?= ucfirst($m['status']) ?></span>
-                <span class="badge bg-light text-dark"><?= \App\Core\View::escape($m['membership_type_name'] ?? '') ?></span>
+                <span class="badge bg-light text-dark"><?= View::escape($m['membership_type_name'] ?? '') ?></span>
             </div>
         </div>
         <i class="bi bi-chevron-right text-muted"></i>

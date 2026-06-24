@@ -40,4 +40,30 @@ class AuditLog
 
         return ['data' => $data, 'total' => (int) $total, 'page' => $page];
     }
+
+    public static function getByActions(array $actions, int $page = 1, int $perPage = 50): array
+    {
+        if (empty($actions)) {
+            return self::getAll($page, $perPage);
+        }
+
+        $placeholders = implode(',', array_fill(0, count($actions), '?'));
+        $offset = ($page - 1) * $perPage;
+        $total = Database::fetch(
+            "SELECT COUNT(*) as cnt FROM audit_logs WHERE action IN ({$placeholders})",
+            $actions
+        )['cnt'];
+
+        $data = Database::fetchAll(
+            "SELECT al.*, u.full_name as user_name, u.username as user_username
+             FROM audit_logs al
+             LEFT JOIN users u ON al.user_id = u.id
+             WHERE al.action IN ({$placeholders})
+             ORDER BY al.created_at DESC
+             LIMIT {$perPage} OFFSET {$offset}",
+            $actions
+        );
+
+        return ['data' => $data, 'total' => (int) $total, 'page' => $page];
+    }
 }

@@ -15,7 +15,7 @@
     <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/app.css" rel="stylesheet">
 </head>
-<body>
+<body class="admin-panel">
     <?php if ($user): ?>
     <div class="app-wrapper">
         <?php require __DIR__ . '/../partials/sidebar.php'; ?>

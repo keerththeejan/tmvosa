@@ -8,7 +8,10 @@ use App\Core\Security;
 use App\Models\User;
 use App\Models\Setting;
 use App\Models\AuditLog;
+use App\Models\EmailTemplate;
+use App\Models\Member;
 use App\Core\Database;
+use App\Helpers\Mailer;
 
 class AdminController extends Controller
 {
@@ -39,10 +42,234 @@ class AdminController extends Controller
         $this->json(['success' => true, 'message' => 'User created.']);
     }
 
+    public function resetPassword(string $id): void
+    {
+        if (!$this->validateCsrf()) {
+            $this->json(['success' => false, 'message' => 'Invalid request.'], 403);
+        }
+
+        if (!Auth::hasRole('super_admin')) {
+            $this->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+        }
+
+        $userId = (int) $id;
+        $target = User::findById($userId);
+        if (!$target) {
+            $this->json(['success' => false, 'message' => 'User not found.'], 404);
+        }
+
+        $newPassword = $this->input('new_password', '');
+        if (strlen($newPassword) < 8) {
+            $this->json(['success' => false, 'message' => 'Password must be at least 8 characters.']);
+        }
+
+        $forceChange = (bool) $this->input('force_password_change', false);
+        User::updatePassword($userId, Security::hashPassword($newPassword));
+        if ($forceChange) {
+            User::update($userId, ['force_password_change' => 1]);
+        }
+
+        AuditLog::log('password_reset', 'users', $userId, null, [
+            'reset_by' => Auth::id(),
+            'force_password_change' => $forceChange ? 1 : 0,
+        ]);
+
+        if (!empty($target['email'])) {
+            Mailer::sendTemplate($target['email'], 'password_reset', [
+                'full_name' => $target['full_name'],
+                'temporary_password' => $newPassword,
+            ], $target['full_name']);
+        }
+
+        $this->json(['success' => true, 'message' => 'Password reset successfully.']);
+    }
+
+    public function forcePasswordChange(string $id): void
+    {
+        if (!$this->validateCsrf()) {
+            $this->json(['success' => false, 'message' => 'Invalid request.'], 403);
+        }
+
+        if (!Auth::hasRole('super_admin')) {
+            $this->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+        }
+
+        $userId = (int) $id;
+        $target = User::findById($userId);
+        if (!$target) {
+            $this->json(['success' => false, 'message' => 'User not found.'], 404);
+        }
+
+        $force = (bool) $this->input('force', false);
+        User::update($userId, ['force_password_change' => $force ? 1 : 0]);
+
+        AuditLog::log('profile_updated', 'users', $userId, null, [
+            'force_password_change' => $force ? 1 : 0,
+            'updated_by' => Auth::id(),
+        ]);
+
+        $this->json([
+            'success' => true,
+            'message' => $force ? 'User must change password on next login.' : 'Forced password change removed.',
+        ]);
+    }
+
+    public function passwordLogs(): void
+    {
+        if (!Auth::hasRole('super_admin')) {
+            http_response_code(403);
+            echo 'Unauthorized';
+            return;
+        }
+
+        $page = (int) $this->input('page', 1);
+        $logs = AuditLog::getByActions(['password_changed', 'password_reset'], $page);
+        $this->view('settings/password-logs', compact('logs'));
+    }
+
     public function settings(): void
     {
         $settings = Setting::getAll();
+        unset($settings['email']);
         $this->view('settings/index', compact('settings'));
+    }
+
+    public function emailSettings(): void
+    {
+        if (!Auth::hasRole('super_admin')) {
+            http_response_code(403);
+            echo 'Unauthorized';
+            return;
+        }
+
+        $emailSettings = Mailer::getSettings();
+        $this->view('settings/email', ['emailSettings' => $emailSettings]);
+    }
+
+    public function updateEmailSettings(): void
+    {
+        if (!$this->validateCsrf()) {
+            $this->json(['success' => false, 'message' => 'Invalid request.'], 403);
+        }
+
+        if (!Auth::hasRole('super_admin')) {
+            $this->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+        }
+
+        $allowed = ['smtp_host', 'smtp_port', 'smtp_encryption', 'from_name', 'from_email', 'admin_notification_email', 'smtp_username'];
+        foreach ($allowed as $key) {
+            $value = $this->input($key);
+            if ($value !== null && $value !== '') {
+                Setting::set($key, Security::sanitize($value));
+            }
+        }
+
+        AuditLog::log('update_settings', 'email_settings');
+        $this->json(['success' => true, 'message' => 'Email settings saved. SMTP password must be set in .env (SMTP_PASSWORD).']);
+    }
+
+    public function testEmail(): void
+    {
+        if (!$this->validateCsrf()) {
+            $this->json(['success' => false, 'message' => 'Invalid request.'], 403);
+        }
+
+        if (!Auth::hasRole('super_admin')) {
+            $this->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+        }
+
+        $to = filter_var($this->input('test_email', ''), FILTER_VALIDATE_EMAIL);
+        if (!$to) {
+            $to = Auth::user()['email'] ?? '';
+        }
+        if (!$to || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
+            $this->json(['success' => false, 'message' => 'Please provide a valid test email address.']);
+        }
+
+        $result = Mailer::sendTest($to);
+        AuditLog::log('email_test', 'email_settings', null, null, ['to' => $to, 'success' => $result['success']]);
+        $this->json($result, $result['success'] ? 200 : 500);
+    }
+
+    public function emailTemplates(): void
+    {
+        if (!Auth::hasRole('super_admin')) {
+            http_response_code(403);
+            echo 'Unauthorized';
+            return;
+        }
+
+        $templates = EmailTemplate::getAll();
+        $this->view('settings/email-templates', compact('templates'));
+    }
+
+    public function updateEmailTemplate(string $id): void
+    {
+        if (!$this->validateCsrf()) {
+            $this->json(['success' => false, 'message' => 'Invalid request.'], 403);
+        }
+
+        if (!Auth::hasRole('super_admin')) {
+            $this->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+        }
+
+        $template = EmailTemplate::findById((int) $id);
+        if (!$template) {
+            $this->json(['success' => false, 'message' => 'Template not found.'], 404);
+        }
+
+        $subject = Security::sanitize($this->input('subject', ''));
+        $body = $this->input('body', '');
+        $isActive = (bool) $this->input('is_active', true);
+
+        if ($subject === '' || trim($body) === '') {
+            $this->json(['success' => false, 'message' => 'Subject and body are required.']);
+        }
+
+        EmailTemplate::update((int) $id, [
+            'subject' => $subject,
+            'body' => $body,
+            'is_active' => $isActive ? 1 : 0,
+        ]);
+
+        AuditLog::log('update_email_template', 'email_templates', (int) $id);
+        $this->json(['success' => true, 'message' => 'Email template updated.']);
+    }
+
+    public function sendExpiryReminders(): void
+    {
+        if (!$this->validateCsrf()) {
+            $this->json(['success' => false, 'message' => 'Invalid request.'], 403);
+        }
+
+        if (!Auth::hasRole('super_admin')) {
+            $this->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+        }
+
+        $days = (int) $this->input('days', 30);
+        $sent = self::dispatchExpiryReminders($days);
+        AuditLog::log('send_expiry_reminders', 'members', null, null, ['sent' => $sent, 'days' => $days]);
+        $this->json(['success' => true, 'message' => "Sent {$sent} membership expiry reminder(s).", 'sent' => $sent]);
+    }
+
+    public static function dispatchExpiryReminders(int $days = 30): int
+    {
+        $members = Member::getExpiringWithinDays($days);
+        $sent = 0;
+        foreach ($members as $member) {
+            if (empty($member['email'])) {
+                continue;
+            }
+            $ok = Mailer::sendTemplate($member['email'], 'membership_expiry_reminder', [
+                'full_name' => $member['full_name_english'],
+                'membership_number' => $member['membership_number'],
+                'expiry_date' => date('d M Y', strtotime($member['membership_expiry_date'])),
+            ], $member['full_name_english']);
+            if ($ok) {
+                $sent++;
+            }
+        }
+        return $sent;
     }
 
     public function updateSettings(): void
@@ -52,7 +279,11 @@ class AdminController extends Controller
         }
 
         $settings = $_POST['settings'] ?? [];
+        $emailKeys = ['smtp_host', 'smtp_port', 'smtp_encryption', 'smtp_username', 'smtp_password', 'from_email', 'from_name', 'admin_notification_email'];
         foreach ($settings as $key => $value) {
+            if (in_array($key, $emailKeys, true)) {
+                continue;
+            }
             Setting::set($key, Security::sanitize($value));
         }
 

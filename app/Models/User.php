@@ -42,6 +42,15 @@ class User
         return Database::update('users', $data, 'id = ?', [$id]);
     }
 
+    public static function updatePassword(int $id, string $hash): void
+    {
+        Database::update('users', [
+            'password' => $hash,
+            'password_changed_at' => date('Y-m-d H:i:s'),
+            'force_password_change' => 0,
+        ], 'id = ?', [$id]);
+    }
+
     public static function updateLastLogin(int $id, string $ip): void
     {
         Database::update('users', [

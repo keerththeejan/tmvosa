@@ -13,10 +13,12 @@ class DashboardController extends Controller
     {
         $memberStats = Member::getStats();
         $revenueStats = Payment::getRevenueStats();
-        $pendingApps = Application::getPendingCount();
+        $applicationStats = Application::getStatusCounts();
+        $recentPayments = Payment::getRecent(5);
 
         $this->view('dashboard/index', [
-            'stats' => array_merge($memberStats, $revenueStats, ['pending_applications' => $pendingApps]),
+            'stats' => array_merge($memberStats, $revenueStats, $applicationStats),
+            'recentPayments' => $recentPayments,
             'growth' => Member::getGrowthData(),
             'revenue' => Payment::getRevenueGrowth(),
             'countries' => Member::getCountryDistribution(),

@@ -1,27 +1,23 @@
 <?php
 use App\Core\View;
-use App\Helpers\Lang;
 
 $pageTitle = 'Applications';
 $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 $statuses = [
-    '' => 'all',
-    'pending' => 'pending',
-    'under_review' => 'under_review',
-    'approved' => 'approved',
-    'rejected' => 'rejected',
+    '' => 'All',
+    'pending' => 'Pending',
+    'under_review' => 'Under Review',
+    'approved' => 'Approved',
+    'rejected' => 'Rejected',
 ];
 ?>
-<div class="mb-3"><?php \App\Core\View::heading('application_management', 'h5', 'file-earmark-text'); ?></div>
+<h5 class="mb-3"><i class="bi bi-file-earmark-text"></i> Application Management</h5>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div class="btn-group btn-group-sm flex-wrap">
-        <?php foreach ($statuses as $val => $key):
-            $label = Lang::ui($key);
-        ?>
-        <a href="?status=<?= $val ?>" class="btn btn-outline-primary bilingual-btn <?= ($currentStatus ?? '') === $val ? 'active' : '' ?>">
-            <span class="label-ta"><?= View::escape($label['ta']) ?></span>
-            <span class="label-en"><?= View::escape($label['en']) ?></span>
+        <?php foreach ($statuses as $val => $label): ?>
+        <a href="?status=<?= $val ?>" class="btn btn-outline-primary <?= ($currentStatus ?? '') === $val ? 'active' : '' ?>">
+            <?= View::escape($label) ?>
         </a>
         <?php endforeach; ?>
     </div>
@@ -29,16 +25,13 @@ $statuses = [
 
 <div class="member-cards">
     <?php if (empty($applications['data'])): ?>
-    <div class="text-center py-5 text-muted bilingual-text bilingual-block">
-        <?php View::text('no_applications', 'p', true); ?>
-    </div>
+    <div class="text-center py-5 text-muted">No applications found.</div>
     <?php else: ?>
     <?php foreach ($applications['data'] as $app): ?>
     <div class="member-card" onclick="location.href='<?= $base ?>/applications/<?= $app['id'] ?>'">
         <div class="card-top">
             <span class="badge bg-<?= match($app['status']) { 'approved' => 'success', 'rejected' => 'danger', 'pending' => 'warning', default => 'info' } ?>">
-                <?php $st = \App\Helpers\Lang::ui($app['status']); ?>
-                <?= View::escape(is_array($st) ? $st['ta'] : $st) ?>
+                <?= ucfirst(str_replace('_', ' ', $app['status'])) ?>
             </span>
             <small class="text-muted"><?= date('d M Y', strtotime($app['created_at'])) ?></small>
         </div>
@@ -49,12 +42,7 @@ $statuses = [
         <p class="text-primary small mb-1"><?= View::escape($app['application_number']) ?></p>
         <div class="card-meta">
             <span><i class="bi bi-telephone"></i> <?= View::escape($app['mobile']) ?></span>
-            <span><i class="bi bi-card-checklist"></i>
-                <?php
-                $membershipDisplay = \App\Helpers\Lang::membershipDisplayFromName($app['membership_type_name'] ?? '');
-                echo View::escape($membershipDisplay['with_validity_ta']);
-                ?>
-            </span>
+            <span><i class="bi bi-card-checklist"></i> <?= View::escape($app['membership_type_name'] ?? '') ?></span>
         </div>
     </div>
     <?php endforeach; ?>

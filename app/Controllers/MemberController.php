@@ -148,6 +148,7 @@ class MemberController extends Controller
 
         Member::update((int) $id, $data);
         AuditLog::log('edit_member', 'members', (int) $id, $oldMember, $data);
+        AuditLog::log('profile_updated', 'members', (int) $id, $oldMember, $data);
 
         if (!empty($_FILES['photo']['name'])) {
             $result = FileUploader::upload($_FILES['photo'], 'photos');

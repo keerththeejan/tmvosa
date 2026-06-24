@@ -30,7 +30,12 @@ class AuthController extends Controller
         $password = $this->input('password', '');
 
         if (Auth::attempt($username, $password)) {
-            $this->json(['success' => true, 'redirect' => \App\Core\App::routeUrl('dashboard')]);
+            $user = Auth::user();
+            $redirect = \App\Core\App::routeUrl('dashboard');
+            if (!empty($user['force_password_change'])) {
+                $redirect = \App\Core\App::routeUrl('settings/password') . '?required=1';
+            }
+            $this->json(['success' => true, 'redirect' => $redirect]);
         }
 
         $this->json(['success' => false, 'message' => 'Invalid credentials.']);

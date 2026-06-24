@@ -78,4 +78,16 @@ class Payment
             [$months]
         );
     }
+
+    public static function getRecent(int $limit = 5): array
+    {
+        return Database::fetchAll(
+            "SELECT p.*, m.full_name_english, m.membership_number
+             FROM payments p
+             JOIN members m ON p.member_id = m.id
+             ORDER BY p.created_at DESC
+             LIMIT ?",
+            [$limit]
+        );
+    }
 }

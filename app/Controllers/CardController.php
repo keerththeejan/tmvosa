@@ -12,6 +12,12 @@ use App\Helpers\PdfGenerator;
 
 class CardController extends Controller
 {
+    public function index(): void
+    {
+        $members = Member::search(['status' => 'active'], 1, 50);
+        $this->view('cards/index', compact('members'));
+    }
+
     public function show(string $memberId): void
     {
         $member = Member::findById((int) $memberId);

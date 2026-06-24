@@ -99,6 +99,7 @@ class Member
                 COUNT(*) as total,
                 SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active,
                 SUM(CASE WHEN status IN ('pending','under_review') THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = 'expired' OR (membership_expiry_date IS NOT NULL AND membership_expiry_date < CURDATE()) THEN 1 ELSE 0 END) as expired,
                 SUM(CASE WHEN membership_expiry_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY) THEN 1 ELSE 0 END) as expiring,
                 SUM(CASE WHEN MONTH(created_at) = MONTH(CURDATE()) AND YEAR(created_at) = YEAR(CURDATE()) THEN 1 ELSE 0 END) as new_this_month
              FROM members"
@@ -121,6 +122,21 @@ class Member
             "SELECT c.name as country, COUNT(m.id) as count
              FROM members m JOIN countries c ON m.country_id = c.id
              WHERE m.status = 'active' GROUP BY c.name ORDER BY count DESC LIMIT 10"
+        );
+    }
+
+    public static function getExpiringWithinDays(int $days = 30): array
+    {
+        return Database::fetchAll(
+            "SELECT m.*, mt.name as membership_type_name
+             FROM members m
+             LEFT JOIN membership_types mt ON m.membership_type_id = mt.id
+             WHERE m.status = 'active'
+               AND m.email IS NOT NULL AND m.email != ''
+               AND m.membership_expiry_date IS NOT NULL
+               AND m.membership_expiry_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL ? DAY)
+             ORDER BY m.membership_expiry_date ASC",
+            [$days]
         );
     }
 
