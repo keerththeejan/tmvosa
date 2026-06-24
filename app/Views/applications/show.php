@@ -1,6 +1,7 @@
 <?php
 use App\Core\View;
 use App\Helpers\Lang;
+use App\Helpers\PaymentMethod;
 
 $pageTitle = 'Application Details';
 $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
@@ -65,6 +66,7 @@ $hasDuplicates = count($relatedMembers) > 0 || count($relatedApplications) > 0;
             <div class="col-6"><strong>Membership Type:</strong> <?= View::escape($membershipDisplay['with_validity_en']) ?></div>
             <div class="col-6"><strong>Validity Period:</strong> <?= View::escape($membershipDisplay['validity_en']) ?></div>
             <div class="col-6"><strong>Amount Paid:</strong> Rs. <?= number_format($application['amount_paid'] ?? 0, 2) ?></div>
+            <div class="col-6"><strong>Payment Method:</strong> <?= View::escape(PaymentMethod::display($application['payment_method'] ?? '')) ?></div>
         </div>
     </div>
 </div>

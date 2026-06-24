@@ -1,6 +1,7 @@
 <?php
 use App\Core\View;
 use App\Helpers\Lang;
+use App\Helpers\PaymentMethod;
 ?>
 <div class="application-form-scroll" id="applicationFormScroll">
     <div class="wizard-progress mb-3 d-none" id="wizardProgress">
@@ -184,13 +185,14 @@ use App\Helpers\Lang;
                     </div>
                     <div class="mb-3">
                         <?php View::label('payment_method', true); ?>
-                        <select name="payment_method" class="form-select" required>
-                            <option value=""><?= View::escape(Lang::ui('select')['ta']) ?> / <?= View::escape(Lang::ui('select')['en']) ?></option>
-                            <option value="bank_transfer"><?= View::escape(Lang::ui('bank_transfer')['ta']) ?> / <?= View::escape(Lang::ui('bank_transfer')['en']) ?></option>
-                            <option value="cash"><?= View::escape(Lang::ui('cash')['ta']) ?> / <?= View::escape(Lang::ui('cash')['en']) ?></option>
-                            <option value="online"><?= View::escape(Lang::ui('online')['ta']) ?> / <?= View::escape(Lang::ui('online')['en']) ?></option>
-                            <option value="cheque"><?= View::escape(Lang::ui('cheque')['ta']) ?> / <?= View::escape(Lang::ui('cheque')['en']) ?></option>
-                        </select>
+                        <?php View::partial('payment-method-select', [
+                            'selected' => PaymentMethod::DEFAULT,
+                            'includeEmpty' => false,
+                        ]); ?>
+                        <?php View::partial('field-required-feedback', [
+                            'ta' => 'கட்டணம் செலுத்திய முறையைத் தேர்வு செய்யவும்.',
+                            'en' => 'Please select a payment method.',
+                        ]); ?>
                     </div>
                     <div class="mb-3">
                         <?php View::label('transaction_number', false); ?>

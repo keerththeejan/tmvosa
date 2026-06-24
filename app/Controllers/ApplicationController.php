@@ -18,6 +18,7 @@ use App\Helpers\ApplicationSubmissionNotifier;
 use App\Helpers\Mailer;
 use App\Helpers\DateParser;
 use App\Helpers\ApplicationValidation;
+use App\Helpers\PaymentMethod;
 use App\Models\Setting;
 
 class ApplicationController extends Controller
@@ -438,7 +439,7 @@ class ApplicationController extends Controller
             'proposer_contact' => Security::sanitize($this->input('proposer_contact', '')),
             'membership_type_id' => (int) $this->input('membership_type_id'),
             'amount_paid' => (float) $this->input('amount_paid', 0),
-            'payment_method' => Security::sanitize($this->input('payment_method', '')),
+            'payment_method' => PaymentMethod::normalize($this->input('payment_method', '')) ?? '',
             'transaction_number' => Security::sanitize($this->input('transaction_number', '')),
             'payment_date' => $this->input('payment_date') ?: null,
         ];
@@ -458,7 +459,6 @@ class ApplicationController extends Controller
             'studied_from_year' => 'Studied from year is required.',
             'studied_to_year' => 'Studied to year is required.',
             'membership_type_id' => 'Membership category is required.',
-            'payment_method' => 'Payment method is required.',
         ];
 
         foreach ($required as $field => $message) {
@@ -476,6 +476,12 @@ class ApplicationController extends Controller
 
         if ($data['amount_paid'] <= 0) {
             $errors[] = 'Amount paid is required.';
+        }
+
+        if (empty($data['payment_method'])) {
+            $errors[] = 'Payment method is required. Please select Bank Transfer or Cash.';
+        } elseif (!PaymentMethod::isAllowed($data['payment_method'])) {
+            $errors[] = 'Invalid payment method. Only Bank Transfer and Cash are accepted.';
         }
 
         if (empty($data['email'])) {

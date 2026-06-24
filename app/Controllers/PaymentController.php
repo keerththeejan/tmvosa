@@ -12,6 +12,7 @@ use App\Models\AuditLog;
 use App\Helpers\NumberGenerator;
 use App\Helpers\Mailer;
 use App\Helpers\PdfGenerator;
+use App\Helpers\PaymentMethod;
 
 class PaymentController extends Controller
 {
@@ -111,7 +112,7 @@ class PaymentController extends Controller
             <p><strong>Member:</strong> ' . htmlspecialchars($receipt['full_name_english']) . '</p>
             <p><strong>Membership No:</strong> ' . htmlspecialchars($receipt['membership_number']) . '</p>
             <p><strong>Amount:</strong> Rs. ' . number_format($receipt['amount'], 2) . '</p>
-            <p><strong>Payment Method:</strong> ' . htmlspecialchars($receipt['payment_method']) . '</p>
+            <p><strong>Payment Method:</strong> ' . htmlspecialchars(PaymentMethod::display($receipt['payment_method'] ?? '')) . '</p>
             <p><strong>Payment Date:</strong> ' . htmlspecialchars($receipt['payment_date']) . '</p>
             <hr>
             <p style="text-align:center;color:#666;">Kilinochchi / Thiruvaiyaru Maha Vidyalayam OSA</p>

@@ -1,5 +1,6 @@
 <?php
 use App\Core\View;
+use App\Helpers\PaymentMethod;
 
 $pageTitle = 'Payments';
 $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
@@ -29,7 +30,7 @@ $statCards = [
             <h6 class="mb-0"><?= View::escape($p['full_name_english']) ?></h6>
             <small class="text-muted"><?= View::escape($p['membership_number']) ?></small>
             <div class="mt-1"><strong class="text-success">Rs. <?= number_format($p['amount'], 2) ?></strong></div>
-            <small class="text-muted"><?= View::escape($p['payment_method']) ?> &middot; <?= date('d M Y', strtotime($p['payment_date'])) ?></small>
+            <small class="text-muted"><?= View::escape(PaymentMethod::display($p['payment_method'] ?? '')) ?> &middot; <?= date('d M Y', strtotime($p['payment_date'])) ?></small>
         </div>
         <div class="text-end">
             <span class="badge bg-<?= match($p['status']) { 'verified' => 'success', 'rejected' => 'danger', default => 'warning' } ?>">
