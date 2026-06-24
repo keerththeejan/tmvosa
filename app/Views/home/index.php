@@ -20,7 +20,7 @@ $pageTitle = 'OSA Alumni — Membership';
                 <?php View::partial('membership-info-summary', compact('membershipTypes')); ?>
             </section>
 
-            <section class="application-form-section mt-4" id="applicationForm">
+            <section class="application-form-section mt-4" id="applicationFormSection">
                 <?php View::heading('begin_application', 'h5', 'file-earmark-text', 'section-heading'); ?>
                 <?php View::partial('application-wizard', compact('countries', 'membershipTypes')); ?>
             </section>

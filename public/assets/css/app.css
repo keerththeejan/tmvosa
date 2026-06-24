@@ -433,6 +433,174 @@ html {
 .wizard-step { display: none; }
 .wizard-step.active { display: block; animation: fadeIn 0.3s; }
 
+/* Single-page scrolling form */
+.application-form-scroll,
+.application-form-single {
+    overflow-x: hidden;
+}
+
+.application-form-single .wizard-step--always-active,
+.application-form-single .wizard-step--always-active.active {
+    display: block;
+    animation: none;
+}
+
+.form-section-card {
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.form-section-card-header {
+    background: linear-gradient(135deg, var(--primary) 0%, #2980b9 100%);
+    color: #fff;
+    padding: 0.9rem 1rem;
+    border: none;
+}
+
+.form-section-card-header .form-section-title .label-ta {
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.form-section-card-header .form-section-title .label-en {
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 0.8rem;
+}
+
+.form-section-card-body {
+    padding: 1rem 1rem 1.1rem;
+}
+
+.form-section-card-body .form-label .label-ta {
+    font-size: 0.95rem;
+    line-height: 1.35;
+}
+
+.form-section-card-body .form-label .label-en {
+    font-size: 0.78rem;
+    line-height: 1.3;
+    margin-top: 0.15rem;
+}
+
+.payment-subheading {
+    margin-top: 0.25rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.payment-subheading .label-ta {
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.form-submit-area {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #fff 28%);
+    padding-top: 0.75rem;
+    padding-bottom: 0.5rem;
+}
+
+.form-submit-area .btn-lg {
+    min-height: 52px;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(25, 135, 84, 0.25);
+}
+
+/* Compact bank card */
+.bank-compact-card .official-bank-card {
+    border-radius: 14px;
+}
+
+.bank-compact-card .bank-emoji {
+    font-size: 1.25rem;
+    margin-right: 0.35rem;
+    vertical-align: middle;
+}
+
+.bank-compact-row {
+    padding: 0.55rem 0;
+    border-bottom: 1px solid #eef2f5;
+}
+
+.bank-compact-row:last-of-type {
+    border-bottom: none;
+}
+
+.bank-compact-row--account {
+    background: #f0f7fc;
+    margin: 0 -0.5rem;
+    padding: 0.75rem 0.5rem;
+    border-radius: 10px;
+    border-bottom: none;
+    margin-bottom: 0.25rem;
+}
+
+.bank-compact-row .info-label .label-ta {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #5a6a7a;
+}
+
+.bank-compact-row .info-label .label-en {
+    font-size: 0.72rem;
+    color: #8a97a3;
+}
+
+.bank-compact-row .info-value {
+    font-size: 0.95rem;
+    word-break: break-word;
+}
+
+.bank-compact-row--account .account-number-value {
+    font-size: 1.35rem;
+    color: var(--primary);
+    letter-spacing: 0.04em;
+}
+
+.preview-filename,
+.preview-filename-img {
+    word-break: break-all;
+    color: #495057;
+}
+
+@media (max-width: 414px) {
+    .form-section-card-body {
+        padding: 0.85rem 0.85rem 1rem;
+    }
+
+    .membership-options {
+        gap: 0.5rem;
+    }
+
+    .upload-area {
+        min-height: 120px;
+        padding: 1rem 0.75rem;
+    }
+
+    .bank-compact-row--account .account-number-value {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .form-section-card-header {
+        padding: 0.75rem 0.85rem;
+    }
+
+    .form-section-card-header .form-section-title .label-ta {
+        font-size: 0.98rem;
+    }
+
+    .bilingual-btn .label-ta,
+    .bilingual-btn .label-en {
+        font-size: 0.85rem;
+    }
+}
+
 @keyframes fadeIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: none; } }
 
 .step-title {

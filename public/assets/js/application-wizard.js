@@ -99,6 +99,7 @@
         const $preview = $area.find('.upload-preview');
         $preview.addClass('d-none');
         $preview.find('.preview-image').addClass('d-none').find('img').attr('src', '');
+        $preview.find('.preview-filename-img').text('');
         $preview.find('.preview-pdf').addClass('d-none').find('.preview-filename').text('');
     }
 
@@ -154,6 +155,7 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 $imgWrap.removeClass('d-none').find('img').attr('src', e.target.result);
+                $imgWrap.find('.preview-filename-img').text(file.name);
             };
             reader.readAsDataURL(file);
         } else {
@@ -267,6 +269,43 @@
             }
             validateDobField();
         });
+    }
+
+    function scrollToFirstInvalidInStep(step) {
+        const $step = $('.wizard-step[data-step="' + step + '"]');
+        let $target = $step.find(':invalid').filter(':visible').first();
+        if (!$target.length && step === 2) {
+            $target = $('#dateOfBirthInput');
+        }
+        if ($target.length && $target[0]) {
+            $('html, body').animate({ scrollTop: $target.offset().top - 88 }, 400);
+            if ($target[0].focus) {
+                $target[0].focus();
+            }
+        }
+    }
+
+    function validateAllFormSteps() {
+        if (!validateDobField()) {
+            const dobInput = document.getElementById('dateOfBirthInput');
+            if (dobInput) dobInput.reportValidity();
+            scrollToFirstInvalidInStep(2);
+            return false;
+        }
+        for (let s = 2; s <= 4; s++) {
+            if (!validateStep(s)) {
+                scrollToFirstInvalidInStep(s);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function initSinglePageUI() {
+        $('.wizard-step--always-active').addClass('active');
+        $('#wizardProgress').addClass('d-none');
+        $('#startBtn, #navButtons').addClass('d-none');
+        $('#submitBtn').removeClass('d-none').addClass('w-100');
     }
 
     function showStep(step) {
@@ -385,17 +424,9 @@
         $('#amountPaid').val($(this).data('fee'));
     });
 
-    initUploadAreas();
-
     $('#applicationForm').on('submit', function(e) {
         e.preventDefault();
-        if (!validateDobField()) {
-            document.getElementById('dateOfBirthInput').reportValidity();
-            currentStep = 2;
-            showStep(2);
-            return;
-        }
-        if (!validateStep(4)) return;
+        if (!validateAllFormSteps()) return;
 
         const $btn = $('#submitBtn');
         $btn.prop('disabled', true);
@@ -417,8 +448,8 @@
                         $('#applicationForm')[0].reset();
                         $('#dateOfBirthHidden').val('');
                         resetAllUploads();
-                        currentStep = 1;
-                        showStep(1);
+                        initSinglePageUI();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
                     });
                 } else {
                     Swal.fire('பிழை / Error', res.message || 'Submission failed.', 'error');
@@ -478,5 +509,6 @@
     });
 
     initDobInput();
-    showStep(1);
+    initUploadAreas();
+    initSinglePageUI();
 })();
