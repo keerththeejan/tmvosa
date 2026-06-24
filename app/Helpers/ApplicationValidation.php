@@ -3,7 +3,6 @@
 namespace App\Helpers;
 
 use App\Core\Database;
-use App\Models\Setting;
 
 class ApplicationValidation
 {
@@ -75,10 +74,10 @@ class ApplicationValidation
             'block' => $exists,
             'normalized' => $normalized,
             'message_ta' => $exists
-                ? 'இந்த தேசிய அடையாள அட்டை இலக்கத்துடன் ஏற்கனவே ஒரு விண்ணப்பம் பதிவு செய்யப்பட்டுள்ளது.'
+                ? 'இந்த தேசிய அடையாள அட்டை இலக்கம் ஏற்கனவே பதிவு செய்யப்பட்டுள்ளது.'
                 : 'தேசிய அடையாள அட்டை இலக்கம் பயன்படுத்தக் கிடைக்கிறது.',
             'message_en' => $exists
-                ? 'Application already exists for this NIC number.'
+                ? 'NIC already exists.'
                 : 'NIC Number is available.',
         ];
     }
@@ -91,13 +90,12 @@ class ApplicationValidation
         }
 
         $exists = self::mobileExists($normalized);
-        $block = $exists && Setting::get('block_duplicate_mobile', '0') === '1';
 
         return [
             'status' => $exists ? 'duplicate' : 'available',
             'available' => !$exists,
-            'block' => $block,
-            'warning' => $exists && !$block,
+            'block' => $exists,
+            'warning' => false,
             'normalized' => $normalized,
             'message_ta' => $exists
                 ? 'இந்த கைத்தொலைபேசி இலக்கம் ஏற்கனவே பதிவு செய்யப்பட்டுள்ளது.'
@@ -126,19 +124,18 @@ class ApplicationValidation
         }
 
         $exists = self::emailExists($normalized);
-        $block = $exists && Setting::get('block_duplicate_email', '0') === '1';
 
         return [
             'status' => $exists ? 'duplicate' : 'available',
             'available' => !$exists,
-            'block' => $block,
-            'warning' => $exists && !$block,
+            'block' => $exists,
+            'warning' => false,
             'normalized' => $normalized,
             'message_ta' => $exists
                 ? 'இந்த மின்னஞ்சல் முகவரி ஏற்கனவே பயன்படுத்தப்பட்டுள்ளது.'
                 : 'மின்னஞ்சல் முகவரி பயன்படுத்தக் கிடைக்கிறது.',
             'message_en' => $exists
-                ? 'This email address is already in use.'
+                ? 'This email has already been used.'
                 : 'Email address is available.',
         ];
     }

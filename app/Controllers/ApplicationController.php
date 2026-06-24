@@ -454,6 +454,7 @@ class ApplicationController extends Controller
             'current_address' => 'Current address is required.',
             'country_id' => 'Country is required.',
             'mobile' => 'Mobile number is required.',
+            'email' => 'Email address is required.',
             'studied_from_year' => 'Studied from year is required.',
             'studied_to_year' => 'Studied to year is required.',
             'membership_type_id' => 'Membership category is required.',
@@ -477,7 +478,9 @@ class ApplicationController extends Controller
             $errors[] = 'Amount paid is required.';
         }
 
-        if (!empty($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+        if (empty($data['email'])) {
+            $errors[] = 'Email address is required.';
+        } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
             $errors[] = 'Please enter a valid email address.';
         }
 

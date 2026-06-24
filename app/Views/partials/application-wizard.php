@@ -15,7 +15,7 @@ use App\Helpers\Lang;
         </div>
     </div>
 
-    <form id="applicationForm" enctype="multipart/form-data" class="application-form-single pb-3" novalidate>
+    <form id="applicationForm" enctype="multipart/form-data" class="application-form-single pb-3 needs-validation" novalidate>
         <input type="hidden" name="_csrf_token" value="<?= $csrfToken ?>">
 
         <!-- Bank details at top -->
@@ -34,6 +34,7 @@ use App\Helpers\Lang;
                         <?php View::label('full_name_tamil', true); ?>
                         <input type="text" name="full_name_tamil" class="form-control" required
                                placeholder="<?= View::escape(View::placeholder('full_name_tamil')) ?>">
+                        <?php View::partial('field-required-feedback'); ?>
                     </div>
                     <div class="mb-3">
                         <?php View::label('full_name_english', false); ?>
@@ -49,6 +50,7 @@ use App\Helpers\Lang;
                                 <option value="female"><?= View::escape(Lang::ui('female')['ta']) ?> / <?= View::escape(Lang::ui('female')['en']) ?></option>
                                 <option value="other"><?= View::escape(Lang::ui('other')['ta']) ?> / <?= View::escape(Lang::ui('other')['en']) ?></option>
                             </select>
+                            <?php View::partial('field-required-feedback'); ?>
                         </div>
                         <div class="col-12 col-sm-6">
                             <?php View::label('date_of_birth', true); ?>
@@ -61,6 +63,7 @@ use App\Helpers\Lang;
                                    maxlength="14"
                                    placeholder="<?= View::escape(View::placeholder('date_of_birth')) ?>">
                             <input type="hidden" name="date_of_birth" id="dateOfBirthHidden">
+                            <?php View::partial('field-required-feedback', ['ta' => 'சரியான பிறந்த திகதியை உள்ளிடவும்.', 'en' => 'Please enter a valid date of birth.']); ?>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -69,11 +72,13 @@ use App\Helpers\Lang;
                                placeholder="<?= View::escape(View::placeholder('nic_number')) ?>"
                                autocomplete="off">
                         <div id="nicValidationFeedback" class="field-validation-feedback mt-1 small d-none" role="alert"></div>
+                        <?php View::partial('field-required-feedback', ['ta' => 'தேசிய அடையாள அட்டை இலக்கம் அவசியம்.', 'en' => 'NIC number is required.']); ?>
                     </div>
                     <div class="mb-3">
                         <?php View::label('current_address', true); ?>
                         <textarea name="current_address" class="form-control" rows="2" required
                                   placeholder="<?= View::escape(View::placeholder('current_address')) ?>"></textarea>
+                        <?php View::partial('field-required-feedback'); ?>
                     </div>
                     <div class="mb-3">
                         <?php View::label('permanent_address', false); ?>
@@ -88,6 +93,7 @@ use App\Helpers\Lang;
                             <option value="<?= $c['id'] ?>"><?= View::escape($c['name']) ?></option>
                             <?php endforeach; ?>
                         </select>
+                        <?php View::partial('field-required-feedback'); ?>
                     </div>
                     <div class="row g-3 mb-0">
                         <div class="col-12 col-sm-6">
@@ -96,6 +102,7 @@ use App\Helpers\Lang;
                                    placeholder="<?= View::escape(View::placeholder('mobile')) ?>"
                                    autocomplete="tel">
                             <div id="mobileValidationFeedback" class="field-validation-feedback mt-1 small d-none" role="alert"></div>
+                            <?php View::partial('field-required-feedback', ['ta' => 'கைத்தொலைபேசி இலக்கம் அவசியம்.', 'en' => 'Mobile number is required.']); ?>
                         </div>
                         <div class="col-12 col-sm-6">
                             <?php View::label('whatsapp', false); ?>
@@ -103,11 +110,12 @@ use App\Helpers\Lang;
                                    placeholder="<?= View::escape(View::placeholder('whatsapp')) ?>">
                         </div>
                         <div class="col-12">
-                            <?php View::label('email', false); ?>
-                            <input type="email" name="email" id="emailInput" class="form-control"
+                            <?php View::label('email', true); ?>
+                            <input type="email" name="email" id="emailInput" class="form-control" required
                                    placeholder="<?= View::escape(View::placeholder('email')) ?>"
                                    autocomplete="email">
                             <div id="emailValidationFeedback" class="field-validation-feedback mt-1 small d-none" role="alert"></div>
+                            <?php View::partial('field-required-feedback', ['ta' => 'மின்னஞ்சல் முகவரி அவசியம்.', 'en' => 'Email address is required.']); ?>
                         </div>
                     </div>
                 </div>
@@ -245,30 +253,52 @@ use App\Helpers\Lang;
                 </div>
             </div>
 
-            <div class="form-section-card card border-0 shadow-sm mb-3">
-                <div class="card-header form-section-card-header">
-                    <?php View::heading('step_declaration_card', 'h5', 'check2-square', 'mb-0 form-section-title'); ?>
-                </div>
-                <div class="card-body">
-                    <div class="form-check declaration-check">
-                        <input type="checkbox" class="form-check-input declaration-checkbox" id="agreeTerms" name="agree_declaration" value="1">
-                        <label class="form-check-label declaration-text bilingual-label" for="agreeTerms">
-                            <?php $decl = Lang::field('declaration'); ?>
-                            <span class="label-ta"><?= View::escape($decl['ta']) ?> <span class="text-danger">*</span></span>
-                            <span class="label-en"><?= View::escape($decl['en']) ?> <span class="text-danger">*</span></span>
-                        </label>
+            <div class="declaration-agreement-section">
+                <div class="form-section-card card border-0 shadow-sm mb-3 declaration-card">
+                    <div class="card-header form-section-card-header text-center">
+                        <?php View::heading('step_declaration_card', 'h5', 'check2-square', 'mb-0 form-section-title justify-content-center'); ?>
                     </div>
-                    <p class="small mt-3 mb-0 bilingual-text bilingual-block declaration-text">
-                        <span class="label-ta"><?= View::escape(Lang::ui('declaration_text_ta')) ?></span>
-                        <span class="label-en"><?= View::escape(Lang::ui('declaration_text_en')) ?></span>
-                    </p>
+                    <div class="card-body declaration-agreement-body text-center">
+                        <p class="small mb-3 bilingual-text bilingual-block declaration-agreement-text mx-auto">
+                            <span class="label-ta"><?= View::escape(Lang::ui('declaration_text_ta')) ?></span>
+                            <span class="label-en"><?= View::escape(Lang::ui('declaration_text_en')) ?></span>
+                        </p>
+
+                        <div class="declaration-check declaration-check--centered">
+                            <input type="checkbox" class="form-check-input declaration-checkbox" id="agreeTerms" name="agree_declaration" value="1" aria-describedby="declarationValidationFeedback">
+                            <label class="form-check-label declaration-text bilingual-label mb-0" for="agreeTerms">
+                                <?php $decl = Lang::field('declaration'); ?>
+                                <span class="label-ta"><?= View::escape($decl['ta']) ?> <span class="text-danger fw-bold">*</span></span>
+                                <span class="label-en"><?= View::escape($decl['en']) ?> <span class="text-danger fw-bold">*</span></span>
+                                <span class="required-hint text-danger" aria-hidden="true">
+                                    <span class="label-ta d-block">(தேவை)</span>
+                                    <span class="label-en d-block">(Required)</span>
+                                </span>
+                            </label>
+                        </div>
+                        <div id="declarationValidationFeedback" class="declaration-invalid-feedback small text-danger mt-2 d-none" role="alert"></div>
+
+                        <div class="declaration-submit-wrap mt-4">
+                            <button type="submit" class="btn btn-success btn-lg bilingual-btn" id="submitBtn" disabled>
+                                <span class="submit-btn-content">
+                                    <span class="label-ta"><i class="bi bi-send"></i> <?= View::escape(Lang::ui('submit')['ta']) ?></span>
+                                    <span class="label-en"><?= View::escape(Lang::ui('submit')['en']) ?></span>
+                                </span>
+                                <span class="submit-btn-loading d-none" aria-hidden="true">
+                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                    <span class="label-ta">சமர்ப்பிக்கிறது…</span>
+                                    <span class="label-en">Submitting…</span>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <?php View::partial('application-contact-section'); ?>
 
-        <div class="wizard-nav form-submit-area mt-2 mb-4">
+        <div class="wizard-nav form-submit-area mt-2 mb-4 d-none" id="wizardNavLegacy">
             <button type="button" class="btn btn-primary btn-lg w-100 bilingual-btn d-none" id="startBtn">
                 <span class="label-ta"><?= View::escape(Lang::ui('start_application')['ta']) ?> <i class="bi bi-arrow-right"></i></span>
                 <span class="label-en"><?= View::escape(Lang::ui('start_application')['en']) ?></span>
@@ -283,17 +313,6 @@ use App\Helpers\Lang;
                     <span class="label-en"><?= View::escape(Lang::ui('next')['en']) ?></span>
                 </button>
             </div>
-            <button type="submit" class="btn btn-success btn-lg w-100 bilingual-btn" id="submitBtn" disabled>
-                <span class="submit-btn-content">
-                    <span class="label-ta"><i class="bi bi-send"></i> <?= View::escape(Lang::ui('submit')['ta']) ?></span>
-                    <span class="label-en"><?= View::escape(Lang::ui('submit')['en']) ?></span>
-                </span>
-                <span class="submit-btn-loading d-none" aria-hidden="true">
-                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-                    <span class="label-ta">சமர்ப்பிக்கிறது…</span>
-                    <span class="label-en">Submitting…</span>
-                </span>
-            </button>
         </div>
     </form>
 

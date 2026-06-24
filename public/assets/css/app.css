@@ -1060,33 +1060,143 @@ html {
 }
 
 .declaration-check {
-    display: flex;
+    display: inline-flex;
     align-items: flex-start;
-    gap: 0.75rem;
-    min-height: 48px;
-    padding: 0.5rem 0;
-    margin-bottom: 0;
+    justify-content: center;
+    gap: 0.65rem;
+    min-height: auto;
+    padding: 0;
+    margin: 0 auto;
+    max-width: 100%;
+    text-align: left;
+}
+
+.declaration-check--centered {
+    width: fit-content;
+    max-width: 36rem;
+}
+
+.declaration-agreement-section {
+    margin-top: 0.25rem;
+}
+
+.declaration-card .form-section-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.declaration-agreement-body {
+    padding: 1.25rem 1rem 1.5rem;
+}
+
+.declaration-agreement-text {
+    max-width: 34rem;
+    line-height: 1.55;
+    color: #495057;
 }
 
 .declaration-check .declaration-checkbox,
 .declaration-check .form-check-input {
-    width: 28px;
-    height: 28px;
-    min-width: 28px;
-    margin-top: 0.1rem;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    margin: 0.15rem 0 0 0;
     flex-shrink: 0;
     cursor: pointer;
+    float: none;
+    position: static;
+}
+
+.declaration-check .form-check-label {
+    padding-left: 0;
+    margin-left: 0;
 }
 
 .declaration-text .label-ta {
-    font-size: 14px;
+    font-size: 0.95rem;
     font-weight: 600;
+    line-height: 1.35;
 }
 
 .declaration-text .label-en {
-    font-size: 12px;
+    font-size: 0.82rem;
     color: #6c757d;
-    margin-top: 0.35rem;
+    margin-top: 0.2rem;
+    line-height: 1.35;
+}
+
+.declaration-text .required-hint {
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 0.15rem;
+}
+
+.declaration-submit-wrap {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.declaration-submit-wrap .btn {
+    width: 100%;
+    min-height: 52px;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(25, 135, 84, 0.25);
+}
+
+@media (min-width: 768px) {
+    .declaration-submit-wrap .btn {
+        width: auto;
+        min-width: 280px;
+        max-width: 420px;
+        padding-left: 2.5rem;
+        padding-right: 2.5rem;
+    }
+}
+
+.declaration-invalid-feedback {
+    max-width: 32rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.form-label-required .required-hint {
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-top: 0.1rem;
+}
+
+.field-validation-feedback {
+    font-weight: 600;
+}
+
+.application-form-single.was-validated .form-control:invalid,
+.application-form-single.was-validated .form-select:invalid,
+.application-form-single .form-control.is-invalid,
+.application-form-single .form-select.is-invalid {
+    border-color: var(--bs-danger);
+    box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.12);
+}
+
+.application-form-single.was-validated .form-control:invalid ~ .invalid-feedback,
+.application-form-single.was-validated .form-select:invalid ~ .invalid-feedback {
+    display: block;
+}
+
+#submitBtn .submit-btn-loading {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+}
+
+#agreeTerms.is-invalid {
+    outline: 2px solid var(--bs-danger);
+    outline-offset: 2px;
 }
 
 .review-summary .review-item .label-ta {
@@ -1478,14 +1588,6 @@ html {
 
 .payment-steps-list .label-ta { font-size: 0.95rem; }
 .payment-steps-list .label-en { font-size: 0.8rem; color: #6c757d; }
-
-/* Application submit loading state */
-#submitBtn .submit-btn-loading {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-}
 
 /* Application contact section */
 .application-contact-card {

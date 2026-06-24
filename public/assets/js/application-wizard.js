@@ -11,7 +11,7 @@
     const FILE_SUCCESS_MSG = 'கோப்பு வெற்றிகரமாக பதிவேற்றப்பட்டது. File uploaded successfully.';
     const ALLOWED_FILE_EXT = ['jpg', 'jpeg', 'png', 'webp', 'pdf'];
     const DECLARATION_REQUIRED_MSG = 'உறுதிமொழியை ஏற்றுக்கொள்ள வேண்டும்.<br>You must accept the declaration before submitting the application.';
-    const FIELD_VALIDATE_DELAY = 1000;
+    const FIELD_VALIDATE_DELAY = 400;
 
     const validationSettings = window.APP_VALIDATION_CONFIG || {
         blockDuplicateMobile: false,
@@ -289,17 +289,66 @@
         });
     }
 
+    function focusField($input, offset) {
+        if (!$input || !$input.length) return;
+        const top = Math.max(0, $input.offset().top - (offset || 96));
+        $('html, body').stop(true).animate({ scrollTop: top }, 320);
+        setTimeout(function() {
+            if ($input[0] && $input[0].focus) {
+                $input[0].focus({ preventScroll: true });
+            }
+        }, 330);
+    }
+
     function scrollToFirstInvalidInStep(step) {
+        const $form = $('#applicationForm');
+        $form.addClass('was-validated');
+
         const $step = $('.wizard-step[data-step="' + step + '"]');
-        let $target = $step.find(':invalid').filter(':visible').first();
+        let $target = $step.find('.is-invalid').filter(':visible').first();
+        if (!$target.length) {
+            $target = $step.find(':invalid').filter(':visible').first();
+        }
         if (!$target.length && step === 2) {
             $target = $('#dateOfBirthInput');
         }
-        if ($target.length && $target[0]) {
-            $('html, body').animate({ scrollTop: $target.offset().top - 88 }, 400);
-            if ($target[0].focus) {
-                $target[0].focus();
+        if ($target.length) {
+            $target.addClass('is-invalid');
+            focusField($target);
+        }
+    }
+
+    function scrollToFirstDuplicateField() {
+        const fields = [
+            { key: 'nic', $el: $('#nicNumberInput') },
+            { key: 'mobile', $el: $('#mobileInput') },
+            { key: 'email', $el: $('#emailInput') }
+        ];
+
+        for (let i = 0; i < fields.length; i++) {
+            const item = fields[i];
+            const state = validationState[item.key];
+            if (state && (state.status === 'duplicate' || state.block)) {
+                focusField(item.$el);
+                return true;
             }
+        }
+        return false;
+    }
+
+    function showDeclarationError(show) {
+        const $box = $('#declarationValidationFeedback');
+        const $check = $('#agreeTerms');
+        if (show) {
+            $check.addClass('is-invalid');
+            $box.removeClass('d-none').html(
+                '<span class="label-ta d-block">உறுதிமொழியை ஏற்றுக்கொள்ள வேண்டும்.</span>' +
+                '<span class="label-en d-block">You must accept the declaration.</span>'
+            );
+            focusField($check, 120);
+        } else {
+            $check.removeClass('is-invalid');
+            $box.addClass('d-none').empty();
         }
     }
 
@@ -317,14 +366,18 @@
             }
         }
         if (!validateDeclaration(false)) {
+            showDeclarationError(true);
             return false;
         }
+        showDeclarationError(false);
         if (!isSubmissionAllowed()) {
-            Swal.fire({
-                title: 'சரிபார்ப்பு தேவை / Validation Required',
-                html: 'தயவுசெய்து படிவத்தின் சரிபார்ப்பு பிழைகளை சரிசெய்யவும்.<br>Please resolve the validation messages before submitting.',
-                icon: 'warning'
-            });
+            if (!scrollToFirstDuplicateField()) {
+                Swal.fire({
+                    title: 'சரிபார்ப்பு தேவை / Validation Required',
+                    html: 'தயவுசெய்து படிவத்தின் சரிபார்ப்பு பிழைகளை சரிசெய்யவும்.<br>Please resolve the validation messages before submitting.',
+                    icon: 'warning'
+                });
+            }
             return false;
         }
         return true;
@@ -332,8 +385,10 @@
 
     function validateDeclaration(showAlert) {
         if ($('#agreeTerms').is(':checked')) {
+            showDeclarationError(false);
             return true;
         }
+        showDeclarationError(true);
         if (showAlert !== false) {
             Swal.fire({
                 title: 'தேவை / Required',
@@ -351,10 +406,19 @@
         if (validationState.nic.status === 'checking') {
             return false;
         }
-        if (validationState.mobile.block) {
+        if (validationState.mobile.status === 'duplicate' || validationState.mobile.block) {
             return false;
         }
-        if (validationState.email.block) {
+        if (validationState.mobile.status === 'checking') {
+            return false;
+        }
+        if (validationState.email.status === 'duplicate' || validationState.email.block) {
+            return false;
+        }
+        if (validationState.email.status === 'checking') {
+            return false;
+        }
+        if (validationState.email.status === 'invalid') {
             return false;
         }
         return true;
@@ -405,6 +469,9 @@
                 '<span class="label-ta">&#10007; ' + escapeHtml(result.message_ta || '') + '</span><br>' +
                 '<span class="label-en">&#10007; ' + escapeHtml(result.message_en || '') + '</span>'
             );
+            if (result.status === 'duplicate' || result.status === 'invalid') {
+                focusField($input);
+            }
         }
     }
 
@@ -413,9 +480,13 @@
     }
 
     function setValidationState(field, result) {
+        const status = result.status || 'idle';
+        const block = !!result.block
+            || status === 'duplicate'
+            || status === 'invalid';
         validationState[field] = {
-            status: result.status || 'idle',
-            block: !!result.block,
+            status: status,
+            block: block,
             warning: !!result.warning
         };
         updateSubmitButtonState();
@@ -535,7 +606,14 @@
             scheduleFieldValidation('email', $email, $('#emailValidationFeedback'));
         });
 
-        $('#agreeTerms').on('change', updateSubmitButtonState);
+        $('#agreeTerms').on('change', function() {
+            showDeclarationError(!this.checked);
+            updateSubmitButtonState();
+        });
+
+        $('#applicationForm').on('input change', '.form-control, .form-select', function() {
+            $(this).removeClass('is-invalid');
+        });
     }
 
     function ensureRemoteValidationBeforeSubmit() {
@@ -574,7 +652,7 @@
         $('.wizard-step--always-active').addClass('active');
         $('#wizardProgress').addClass('d-none');
         $('#startBtn, #navButtons').addClass('d-none');
-        $('#submitBtn').removeClass('d-none').addClass('w-100');
+        $('#submitBtn').removeClass('d-none');
         updateSubmitButtonState();
     }
 
@@ -598,6 +676,7 @@
     function validateStep(step) {
         if (step === 1) return true;
 
+        $('#applicationForm').addClass('was-validated');
         const $step = $('.wizard-step[data-step="' + step + '"]');
         let valid = true;
 
@@ -722,6 +801,7 @@
         ensureRemoteValidationBeforeSubmit().done(function() {
             if (!validateDeclaration() || !isSubmissionAllowed()) {
                 setSubmitting(false);
+                scrollToFirstDuplicateField();
                 updateSubmitButtonState();
                 return;
             }
