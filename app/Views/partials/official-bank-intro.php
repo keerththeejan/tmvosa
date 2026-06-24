@@ -70,13 +70,14 @@ $membershipTypes = $membershipTypes ?? [];
                     <?php View::text('membership_fee', 'h6', true, 'mb-0'); ?>
                 </div>
                 <?php foreach ($membershipTypes as $type):
-                    $isTenYear = ($type['slug'] ?? '') === 'ten_year';
-                    $title = Lang::ui($isTenYear ? 'ten_year_member' : 'ordinary_member');
+                    $slug = $type['slug'] ?? 'ordinary';
+                    $years = (int) ($type['duration_years'] ?? ($slug === 'ten_year' ? 10 : 1));
+                    $display = Lang::membershipDisplayFromSlug($slug, $years);
                     $fee = Lang::formatFee((float) $type['fee']);
                 ?>
                 <div class="fee-summary-item mb-2">
-                    <div class="label-ta fw-semibold"><?= View::escape($title['ta']) ?> — <?= View::escape($fee['ta']) ?></div>
-                    <div class="label-en"><?= View::escape($title['en']) ?> — <?= View::escape($fee['en']) ?></div>
+                    <div class="label-ta fw-semibold"><?= View::escape($display['title_ta']) ?> (<?= View::escape($display['validity_ta']) ?>) — <?= View::escape($fee['ta']) ?></div>
+                    <div class="label-en"><?= View::escape($display['title_en']) ?> (<?= View::escape($display['validity_en']) ?>) — <?= View::escape($fee['en']) ?></div>
                 </div>
                 <?php endforeach; ?>
             </div>

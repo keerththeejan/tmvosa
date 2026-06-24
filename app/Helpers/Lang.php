@@ -23,7 +23,8 @@ class Lang
         'teacher_name' => ['ta' => 'ஆசிரியர் பெயர்', 'en' => 'Teacher Name'],
         'occupation' => ['ta' => 'தற்போதைய தொழில்', 'en' => 'Current Occupation'],
         'company' => ['ta' => 'பணிபுரியும் நிறுவனம்', 'en' => 'Organization / Company'],
-        'membership_type' => ['ta' => 'உறுப்பினர் வகை', 'en' => 'Membership Category'],
+        'membership_type' => ['ta' => 'உறுப்பினர் வகை', 'en' => 'Membership Type'],
+        'validity_period' => ['ta' => 'செல்லுபடியாகும் காலம்', 'en' => 'Validity Period'],
         'amount_paid' => ['ta' => 'செலுத்தப்பட்ட தொகை', 'en' => 'Amount Paid'],
         'payment_method' => ['ta' => 'கட்டணம் செலுத்திய முறை', 'en' => 'Payment Method'],
         'transaction_number' => ['ta' => 'பரிவர்த்தனை இலக்கம்', 'en' => 'Transaction Number'],
@@ -115,6 +116,10 @@ class Lang
         'declaration_text_en' => 'I hereby declare that the information provided above is true and accurate.',
         'ordinary_member' => ['ta' => 'சாதாரண உறுப்பினர்', 'en' => 'Ordinary Member'],
         'ten_year_member' => ['ta' => '10 ஆண்டு உறுப்பினர்', 'en' => '10-Year Membership'],
+        'validity_1_year' => ['ta' => '1 ஆண்டு', 'en' => '1 Year'],
+        'validity_10_years' => ['ta' => '10 ஆண்டுகள்', 'en' => '10 Years'],
+        'fee_label' => ['ta' => 'கட்டணம்', 'en' => 'Fee'],
+        'selected_badge' => ['ta' => 'தேர்ந்தெடுக்கப்பட்டது', 'en' => 'Selected'],
         'selected_fee' => ['ta' => 'தேர்ந்தெடுக்கப்பட்ட சந்தா', 'en' => 'Selected Fee'],
         'upload_hint' => ['ta' => 'பதிவேற்ற அல்லது புகைப்படம் எடுக்க தட்டவும்', 'en' => 'Tap to upload or take photo'],
         'dashboard' => ['ta' => 'கட்டுப்பாட்டு பலகை', 'en' => 'Dashboard'],
@@ -209,6 +214,12 @@ class Lang
         'update_photo' => ['ta' => 'புகைப்படத்தை புதுப்பிக்கவும்', 'en' => 'Update Photo'],
         'personal_info' => ['ta' => 'தனிப்பட்ட தகவல்கள்', 'en' => 'Personal Information'],
         'contact_info' => ['ta' => 'தொடர்பு தகவல்கள்', 'en' => 'Contact Information'],
+        'contact_for_inquiries' => ['ta' => 'தொடர்புகளுக்கு', 'en' => 'For Inquiries'],
+        'contact_inquiries_text' => [
+            'ta' => 'இது தொடர்பாக ஏதேனும் விளக்கம் அல்லது மேலதிக தகவல்கள் தேவைப்படின், தயவுசெய்து செயலாளர் அவர்களை கீழ்க்காணும் தொலைபேசி இலக்கத்தில் தொடர்புகொள்ளவும்.',
+            'en' => 'For any clarification or additional information regarding this application, please contact the Secretary using the telephone number below.',
+        ],
+        'secretary' => ['ta' => 'செயலாளர்', 'en' => 'Secretary'],
         'membership_info' => ['ta' => 'உறுப்பினர் தகவல்கள்', 'en' => 'Membership Information'],
     ];
 
@@ -219,6 +230,11 @@ class Lang
         'account_number' => '93013617',
         'address_ta' => 'கிளிநொச்சி திருவையாறு மகா வித்தியாலயம், திருவையாறு, கிளிநொச்சி 42400',
         'address_en' => 'KN Thiruvaiyaru Maha Vidyalayam, Thiruvaiyaru, Kilinochchi 42400',
+    ];
+
+    private static array $applicationContact = [
+        'phone_display' => '077 887 0135',
+        'phone_tel' => '0778870135',
     ];
 
     private static array $paymentSteps = [
@@ -277,6 +293,11 @@ class Lang
         return self::$bank;
     }
 
+    public static function applicationContact(): array
+    {
+        return self::$applicationContact;
+    }
+
     public static function paymentSteps(): array
     {
         return self::$paymentSteps;
@@ -288,5 +309,47 @@ class Lang
             'ta' => 'ரூ. ' . number_format($amount, 2),
             'en' => 'Rs. ' . number_format($amount, 2),
         ];
+    }
+
+    public static function membershipValidityLabel(int $years): array
+    {
+        if ($years === 1) {
+            return self::ui('validity_1_year');
+        }
+        if ($years === 10) {
+            return self::ui('validity_10_years');
+        }
+        return [
+            'ta' => $years . ' ஆண்டுகள்',
+            'en' => $years . ' Years',
+        ];
+    }
+
+    public static function membershipDisplayFromSlug(string $slug, ?int $durationYears = null): array
+    {
+        $isTenYear = $slug === 'ten_year';
+        $title = self::ui($isTenYear ? 'ten_year_member' : 'ordinary_member');
+        $years = $durationYears ?? ($isTenYear ? 10 : 1);
+        $validity = self::membershipValidityLabel($years);
+        $feeLabel = self::ui('fee_label');
+
+        return [
+            'slug' => $slug,
+            'years' => $years,
+            'title_ta' => $title['ta'],
+            'title_en' => $title['en'],
+            'validity_ta' => $validity['ta'],
+            'validity_en' => $validity['en'],
+            'with_validity_ta' => $title['ta'] . ' (' . $validity['ta'] . ')',
+            'with_validity_en' => $title['en'] . ' (' . $validity['en'] . ')',
+            'fee_label_ta' => $feeLabel['ta'],
+            'fee_label_en' => $feeLabel['en'],
+        ];
+    }
+
+    public static function membershipDisplayFromName(string $typeName): array
+    {
+        $slug = (stripos($typeName, '10') !== false) ? 'ten_year' : 'ordinary';
+        return self::membershipDisplayFromSlug($slug);
     }
 }

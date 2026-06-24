@@ -621,19 +621,156 @@ html {
 .step-dot small { font-size: 0.6rem; color: #6c757d; display: block; margin-top: 4px; }
 
 /* Membership Options */
-.membership-options { display: flex; flex-direction: column; gap: 0.75rem; }
-.membership-option input { display: none; }
-.membership-option .option-card {
-    border: 2px solid #e0e0e0;
-    border-radius: 12px;
-    padding: 1rem;
-    cursor: pointer;
-    transition: all 0.2s;
+.membership-options {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
 }
+
+@media (min-width: 576px) {
+    .membership-options {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: stretch;
+    }
+}
+
+.membership-option {
+    display: flex;
+    min-height: 100%;
+    margin: 0;
+}
+
+.membership-option input { display: none; }
+
+.membership-option .option-card {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border: 2px solid #e0e6eb;
+    border-radius: 14px;
+    padding: 1.1rem 1rem 1rem;
+    padding-top: 2.35rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    background: #fff;
+    min-height: 100%;
+}
+
+.membership-option .option-card:hover {
+    border-color: rgba(26, 82, 118, 0.45);
+    box-shadow: 0 4px 14px rgba(26, 82, 118, 0.08);
+}
+
 .membership-option input:checked + .option-card {
     border-color: var(--primary);
-    background: rgba(26,82,118,0.05);
+    background: linear-gradient(180deg, rgba(26, 82, 118, 0.07) 0%, rgba(26, 82, 118, 0.03) 100%);
+    box-shadow: 0 0 0 1px var(--primary), 0 6px 18px rgba(26, 82, 118, 0.12);
 }
+
+.option-selected-badge {
+    display: none;
+    position: absolute;
+    top: 0.65rem;
+    right: 0.65rem;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 0.68rem;
+    line-height: 1.2;
+}
+
+.option-selected-badge .bi {
+    font-size: 0.8rem;
+}
+
+.option-selected-badge .label-ta,
+.option-selected-badge .label-en {
+    display: inline;
+    color: #fff;
+    font-weight: 600;
+}
+
+.option-selected-badge .label-en::before {
+    content: ' / ';
+    opacity: 0.85;
+}
+
+.membership-option input:checked + .option-card .option-selected-badge {
+    display: inline-flex;
+}
+
+.option-title-block {
+    margin-bottom: 0.65rem;
+}
+
+.option-title-ta {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1a5276;
+    line-height: 1.35;
+}
+
+.option-title-en {
+    display: block;
+    font-size: 0.88rem;
+    color: #5a6c7d;
+    margin-top: 0.15rem;
+}
+
+.option-validity-block {
+    background: rgba(26, 82, 118, 0.07);
+    border: 1px solid rgba(26, 82, 118, 0.12);
+    border-radius: 10px;
+    padding: 0.7rem 0.8rem;
+    margin-bottom: 0.85rem;
+}
+
+.option-validity-line + .option-validity-line {
+    margin-top: 0.25rem;
+}
+
+.option-validity-ta {
+    display: block;
+    font-size: 0.92rem;
+    color: #1a5276;
+    line-height: 1.4;
+}
+
+.option-validity-en {
+    display: block;
+    font-size: 0.8rem;
+    color: #5a6c7d;
+    line-height: 1.35;
+}
+
+.option-meta-label {
+    font-weight: 500;
+    margin-right: 0.2rem;
+}
+
+.option-fee-block {
+    padding-top: 0.15rem;
+}
+
+.option-fee-ta {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.35;
+}
+
+.option-fee-en {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: #5a6c7d;
+    margin-top: 0.15rem;
+}
+
 .option-title { font-weight: 600; font-size: 1rem; }
 .option-fee { font-size: 1.25rem; font-weight: 700; color: var(--primary); margin: 0.25rem 0; }
 .option-desc { font-size: 0.8rem; color: #6c757d; }
@@ -1077,15 +1214,15 @@ html {
 }
 
 .membership-option .option-fee-ta {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--primary);
-    margin-top: 0.25rem;
 }
 
 .membership-option .option-fee-en {
-    font-size: 0.9rem;
-    color: #6c757d;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: #5a6c7d;
 }
 
 /* Site Footer */
@@ -1145,3 +1282,128 @@ html {
 
 .payment-steps-list .label-ta { font-size: 0.95rem; }
 .payment-steps-list .label-en { font-size: 0.8rem; color: #6c757d; }
+
+/* Draft restore notice */
+.draft-restore-banner {
+    border-radius: 12px;
+    background: linear-gradient(135deg, #e8f4fc 0%, #f0f7ff 100%);
+    border-left: 4px solid var(--primary) !important;
+}
+
+.draft-restore-banner .label-ta {
+    font-size: 0.95rem;
+    color: #1a5276;
+}
+
+.draft-restore-banner .label-en {
+    font-size: 0.82rem;
+    color: #5a6c7d;
+    margin-top: 0.15rem;
+}
+
+.draft-file-hint {
+    line-height: 1.4;
+}
+
+/* Application contact section */
+.application-contact-card {
+    background: linear-gradient(180deg, #e8f4fc 0%, #f0f8ff 100%);
+    border: 1px solid rgba(26, 82, 118, 0.12) !important;
+    border-radius: 14px;
+}
+
+.application-contact-card .card-body {
+    padding: 1.35rem 1.15rem;
+}
+
+.application-contact-icon {
+    width: 3rem;
+    height: 3rem;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(26, 82, 118, 0.12);
+    color: var(--primary);
+    font-size: 1.35rem;
+}
+
+.application-contact-title .label-ta {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1a5276;
+}
+
+.application-contact-title .label-en {
+    display: block;
+    font-size: 0.88rem;
+    color: #5a6c7d;
+    margin-top: 0.2rem;
+    font-weight: 500;
+}
+
+.application-contact-text .label-ta {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: #2c3e50;
+}
+
+.application-contact-text .label-en {
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: #5a6c7d;
+    margin-top: 0.65rem;
+}
+
+.application-contact-role {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a5276;
+}
+
+.application-contact-role-en {
+    font-size: 0.85rem;
+    color: #5a6c7d;
+    margin-top: 0.15rem;
+}
+
+.application-contact-phone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.55rem 1.1rem;
+    border-radius: 999px;
+    background: var(--primary);
+    color: #fff !important;
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: background 0.2s, transform 0.15s;
+}
+
+.application-contact-phone:hover,
+.application-contact-phone:focus {
+    background: #154360;
+    color: #fff !important;
+    transform: translateY(-1px);
+}
+
+.application-contact-phone .bi {
+    font-size: 1rem;
+}
+
+@media (max-width: 414px) {
+    .application-contact-card .card-body {
+        padding: 1.15rem 0.95rem;
+    }
+
+    .application-contact-phone {
+        font-size: 1.05rem;
+        width: 100%;
+        max-width: 280px;
+    }
+}

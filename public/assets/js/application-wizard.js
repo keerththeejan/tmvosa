@@ -10,6 +10,17 @@
     const FILE_REQUIRED_ERROR = 'இந்த ஆவணத்தை பதிவேற்றவும். Please upload this document.';
     const FILE_SUCCESS_MSG = 'கோப்பு வெற்றிகரமாக பதிவேற்றப்பட்டது. File uploaded successfully.';
     const ALLOWED_FILE_EXT = ['jpg', 'jpeg', 'png', 'webp', 'pdf'];
+    const DRAFT_STORAGE_KEY = 'osa_application_form_draft';
+    const DRAFT_DB_NAME = 'osa_application_draft_files';
+    const DRAFT_DB_STORE = 'files';
+    const DRAFT_SAVE_DELAY = 600;
+    const DRAFT_RESTORE_MSG_TA = 'வரைவு தகவல்கள் மீட்டெடுக்கப்பட்டுள்ளன';
+    const DRAFT_RESTORE_MSG_EN = 'Draft information restored successfully';
+    const DRAFT_FILE_HINT_TA = 'முந்தைய கோப்பு: ';
+    const DRAFT_FILE_HINT_EN = 'Previous file: ';
+
+    let draftSaveTimer = null;
+    let isRestoringDraft = false;
 
     function formatDobMask(value) {
         const digits = value.replace(/\D/g, '').slice(0, 8);
@@ -101,6 +112,7 @@
         $preview.find('.preview-image').addClass('d-none').find('img').attr('src', '');
         $preview.find('.preview-filename-img').text('');
         $preview.find('.preview-pdf').addClass('d-none').find('.preview-filename').text('');
+        $preview.find('.draft-file-hint').remove();
     }
 
     function handleFileSelected(input) {
@@ -162,14 +174,16 @@
             $pdfWrap.removeClass('d-none').find('.preview-filename').text(file.name);
         }
 
-        Swal.fire({
-            toast: true,
-            position: 'top',
-            icon: 'success',
-            title: FILE_SUCCESS_MSG,
-            showConfirmButton: false,
-            timer: 2200
-        });
+        if (!isRestoringDraft) {
+            Swal.fire({
+                toast: true,
+                position: 'top',
+                icon: 'success',
+                title: FILE_SUCCESS_MSG,
+                showConfirmButton: false,
+                timer: 2200
+            });
+        }
 
         return true;
     }
@@ -308,6 +322,333 @@
         $('#submitBtn').removeClass('d-none').addClass('w-100');
     }
 
+    function openDraftFileDb() {
+        return new Promise(function(resolve, reject) {
+            if (!window.indexedDB) {
+                resolve(null);
+                return;
+            }
+            const request = indexedDB.open(DRAFT_DB_NAME, 1);
+            request.onupgradeneeded = function(e) {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains(DRAFT_DB_STORE)) {
+                    db.createObjectStore(DRAFT_DB_STORE);
+                }
+            };
+            request.onsuccess = function() { resolve(request.result); };
+            request.onerror = function() { reject(request.error); };
+        });
+    }
+
+    function saveDraftFileBlob(fieldName, file) {
+        return openDraftFileDb().then(function(db) {
+            if (!db || !file) return;
+            return new Promise(function(resolve, reject) {
+                const tx = db.transaction(DRAFT_DB_STORE, 'readwrite');
+                tx.objectStore(DRAFT_DB_STORE).put(file, fieldName);
+                tx.oncomplete = function() { db.close(); resolve(); };
+                tx.onerror = function() { db.close(); reject(tx.error); };
+            });
+        });
+    }
+
+    function loadDraftFileBlob(fieldName) {
+        return openDraftFileDb().then(function(db) {
+            if (!db) return null;
+            return new Promise(function(resolve, reject) {
+                const tx = db.transaction(DRAFT_DB_STORE, 'readonly');
+                const request = tx.objectStore(DRAFT_DB_STORE).get(fieldName);
+                request.onsuccess = function() { db.close(); resolve(request.result || null); };
+                request.onerror = function() { db.close(); reject(request.error); };
+            });
+        });
+    }
+
+    function clearDraftFileBlobs() {
+        return openDraftFileDb().then(function(db) {
+            if (!db) return;
+            return new Promise(function(resolve, reject) {
+                const tx = db.transaction(DRAFT_DB_STORE, 'readwrite');
+                tx.objectStore(DRAFT_DB_STORE).clear();
+                tx.oncomplete = function() { db.close(); resolve(); };
+                tx.onerror = function() { db.close(); reject(tx.error); };
+            });
+        });
+    }
+
+    function collectDraftData() {
+        const $form = $('#applicationForm');
+        if (!$form.length) return null;
+
+        const fields = {};
+        $form.find('input, select, textarea').each(function() {
+            const el = this;
+            if (!el.name || el.name === '_csrf_token' || el.type === 'file') return;
+            if (el.type === 'radio') {
+                if (el.checked) fields[el.name] = el.value;
+                return;
+            }
+            if (el.type === 'checkbox') {
+                fields[el.name || el.id] = el.checked;
+                return;
+            }
+            fields[el.name] = el.value;
+        });
+
+        const dobInput = document.getElementById('dateOfBirthInput');
+        const dobHidden = document.getElementById('dateOfBirthHidden');
+        if (dobInput) fields.dateOfBirthInput = dobInput.value;
+        if (dobHidden) fields.dateOfBirthHidden = dobHidden.value;
+
+        const agree = document.getElementById('agreeTerms');
+        if (agree) fields.agreeTerms = agree.checked;
+
+        const fileRefs = {};
+        $('.upload-file-input').each(function() {
+            const input = this;
+            const file = input.files && input.files[0];
+            if (!file) return;
+            fileRefs[input.name] = {
+                name: file.name,
+                size: file.size,
+                type: file.type || '',
+                lastModified: file.lastModified || 0
+            };
+        });
+
+        return {
+            version: 1,
+            savedAt: new Date().toISOString(),
+            currentStep: currentStep,
+            fields: fields,
+            fileRefs: fileRefs
+        };
+    }
+
+    function saveDraftNow() {
+        if (isRestoringDraft) return;
+        const $form = $('#applicationForm');
+        if (!$form.length) return;
+
+        try {
+            const draft = collectDraftData();
+            if (!draft) return;
+            localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+
+            const filePromises = [];
+            $('.upload-file-input').each(function() {
+                const file = this.files && this.files[0];
+                if (file) {
+                    filePromises.push(saveDraftFileBlob(this.name, file));
+                }
+            });
+            if (filePromises.length) {
+                Promise.all(filePromises).catch(function() {});
+            }
+        } catch (err) {
+            // Ignore quota or serialization errors; do not break the form.
+        }
+    }
+
+    function scheduleDraftSave() {
+        if (isRestoringDraft) return;
+        clearTimeout(draftSaveTimer);
+        draftSaveTimer = setTimeout(saveDraftNow, DRAFT_SAVE_DELAY);
+    }
+
+    function clearApplicationDraft() {
+        try {
+            localStorage.removeItem(DRAFT_STORAGE_KEY);
+        } catch (err) {}
+        clearDraftFileBlobs().catch(function() {});
+        $('#draftRestoreBanner').remove();
+    }
+
+    function showDraftRestoreNotice() {
+        if ($('#draftRestoreBanner').length) return;
+
+        const $banner = $(
+            '<div class="draft-restore-banner alert alert-info border-0 shadow-sm mb-3" id="draftRestoreBanner" role="status">' +
+            '<div class="d-flex align-items-start gap-2">' +
+            '<i class="bi bi-arrow-counterclockwise fs-5 flex-shrink-0 mt-1"></i>' +
+            '<div class="flex-grow-1">' +
+            '<div class="label-ta fw-bold">' + DRAFT_RESTORE_MSG_TA + '</div>' +
+            '<div class="label-en">' + DRAFT_RESTORE_MSG_EN + '</div>' +
+            '</div>' +
+            '<button type="button" class="btn-close flex-shrink-0" aria-label="Close"></button>' +
+            '</div></div>'
+        );
+
+        $banner.find('.btn-close').on('click', function() {
+            $banner.remove();
+        });
+
+        $('#applicationForm').prepend($banner);
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                toast: true,
+                position: 'top',
+                icon: 'info',
+                title: DRAFT_RESTORE_MSG_TA,
+                text: DRAFT_RESTORE_MSG_EN,
+                showConfirmButton: false,
+                timer: 4200
+            });
+        }
+    }
+
+    function applyDraftFieldValues(fields) {
+        if (!fields) return;
+
+        const $form = $('#applicationForm');
+        Object.keys(fields).forEach(function(key) {
+            if (key === 'dateOfBirthInput' || key === 'dateOfBirthHidden' || key === 'agreeTerms') return;
+            const $els = $form.find('[name="' + key + '"]');
+            if (!$els.length) return;
+
+            const first = $els[0];
+            if (first.type === 'radio') {
+                $els.filter('[value="' + fields[key] + '"]').prop('checked', true).trigger('change');
+                return;
+            }
+            if (first.type === 'checkbox') {
+                $els.prop('checked', !!fields[key]);
+                return;
+            }
+            $els.val(fields[key]);
+        });
+
+        if (fields.dateOfBirthInput) {
+            $('#dateOfBirthInput').val(fields.dateOfBirthInput);
+        }
+        if (fields.dateOfBirthHidden) {
+            $('#dateOfBirthHidden').val(fields.dateOfBirthHidden);
+        } else if (fields.dateOfBirthInput) {
+            validateDobField();
+        }
+
+        if (typeof fields.agreeTerms === 'boolean') {
+            $('#agreeTerms').prop('checked', fields.agreeTerms);
+        }
+
+        const membership = $('input[name="membership_type_id"]:checked');
+        if (membership.length) {
+            $('#amountPaid').val(membership.data('fee'));
+            updateMembershipSelection(membership);
+        }
+    }
+
+    function restoreDraftFileInput(input, ref) {
+        if (!input || !ref) return Promise.resolve(false);
+
+        return loadDraftFileBlob(input.name).then(function(blob) {
+            if (!blob) {
+                if (ref.name) {
+                    const $area = $(input).closest('.upload-area');
+                    $area.addClass('has-file');
+                    const $preview = $area.find('.upload-preview');
+                    $preview.removeClass('d-none');
+                    $preview.find('.preview-image, .preview-pdf').addClass('d-none');
+                    const hint = DRAFT_FILE_HINT_TA + ref.name + ' — ' + DRAFT_FILE_HINT_EN + ref.name;
+                    $preview.append('<div class="draft-file-hint small text-muted mt-2">' + hint + '</div>');
+                }
+                return false;
+            }
+
+            const file = new File([blob], ref.name, {
+                type: ref.type || blob.type || 'application/octet-stream',
+                lastModified: ref.lastModified || Date.now()
+            });
+
+            if (typeof DataTransfer !== 'undefined') {
+                const transfer = new DataTransfer();
+                transfer.items.add(file);
+                input.files = transfer.files;
+            } else {
+                return false;
+            }
+
+            handleFileSelected(input);
+            return true;
+        }).catch(function() {
+            return false;
+        });
+    }
+
+    function restoreApplicationDraft() {
+        let raw = null;
+        try {
+            raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+        } catch (err) {
+            return;
+        }
+        if (!raw) return;
+
+        let draft;
+        try {
+            draft = JSON.parse(raw);
+        } catch (err) {
+            return;
+        }
+        if (!draft || !draft.fields || typeof draft.fields !== 'object') return;
+
+        const hasContent = Object.keys(draft.fields).some(function(k) {
+            const v = draft.fields[k];
+            return v !== '' && v !== null && v !== undefined && v !== false;
+        });
+        const hasFiles = draft.fileRefs && Object.keys(draft.fileRefs).length > 0;
+        if (!hasContent && !hasFiles) return;
+
+        isRestoringDraft = true;
+
+        applyDraftFieldValues(draft.fields);
+
+        if (draft.currentStep && draft.currentStep >= 1 && draft.currentStep <= totalSteps) {
+            currentStep = draft.currentStep;
+            if ($('#wizardProgress').hasClass('d-none')) {
+                initSinglePageUI();
+            } else {
+                showStep(currentStep);
+            }
+        }
+
+        const fileRestorePromises = [];
+        if (draft.fileRefs) {
+            Object.keys(draft.fileRefs).forEach(function(fieldName) {
+                const input = document.querySelector('.upload-file-input[name="' + fieldName + '"]');
+                if (input) {
+                    fileRestorePromises.push(restoreDraftFileInput(input, draft.fileRefs[fieldName]));
+                }
+            });
+        }
+
+        Promise.all(fileRestorePromises).finally(function() {
+            isRestoringDraft = false;
+            showDraftRestoreNotice();
+            saveDraftNow();
+        });
+    }
+
+    function initDraftAutoSave() {
+        const $form = $('#applicationForm');
+        if (!$form.length) return;
+
+        $form.on('input change', 'input, select, textarea', function() {
+            if (this.type === 'file') return;
+            scheduleDraftSave();
+        });
+
+        $(document).on('change', '.upload-file-input', function() {
+            scheduleDraftSave();
+        });
+
+        window.addEventListener('beforeunload', saveDraftNow);
+        window.addEventListener('pagehide', saveDraftNow);
+
+        restoreApplicationDraft();
+    }
+
     function showStep(step) {
         $('.wizard-step').removeClass('active');
         $('.wizard-step[data-step="' + step + '"]').addClass('active');
@@ -420,9 +761,25 @@
         }
     });
 
+    function updateMembershipSelection($input) {
+        if (!$input || !$input.length) return;
+        const fee = $input.data('fee');
+        const slug = $input.data('slug') || '';
+        const years = $input.data('years') || '';
+        $('#amountPaid').val(fee);
+        $('#membershipTypeSlug').val(slug);
+        $('#membershipFeeValue').val(fee);
+        $('#membershipValidityYears').val(years);
+    }
+
     $('input[name="membership_type_id"]').on('change', function() {
-        $('#amountPaid').val($(this).data('fee'));
+        updateMembershipSelection($(this));
     });
+
+    const $selectedMembership = $('input[name="membership_type_id"]:checked');
+    if ($selectedMembership.length) {
+        updateMembershipSelection($selectedMembership);
+    }
 
     $('#applicationForm').on('submit', function(e) {
         e.preventDefault();
@@ -445,6 +802,7 @@
                         icon: 'success',
                         confirmButtonText: 'சரி / OK'
                     }).then(function() {
+                        clearApplicationDraft();
                         $('#applicationForm')[0].reset();
                         $('#dateOfBirthHidden').val('');
                         resetAllUploads();
@@ -511,4 +869,5 @@
     initDobInput();
     initUploadAreas();
     initSinglePageUI();
+    initDraftAutoSave();
 })();

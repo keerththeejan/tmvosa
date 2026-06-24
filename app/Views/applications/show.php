@@ -30,7 +30,25 @@ $documentsByType = $documentsByType ?? [];
             <div class="col-6"><strong>Country:</strong> <?= View::escape($application['country_name'] ?? '-') ?></div>
             <div class="col-6"><strong>Batch:</strong> <?= View::escape($application['studied_to_year'] ?? '-') ?></div>
             <div class="col-6"><strong>Occupation:</strong> <?= View::escape($application['occupation'] ?? '-') ?></div>
-            <div class="col-6"><strong>Membership:</strong> <?= View::escape($application['membership_type_name'] ?? '') ?></div>
+            <div class="col-6">
+                <div class="bilingual-label mb-1">
+                    <span class="label-ta fw-semibold"><?= View::escape(Lang::field('membership_type')['ta']) ?></span>
+                    <span class="label-en"><?= View::escape(Lang::field('membership_type')['en']) ?></span>
+                </div>
+                <?php
+                $membershipDisplay = Lang::membershipDisplayFromName($application['membership_type_name'] ?? '');
+                ?>
+                <div class="label-ta"><?= View::escape($membershipDisplay['with_validity_ta']) ?></div>
+                <div class="label-en text-muted"><?= View::escape($membershipDisplay['with_validity_en']) ?></div>
+            </div>
+            <div class="col-6">
+                <div class="bilingual-label mb-1">
+                    <span class="label-ta fw-semibold"><?= View::escape(Lang::field('validity_period')['ta']) ?></span>
+                    <span class="label-en"><?= View::escape(Lang::field('validity_period')['en']) ?></span>
+                </div>
+                <div class="label-ta"><?= View::escape($membershipDisplay['validity_ta']) ?></div>
+                <div class="label-en text-muted"><?= View::escape($membershipDisplay['validity_en']) ?></div>
+            </div>
             <div class="col-6"><strong>Amount Paid:</strong> Rs. <?= number_format($application['amount_paid'] ?? 0, 2) ?></div>
         </div>
     </div>

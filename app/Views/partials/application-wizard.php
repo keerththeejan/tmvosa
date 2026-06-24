@@ -159,23 +159,7 @@ use App\Helpers\Lang;
                 <div class="card-body">
                     <div class="mb-3">
                         <?php View::label('membership_type', true); ?>
-                        <div class="membership-options">
-                            <?php foreach ($membershipTypes as $type):
-                                $isTenYear = $type['slug'] === 'ten_year';
-                                $title = Lang::ui($isTenYear ? 'ten_year_member' : 'ordinary_member');
-                                $amount = number_format((float) $type['fee'], 0);
-                            ?>
-                            <label class="membership-option">
-                                <input type="radio" name="membership_type_id" value="<?= $type['id'] ?>" data-fee="<?= $type['fee'] ?>">
-                                <div class="option-card">
-                                    <span class="label-ta"><?= View::escape($title['ta']) ?></span>
-                                    <span class="label-en"><?= View::escape($title['en']) ?></span>
-                                    <div class="option-fee-ta">ரூ. <?= $amount ?></div>
-                                    <div class="option-fee-en">Rs. <?= $amount ?></div>
-                                </div>
-                            </label>
-                            <?php endforeach; ?>
-                        </div>
+                        <?php View::partial('membership-type-options', compact('membershipTypes')); ?>
                     </div>
 
                     <?php View::heading('payment_info', 'h6', 'credit-card', 'payment-subheading'); ?>
@@ -275,6 +259,8 @@ use App\Helpers\Lang;
                 </div>
             </div>
         </div>
+
+        <?php View::partial('application-contact-section'); ?>
 
         <div class="wizard-nav form-submit-area mt-2 mb-4">
             <button type="button" class="btn btn-primary btn-lg w-100 bilingual-btn d-none" id="startBtn">

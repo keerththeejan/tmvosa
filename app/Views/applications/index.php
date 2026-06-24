@@ -49,7 +49,12 @@ $statuses = [
         <p class="text-primary small mb-1"><?= View::escape($app['application_number']) ?></p>
         <div class="card-meta">
             <span><i class="bi bi-telephone"></i> <?= View::escape($app['mobile']) ?></span>
-            <span><i class="bi bi-card-checklist"></i> <?= View::escape($app['membership_type_name'] ?? '') ?></span>
+            <span><i class="bi bi-card-checklist"></i>
+                <?php
+                $membershipDisplay = \App\Helpers\Lang::membershipDisplayFromName($app['membership_type_name'] ?? '');
+                echo View::escape($membershipDisplay['with_validity_ta']);
+                ?>
+            </span>
         </div>
     </div>
     <?php endforeach; ?>
