@@ -187,17 +187,40 @@ use App\Helpers\Lang;
         <div class="wizard-step" data-step="4">
             <?php View::heading('step_documents', 'h5', 'cloud-upload'); ?>
 
-            <?php foreach (['payment_slip', 'nic_copy', 'passport_photo'] as $labelKey): ?>
+            <?php foreach (['payment_slip', 'nic_copy', 'passport_photo'] as $labelKey):
+                $docRequired = $labelKey === 'payment_slip';
+                $inputId = $labelKey;
+                $accept = 'image/jpeg,image/jpg,image/png,image/webp,application/pdf,.pdf';
+                $captureAttr = $labelKey === 'payment_slip' ? ' capture="environment"' : '';
+            ?>
             <div class="upload-box mb-3">
-                <?php View::label($labelKey, true); ?>
-                <div class="upload-area" data-input="<?= $labelKey ?>">
-                    <i class="bi bi-camera fs-2 text-muted"></i>
-                    <div class="bilingual-text bilingual-block mt-2">
-                        <span class="label-ta"><?= View::escape(Lang::ui('upload_hint')['ta']) ?></span>
-                        <span class="label-en"><?= View::escape(Lang::ui('upload_hint')['en']) ?></span>
+                <?php View::label($labelKey, $docRequired, $inputId); ?>
+                <div class="upload-area" data-upload-for="<?= View::escape($inputId) ?>" tabindex="0" role="button" aria-label="<?= View::escape(Lang::field($labelKey)['ta']) ?>">
+                    <div class="upload-area-body">
+                        <i class="bi bi-cloud-arrow-up fs-1 text-muted"></i>
+                        <div class="bilingual-text bilingual-block mt-2">
+                            <span class="label-ta"><?= View::escape(Lang::ui('upload_hint')['ta']) ?></span>
+                            <span class="label-en"><?= View::escape(Lang::ui('upload_hint')['en']) ?></span>
+                        </div>
+                        <small class="text-muted d-block mt-1">JPG, PNG, WEBP, PDF — max 10MB</small>
                     </div>
-                    <input type="file" name="<?= $labelKey ?>" accept="image/*,.pdf" capture="environment" class="d-none" required>
-                    <div class="preview mt-2 d-none"><img src="" class="img-thumbnail" style="max-height:100px;"></div>
+                    <input
+                        type="file"
+                        id="<?= View::escape($inputId) ?>"
+                        name="<?= View::escape($labelKey) ?>"
+                        class="upload-file-input"
+                        accept="<?= View::escape($accept) ?>"
+                        <?= $captureAttr ?>
+                        <?= $docRequired ? 'required' : '' ?>>
+                    <div class="upload-preview d-none">
+                        <div class="preview-image d-none">
+                            <img src="" alt="" class="img-thumbnail upload-thumb">
+                        </div>
+                        <div class="preview-pdf d-none">
+                            <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                            <div class="preview-filename small fw-semibold mt-1"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <?php endforeach; ?>

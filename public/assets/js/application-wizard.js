@@ -4,6 +4,12 @@
     const totalSteps = 4;
     const DOB_MIN_YEAR = 1940;
     const DOB_INVALID_MSG = 'தயவுசெய்து சரியான பிறந்த திகதியை உள்ளிடவும். Please enter a valid Date of Birth.';
+    const MAX_FILE_SIZE = 10 * 1024 * 1024;
+    const FILE_SIZE_ERROR = 'கோப்பின் அளவு 10MB ஐ விட அதிகமாக இருக்கக்கூடாது. File size must be less than 10MB.';
+    const FILE_TYPE_ERROR = 'JPG, PNG, WEBP அல்லது PDF மட்டுமே அனுமதிக்கப்படும். Only JPG, PNG, WEBP, or PDF files are allowed.';
+    const FILE_REQUIRED_ERROR = 'இந்த ஆவணத்தை பதிவேற்றவும். Please upload this document.';
+    const FILE_SUCCESS_MSG = 'கோப்பு வெற்றிகரமாக பதிவேற்றப்பட்டது. File uploaded successfully.';
+    const ALLOWED_FILE_EXT = ['jpg', 'jpeg', 'png', 'webp', 'pdf'];
 
     function formatDobMask(value) {
         const digits = value.replace(/\D/g, '').slice(0, 8);
@@ -80,6 +86,159 @@
         return true;
     }
 
+    function isAllowedFile(file) {
+        if (!file) return false;
+        const ext = (file.name.split('.').pop() || '').toLowerCase();
+        if (ALLOWED_FILE_EXT.indexOf(ext) === -1) return false;
+        if (file.type && file.type.indexOf('image/') === 0) return true;
+        if (file.type === 'application/pdf') return true;
+        return ALLOWED_FILE_EXT.indexOf(ext) !== -1;
+    }
+
+    function resetUploadPreview($area) {
+        const $preview = $area.find('.upload-preview');
+        $preview.addClass('d-none');
+        $preview.find('.preview-image').addClass('d-none').find('img').attr('src', '');
+        $preview.find('.preview-pdf').addClass('d-none').find('.preview-filename').text('');
+    }
+
+    function handleFileSelected(input) {
+        const file = input.files && input.files[0];
+        const $area = $(input).closest('.upload-area');
+
+        if (!file) {
+            $area.removeClass('has-file');
+            resetUploadPreview($area);
+            input.setCustomValidity('');
+            return true;
+        }
+
+        if (file.size > MAX_FILE_SIZE) {
+            input.value = '';
+            $area.removeClass('has-file');
+            resetUploadPreview($area);
+            input.setCustomValidity(FILE_SIZE_ERROR);
+            Swal.fire({
+                title: 'பிழை / Error',
+                text: FILE_SIZE_ERROR,
+                icon: 'error'
+            });
+            return false;
+        }
+
+        if (!isAllowedFile(file)) {
+            input.value = '';
+            $area.removeClass('has-file');
+            resetUploadPreview($area);
+            input.setCustomValidity(FILE_TYPE_ERROR);
+            Swal.fire({
+                title: 'பிழை / Error',
+                text: FILE_TYPE_ERROR,
+                icon: 'error'
+            });
+            return false;
+        }
+
+        input.setCustomValidity('');
+        $area.addClass('has-file');
+
+        const $preview = $area.find('.upload-preview');
+        const $imgWrap = $preview.find('.preview-image');
+        const $pdfWrap = $preview.find('.preview-pdf');
+
+        $preview.removeClass('d-none');
+        $imgWrap.addClass('d-none');
+        $pdfWrap.addClass('d-none');
+
+        if (file.type.indexOf('image/') === 0) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $imgWrap.removeClass('d-none').find('img').attr('src', e.target.result);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            $pdfWrap.removeClass('d-none').find('.preview-filename').text(file.name);
+        }
+
+        Swal.fire({
+            toast: true,
+            position: 'top',
+            icon: 'success',
+            title: FILE_SUCCESS_MSG,
+            showConfirmButton: false,
+            timer: 2200
+        });
+
+        return true;
+    }
+
+    function initUploadAreas() {
+        $('.upload-area').each(function() {
+            const $area = $(this);
+            const inputId = $area.data('upload-for');
+            const input = inputId ? document.getElementById(inputId) : $area.find('input[type="file"]')[0];
+            if (!input) return;
+
+            $area.on('click', function(e) {
+                if (e.target === input) return;
+                input.click();
+            });
+
+            $area.on('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    input.click();
+                }
+            });
+
+            ['dragenter', 'dragover'].forEach(function(eventName) {
+                $area.on(eventName, function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    $area.addClass('is-dragover');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(function(eventName) {
+                $area.on(eventName, function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    $area.removeClass('is-dragover');
+                });
+            });
+
+            $area.on('drop', function(e) {
+                const dt = e.originalEvent && e.originalEvent.dataTransfer;
+                if (!dt || !dt.files || !dt.files.length) return;
+                if (typeof DataTransfer !== 'undefined') {
+                    const transfer = new DataTransfer();
+                    transfer.items.add(dt.files[0]);
+                    input.files = transfer.files;
+                } else {
+                    input.files = dt.files;
+                }
+                handleFileSelected(input);
+            });
+        });
+
+        $(document).on('change', '.upload-file-input', function() {
+            handleFileSelected(this);
+        });
+    }
+
+    function resetAllUploads() {
+        $('.upload-area').each(function() {
+            const $area = $(this);
+            $area.removeClass('has-file is-dragover');
+            resetUploadPreview($area);
+            const input = $area.find('.upload-file-input')[0];
+            if (input) {
+                input.value = '';
+                input.setCustomValidity('');
+            }
+        });
+    }
+
     function initDobInput() {
         const $input = $('#dateOfBirthInput');
         if (!$input.length) return;
@@ -144,12 +303,16 @@
             }
             if (this.type === 'file') {
                 if (!this.files || !this.files.length) {
-                    this.setCustomValidity('Please upload this document.');
+                    this.setCustomValidity(FILE_REQUIRED_ERROR);
                     this.reportValidity();
                     valid = false;
                     return false;
                 }
-                this.setCustomValidity('');
+                if (!handleFileSelected(this)) {
+                    this.reportValidity();
+                    valid = false;
+                    return false;
+                }
                 return;
             }
             this.setCustomValidity('');
@@ -222,26 +385,7 @@
         $('#amountPaid').val($(this).data('fee'));
     });
 
-    $('.upload-area').on('click', function() {
-        $(this).find('input[type="file"]').click();
-    });
-
-    $('.upload-area input[type="file"]').on('change', function() {
-        const $area = $(this).closest('.upload-area');
-        const file = this.files[0];
-        if (!file) return;
-        this.setCustomValidity('');
-        $area.addClass('has-file');
-        if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                $area.find('.preview').removeClass('d-none').find('img').attr('src', e.target.result);
-            };
-            reader.readAsDataURL(file);
-        } else {
-            $area.find('.preview').removeClass('d-none').html('<i class="bi bi-file-pdf fs-1 text-danger"></i>');
-        }
-    });
+    initUploadAreas();
 
     $('#applicationForm').on('submit', function(e) {
         e.preventDefault();
@@ -272,7 +416,7 @@
                     }).then(function() {
                         $('#applicationForm')[0].reset();
                         $('#dateOfBirthHidden').val('');
-                        $('.upload-area').removeClass('has-file').find('.preview').addClass('d-none');
+                        resetAllUploads();
                         currentStep = 1;
                         showStep(1);
                     });

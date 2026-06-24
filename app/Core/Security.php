@@ -53,7 +53,7 @@ class Security
         }
 
         if ($file['size'] > $maxSize) {
-            $errors[] = 'File size exceeds maximum allowed (' . ($maxSize / 1024 / 1024) . 'MB).';
+            $errors[] = 'கோப்பின் அளவு 10MB ஐ விட அதிகமாக இருக்கக்கூடாது. File size must be less than 10MB.';
         }
 
         $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
@@ -65,7 +65,7 @@ class Security
         $mime = finfo_file($finfo, $file['tmp_name']);
         finfo_close($finfo);
 
-        $allowedMimes = ['image/jpeg', 'image/png', 'application/pdf'];
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
         if (!in_array($mime, $allowedMimes)) {
             $errors[] = 'Invalid file content.';
         }

@@ -84,7 +84,56 @@ class ApplicationController extends Controller
             return;
         }
         $documents = Document::getByApplication((int) $id);
-        $this->view('applications/show', compact('application', 'documents'));
+        $documentsByType = [];
+        foreach ($documents as $doc) {
+            $documentsByType[$doc['document_type']] = $doc;
+        }
+        $this->view('applications/show', compact('application', 'documents', 'documentsByType'));
+    }
+
+    public function uploadDocument(string $id): void
+    {
+        if (!$this->validateCsrf()) {
+            $this->json(['success' => false, 'message' => 'Invalid request.'], 403);
+        }
+
+        $application = Application::findById((int) $id);
+        if (!$application) {
+            $this->json(['success' => false, 'message' => 'Application not found.'], 404);
+        }
+
+        $type = $this->input('document_type', '');
+        $allowed = ['payment_slip', 'nic_copy', 'passport_photo'];
+        if (!in_array($type, $allowed, true)) {
+            $this->json(['success' => false, 'message' => 'Invalid document type.'], 422);
+        }
+
+        if (empty($_FILES['document']['name']) || ($_FILES['document']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+            $this->json(['success' => false, 'message' => 'Please select a file to upload.'], 422);
+        }
+
+        $result = FileUploader::upload($_FILES['document'], 'documents');
+        if (isset($result['errors'])) {
+            $this->json(['success' => false, 'message' => implode(' ', $result['errors'])], 422);
+        }
+
+        Database::query(
+            "DELETE FROM member_documents WHERE application_id = ? AND document_type = ?",
+            [(int) $id, $type]
+        );
+
+        Document::create([
+            'application_id' => (int) $id,
+            'document_type' => $type,
+            'file_name' => $result['file_name'],
+            'file_path' => $result['file_path'],
+            'file_size' => $result['file_size'],
+            'mime_type' => $result['mime_type'],
+        ]);
+
+        AuditLog::log('upload_application_document', 'member_applications', (int) $id, null, ['document_type' => $type]);
+
+        $this->json(['success' => true, 'message' => 'Document uploaded successfully.']);
     }
 
     public function approve(string $id): void
@@ -273,8 +322,6 @@ class ApplicationController extends Controller
         $errors = [];
         $required = [
             'payment_slip' => 'Payment slip is required.',
-            'nic_copy' => 'NIC copy is required.',
-            'passport_photo' => 'Passport photo is required.',
         ];
 
         foreach ($required as $field => $message) {

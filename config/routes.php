@@ -25,6 +25,7 @@ $router->get('/applications', ['ApplicationController', 'index'], ['AuthMiddlewa
 $router->get('/applications/{id}', ['ApplicationController', 'show'], ['AuthMiddleware']);
 $router->post('/applications/{id}/approve', ['ApplicationController', 'approve'], ['AuthMiddleware']);
 $router->post('/applications/{id}/reject', ['ApplicationController', 'reject'], ['AuthMiddleware']);
+$router->post('/applications/{id}/documents', ['ApplicationController', 'uploadDocument'], ['AuthMiddleware']);
 
 // Members
 $router->get('/members', ['MemberController', 'index'], ['AuthMiddleware']);

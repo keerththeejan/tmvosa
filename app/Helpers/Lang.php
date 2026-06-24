@@ -70,6 +70,33 @@ class Lang
             'ta' => 'கிளி / திருவையாறு மகா வித்தியாலயம் பழைய மாணவர் சங்கம்',
             'en' => 'Kilinochchi / Thiruvaiyaru Maha Vidyalayam Old Students\' Association',
         ],
+        'not_uploaded' => ['ta' => 'பதிவேற்றப்படவில்லை', 'en' => 'Not Uploaded'],
+        'upload_later_hint' => [
+            'ta' => 'பின்னர் பதிவேற்றலாம் அல்லது உறுப்பினரிடம் கோரலாம்.',
+            'en' => 'Can be uploaded later or requested from the applicant.',
+        ],
+        'upload_document' => ['ta' => 'ஆவணத்தை பதிவேற்று', 'en' => 'Upload Document'],
+        'view_document' => ['ta' => 'ஆவணத்தை காண்க', 'en' => 'View Document'],
+        'uploaded' => ['ta' => 'பதிவேற்றப்பட்டது', 'en' => 'Uploaded'],
+        'documents' => ['ta' => 'ஆவணங்கள்', 'en' => 'Documents'],
+        'file_upload_success' => [
+            'ta' => 'கோப்பு வெற்றிகரமாக பதிவேற்றப்பட்டது.',
+            'en' => 'File uploaded successfully.',
+        ],
+        'file_size_error' => [
+            'ta' => 'கோப்பின் அளவு 10MB ஐ விட அதிகமாக இருக்கக்கூடாது.',
+            'en' => 'File size must be less than 10MB.',
+        ],
+        'file_type_error' => [
+            'ta' => 'JPG, PNG, WEBP அல்லது PDF மட்டுமே அனுமதிக்கப்படும்.',
+            'en' => 'Only JPG, PNG, WEBP, or PDF files are allowed.',
+        ],
+        'file_required_error' => [
+            'ta' => 'இந்த ஆவணத்தை பதிவேற்றவும்.',
+            'en' => 'Please upload this document.',
+        ],
+        'developed_by' => ['ta' => 'வடிவமைப்பு:', 'en' => 'Developed by'],
+        'begin_application' => ['ta' => 'விண்ணப்ப படிவம்', 'en' => 'Application Form'],
         'dob_invalid' => [
             'ta' => 'தயவுசெய்து சரியான பிறந்த திகதியை உள்ளிடவும்.',
             'en' => 'Please enter a valid Date of Birth.',
