@@ -109,55 +109,27 @@ $hasDuplicates = count($relatedMembers) > 0 || count($relatedApplications) > 0;
     </div>
 </div>
 
-<?php if (in_array($application['status'], ['pending', 'under_review'])): ?>
-<div class="d-flex gap-2">
+<?php
+$canDelete = !($application['status'] === 'approved' && !empty($application['member_id']));
+$canReview = in_array($application['status'], ['pending', 'under_review'], true);
+?>
+<div id="applicationPage" class="d-none"
+     data-app-id="<?= (int) $application['id'] ?>"
+     data-app-number="<?= View::escape($application['application_number']) ?>"
+     data-can-delete="<?= $canDelete ? '1' : '0' ?>"
+     data-can-review="<?= $canReview ? '1' : '0' ?>"></div>
+
+<?php if ($canReview): ?>
+<div class="d-flex gap-2 mb-2">
     <button class="btn btn-success flex-fill" id="approveBtn"><i class="bi bi-check-lg"></i> Approve</button>
     <button class="btn btn-danger flex-fill" id="rejectBtn"><i class="bi bi-x-lg"></i> Reject</button>
 </div>
-<script>
-$('.admin-doc-upload').on('submit', function(e) {
-    e.preventDefault();
-    const $form = $(this);
-    const fd = new FormData();
-    fd.append('document_type', $form.data('type'));
-    fd.append('document', $form.find('input[type="file"]')[0].files[0]);
-    fd.append('_csrf_token', CSRF_TOKEN);
-    $.ajax({
-        url: BASE_URL + '/applications/<?= (int) $application['id'] ?>/documents',
-        method: 'POST',
-        data: fd,
-        processData: false,
-        contentType: false,
-        success: function(res) {
-            if (res.success) {
-                Swal.fire('Uploaded', res.message, 'success').then(() => location.reload());
-            } else {
-                Swal.fire('Error', res.message, 'error');
-            }
-        },
-        error: function(xhr) {
-            const msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Upload failed.';
-            Swal.fire('Error', msg, 'error');
-        }
-    });
-});
+<?php endif; ?>
 
-$('#approveBtn').on('click', function() {
-    Swal.fire({ title: 'Approve Application?', icon: 'question', showCancelButton: true, confirmButtonText: 'Approve' })
-    .then(r => { if (r.isConfirmed) {
-        $.post(BASE_URL + '/applications/<?= $application['id'] ?>/approve', { _csrf_token: CSRF_TOKEN }, function(res) {
-            if (res.success) Swal.fire('Approved!', 'Membership: ' + res.membership_number, 'success').then(() => location.reload());
-            else Swal.fire('Error', res.message, 'error');
-        });
-    }});
-});
-$('#rejectBtn').on('click', function() {
-    Swal.fire({ title: 'Reject Application', input: 'textarea', inputLabel: 'Reason', showCancelButton: true })
-    .then(r => { if (r.isConfirmed) {
-        $.post(BASE_URL + '/applications/<?= $application['id'] ?>/reject', { _csrf_token: CSRF_TOKEN, reason: r.value }, function(res) {
-            if (res.success) Swal.fire('Rejected', res.message, 'info').then(() => location.reload());
-        });
-    }});
-});
-</script>
+<?php if ($canDelete): ?>
+<div class="d-grid">
+    <button type="button" class="btn btn-outline-danger" id="deleteAppBtn">
+        <i class="bi bi-trash"></i> Delete Application
+    </button>
+</div>
 <?php endif; ?>

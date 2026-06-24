@@ -27,14 +27,24 @@ $statuses = [
     <?php if (empty($applications['data'])): ?>
     <div class="text-center py-5 text-muted">No applications found.</div>
     <?php else: ?>
-    <?php foreach ($applications['data'] as $app): ?>
-    <div class="member-card" onclick="location.href='<?= $base ?>/applications/<?= $app['id'] ?>'">
+    <?php foreach ($applications['data'] as $app):
+        $canDeleteApp = !($app['status'] === 'approved' && !empty($app['member_id']));
+    ?>
+    <div class="member-card application-card" data-app-id="<?= (int) $app['id'] ?>" data-app-number="<?= View::escape($app['application_number']) ?>" data-can-delete="<?= $canDeleteApp ? '1' : '0' ?>">
         <div class="card-top">
             <span class="badge bg-<?= match($app['status']) { 'approved' => 'success', 'rejected' => 'danger', 'pending' => 'warning', default => 'info' } ?>">
                 <?= ucfirst(str_replace('_', ' ', $app['status'])) ?>
             </span>
-            <small class="text-muted"><?= date('d M Y', strtotime($app['created_at'])) ?></small>
+            <div class="d-flex align-items-center gap-2">
+                <?php if ($canDeleteApp): ?>
+                <button type="button" class="btn btn-sm btn-outline-danger application-delete-btn" title="Delete application" aria-label="Delete application">
+                    <i class="bi bi-trash"></i>
+                </button>
+                <?php endif; ?>
+                <small class="text-muted"><?= date('d M Y', strtotime($app['created_at'])) ?></small>
+            </div>
         </div>
+        <a href="<?= $base ?>/applications/<?= $app['id'] ?>" class="application-card-link text-decoration-none text-body">
         <h6 class="mb-1"><?= View::escape($app['full_name_tamil'] ?: $app['full_name_english']) ?></h6>
         <?php if ($app['full_name_english'] && $app['full_name_tamil']): ?>
         <p class="text-muted small mb-1"><?= View::escape($app['full_name_english']) ?></p>
@@ -44,6 +54,7 @@ $statuses = [
             <span><i class="bi bi-telephone"></i> <?= View::escape($app['mobile']) ?></span>
             <span><i class="bi bi-card-checklist"></i> <?= View::escape($app['membership_type_name'] ?? '') ?></span>
         </div>
+        </a>
     </div>
     <?php endforeach; ?>
     <?php endif; ?>

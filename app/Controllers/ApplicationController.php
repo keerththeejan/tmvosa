@@ -101,7 +101,11 @@ class ApplicationController extends Controller
         $status = $this->input('status', '');
         $page = (int) $this->input('page', 1);
         $applications = Application::getAll($status, $page);
-        $this->view('applications/index', ['applications' => $applications, 'currentStatus' => $status]);
+        $this->view('applications/index', [
+            'applications' => $applications,
+            'currentStatus' => $status,
+            'pageScript' => 'applications-index.js',
+        ]);
     }
 
     public function show(string $id): void
@@ -117,7 +121,9 @@ class ApplicationController extends Controller
             $documentsByType[$doc['document_type']] = $doc;
         }
         $duplicates = ApplicationValidation::findDuplicatesForNic($application['nic_number'] ?? '');
-        $this->view('applications/show', compact('application', 'documents', 'documentsByType', 'duplicates'));
+        $this->view('applications/show', compact('application', 'documents', 'documentsByType', 'duplicates') + [
+            'pageScript' => 'application-show.js',
+        ]);
     }
 
     public function duplicates(): void
@@ -294,6 +300,47 @@ class ApplicationController extends Controller
         $this->json(['success' => true, 'message' => 'Application rejected.']);
     }
 
+    public function destroy(string $id): void
+    {
+        if (!$this->validateCsrf()) {
+            $this->json(['success' => false, 'message' => 'Invalid request.'], 403);
+        }
+
+        $application = Application::findById((int) $id);
+        if (!$application) {
+            $this->json(['success' => false, 'message' => 'Application not found.'], 404);
+        }
+
+        if ($application['status'] === 'approved' && !empty($application['member_id'])) {
+            $this->json([
+                'success' => false,
+                'message' => 'Approved applications linked to a member cannot be deleted. Manage the member record instead.',
+            ], 422);
+        }
+
+        Database::beginTransaction();
+        try {
+            $this->deleteApplicationFiles((int) $id);
+            Application::delete((int) $id);
+            AuditLog::log('delete_application', 'member_applications', (int) $id, [
+                'application_number' => $application['application_number'],
+                'status' => $application['status'],
+                'full_name' => $application['full_name_english'],
+            ]);
+            Database::commit();
+
+            $this->json([
+                'success' => true,
+                'message' => 'Application deleted successfully.',
+                'redirect' => \App\Core\App::baseUrl() . '/applications',
+            ]);
+        } catch (\Exception $e) {
+            Database::rollback();
+            error_log('Application delete failed: ' . $e->getMessage());
+            $this->json(['success' => false, 'message' => 'Could not delete application. Please try again.'], 500);
+        }
+    }
+
     public function track(): void
     {
         $number = Security::sanitize($this->input('application_number', ''));
@@ -440,6 +487,17 @@ class ApplicationController extends Controller
                         'mime_type' => $result['mime_type'],
                     ]);
                 }
+            }
+        }
+    }
+
+    private function deleteApplicationFiles(int $applicationId): void
+    {
+        $documents = Document::getByApplication($applicationId);
+        foreach ($documents as $doc) {
+            $fullPath = FileUploader::getFullPath($doc['file_path']);
+            if (is_file($fullPath)) {
+                @unlink($fullPath);
             }
         }
     }

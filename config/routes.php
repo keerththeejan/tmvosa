@@ -27,6 +27,7 @@ $router->get('/applications/duplicates', ['ApplicationController', 'duplicates']
 $router->get('/applications/{id}', ['ApplicationController', 'show'], ['AuthMiddleware']);
 $router->post('/applications/{id}/approve', ['ApplicationController', 'approve'], ['AuthMiddleware']);
 $router->post('/applications/{id}/reject', ['ApplicationController', 'reject'], ['AuthMiddleware']);
+$router->post('/applications/{id}/delete', ['ApplicationController', 'destroy'], ['AuthMiddleware']);
 $router->post('/applications/{id}/documents', ['ApplicationController', 'uploadDocument'], ['AuthMiddleware']);
 
 // Members

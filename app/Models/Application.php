@@ -56,6 +56,11 @@ class Application
         return Database::update('member_applications', $data, 'id = ?', [$id]);
     }
 
+    public static function delete(int $id): int
+    {
+        return Database::delete('member_applications', 'id = ?', [$id]);
+    }
+
     public static function getPendingCount(): int
     {
         return (int) Database::fetch(
