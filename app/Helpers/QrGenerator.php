@@ -10,7 +10,7 @@ class QrGenerator
 {
     public static function generate(string $data, string $filename): string
     {
-        $qrCode = QrCode::create($data)->setSize(300)->setMargin(10);
+        $qrCode = new QrCode(data: $data, size: 300, margin: 10);
         $writer = new PngWriter();
         $result = $writer->write($qrCode);
 
