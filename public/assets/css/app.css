@@ -1479,26 +1479,12 @@ html {
 .payment-steps-list .label-ta { font-size: 0.95rem; }
 .payment-steps-list .label-en { font-size: 0.8rem; color: #6c757d; }
 
-/* Draft restore notice */
-.draft-restore-banner {
-    border-radius: 12px;
-    background: linear-gradient(135deg, #e8f4fc 0%, #f0f7ff 100%);
-    border-left: 4px solid var(--primary) !important;
-}
-
-.draft-restore-banner .label-ta {
-    font-size: 0.95rem;
-    color: #1a5276;
-}
-
-.draft-restore-banner .label-en {
-    font-size: 0.82rem;
-    color: #5a6c7d;
-    margin-top: 0.15rem;
-}
-
-.draft-file-hint {
-    line-height: 1.4;
+/* Application submit loading state */
+#submitBtn .submit-btn-loading {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
 }
 
 /* Application contact section */

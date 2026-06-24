@@ -17,6 +17,33 @@ class Controller
         exit;
     }
 
+    /**
+     * Send JSON to the client immediately, then run a background task (e.g. email).
+     */
+    protected function jsonThen(callable $after, array $data, int $code = 200): void
+    {
+        http_response_code($code);
+        header('Content-Type: application/json');
+        echo json_encode($data);
+
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        } else {
+            while (ob_get_level() > 0) {
+                ob_end_flush();
+            }
+            flush();
+        }
+
+        try {
+            $after();
+        } catch (\Throwable $e) {
+            error_log('Post-response task failed: ' . $e->getMessage());
+        }
+
+        exit;
+    }
+
     protected function redirect(string $url): void
     {
         header("Location: {$url}");

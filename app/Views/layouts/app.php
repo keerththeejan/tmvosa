@@ -13,7 +13,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-    <link href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/app.css" rel="stylesheet">
+    <link href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/<?= \App\Core\App::assetVersion('assets/css/app.css') ?>" rel="stylesheet">
 </head>
 <body class="admin-panel">
     <?php if ($user): ?>
@@ -51,9 +51,9 @@
         const BASE_URL = '<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>';
         const CSRF_TOKEN = '<?= $csrfToken ?>';
     </script>
-    <script src="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/js/app.js"></script>
+    <script src="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/<?= \App\Core\App::assetVersion('assets/js/app.js') ?>"></script>
     <?php if (isset($pageScript)): ?>
-        <script src="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/js/<?= $pageScript ?>"></script>
+        <script src="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/<?= \App\Core\App::assetVersion('assets/js/' . $pageScript) ?>"></script>
     <?php endif; ?>
     <script>
         if ('serviceWorker' in navigator) {

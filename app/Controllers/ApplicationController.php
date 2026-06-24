@@ -14,6 +14,7 @@ use App\Models\Document;
 use App\Models\AuditLog;
 use App\Helpers\NumberGenerator;
 use App\Helpers\FileUploader;
+use App\Helpers\ApplicationSubmissionNotifier;
 use App\Helpers\Mailer;
 use App\Helpers\DateParser;
 use App\Helpers\ApplicationValidation;
@@ -73,6 +74,7 @@ class ApplicationController extends Controller
             if ($appId <= 0) {
                 throw new \RuntimeException('Application insert returned no ID.');
             }
+            $data['application_id'] = $appId;
             $this->handleDocumentUploads($appId);
             Database::commit();
         } catch (\PDOException $e) {
@@ -101,8 +103,6 @@ class ApplicationController extends Controller
             ], 500);
         }
 
-        $this->sendSubmissionEmails($data);
-
         Session::set('application_submitted', [
             'application_number' => $data['application_number'],
             'full_name' => $data['full_name_english'],
@@ -117,10 +117,15 @@ class ApplicationController extends Controller
             'redirect' => $successUrl,
         ];
 
+        $emailData = $data;
         if ($this->wantsJson()) {
-            $this->json($payload);
+            $this->jsonThen(
+                fn () => ApplicationSubmissionNotifier::send($emailData),
+                $payload
+            );
         }
 
+        ApplicationSubmissionNotifier::send($emailData);
         $this->redirect($successUrl);
     }
 
@@ -138,33 +143,6 @@ class ApplicationController extends Controller
             'fullName' => $submission['full_name'] ?? '',
             'submittedAt' => $submission['submitted_at'] ?? '',
         ]);
-    }
-
-    private function sendSubmissionEmails(array $data): void
-    {
-        try {
-            if (!empty($data['email'])) {
-                $sent = Mailer::sendTemplate($data['email'], 'application_received', [
-                    'full_name' => $data['full_name_english'],
-                    'application_number' => $data['application_number'],
-                ], $data['full_name_english']);
-                if (!$sent) {
-                    error_log('Application received email failed: ' . (Mailer::getLastError() ?? 'unknown'));
-                }
-            }
-
-            $notified = Mailer::notifyAdmin('admin_notification', [
-                'application_number' => $data['application_number'],
-                'full_name' => $data['full_name_english'],
-                'mobile' => $data['mobile'],
-                'email' => $data['email'] ?? 'N/A',
-            ]);
-            if (!$notified) {
-                error_log('Admin notification email failed: ' . (Mailer::getLastError() ?? 'unknown'));
-            }
-        } catch (\Throwable $e) {
-            error_log('Application submit email error: ' . $e->getMessage());
-        }
     }
 
     public function index(): void
@@ -556,21 +534,34 @@ class ApplicationController extends Controller
 
     private function handleDocumentUploads(int $applicationId): void
     {
-        $docTypes = ['nic_copy', 'passport_photo', 'payment_slip'];
-        foreach ($docTypes as $type) {
-            if (!empty($_FILES[$type]['name'])) {
-                $result = FileUploader::upload($_FILES[$type], 'documents');
-                if (!isset($result['errors'])) {
-                    Document::create([
-                        'application_id' => $applicationId,
-                        'document_type' => $type,
-                        'file_name' => $result['file_name'],
-                        'file_path' => $result['file_path'],
-                        'file_size' => $result['file_size'],
-                        'mime_type' => $result['mime_type'],
-                    ]);
-                }
+        $docTypes = [
+            'passport_photo' => ['max_bytes' => FileUploader::PROFILE_MAX_BYTES, 'thumbnail' => true],
+            'payment_slip' => ['max_bytes' => FileUploader::DOCUMENT_MAX_BYTES, 'thumbnail' => true],
+            'nic_copy' => ['max_bytes' => FileUploader::DOCUMENT_MAX_BYTES, 'thumbnail' => false],
+        ];
+
+        foreach ($docTypes as $type => $options) {
+            if (empty($_FILES[$type]['name'])) {
+                continue;
             }
+
+            $result = FileUploader::upload($_FILES[$type], 'documents', $options);
+            if (isset($result['errors'])) {
+                if ($type === 'payment_slip') {
+                    throw new \RuntimeException('Payment slip upload failed.');
+                }
+                error_log("Optional document upload failed ({$type}): " . implode(' ', $result['errors']));
+                continue;
+            }
+
+            Document::create([
+                'application_id' => $applicationId,
+                'document_type' => $type,
+                'file_name' => $result['file_name'],
+                'file_path' => $result['file_path'],
+                'file_size' => $result['file_size'],
+                'mime_type' => $result['mime_type'],
+            ]);
         }
     }
 

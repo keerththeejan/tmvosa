@@ -5,7 +5,7 @@ $membershipDisplay = Lang::membershipDisplayFromName($member['membership_type_na
 <div class="member-profile-card text-center mb-3">
     <div class="profile-avatar mx-auto">
         <?php if ($member['photo']): ?>
-        <img src="<?= $base ?>/../storage/uploads/<?= $member['photo'] ?>" alt="">
+        <img src="<?= $base ?>/../storage/uploads/<?= $member['photo'] ?>" alt="" loading="lazy" decoding="async">
         <?php else: ?>
         <div class="avatar-placeholder-lg"><?= strtoupper(substr($member['full_name_english'], 0, 1)) ?></div>
         <?php endif; ?>

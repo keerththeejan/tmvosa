@@ -46,7 +46,7 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
     <div class="member-card" onclick="location.href='<?= $base ?>/members/<?= $m['id'] ?>'">
         <div class="card-avatar">
             <?php if ($m['photo']): ?>
-            <img src="<?= $base ?>/../storage/uploads/<?= $m['photo'] ?>" alt="">
+            <img src="<?= $base ?>/../storage/uploads/<?= $m['photo'] ?>" alt="" loading="lazy" decoding="async">
             <?php else: ?>
             <div class="avatar-placeholder"><?= strtoupper(substr($m['full_name_english'], 0, 1)) ?></div>
             <?php endif; ?>

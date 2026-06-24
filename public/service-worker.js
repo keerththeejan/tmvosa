@@ -1,9 +1,10 @@
-const CACHE_NAME = 'osa-alumni-v7';
+const CACHE_NAME = 'osa-alumni-v8';
 const OFFLINE_URL = 'offline.html';
 
 const PRECACHE_URLS = [
     'assets/css/app.css',
     'assets/js/app.js',
+    'assets/js/image-compress.js',
     'assets/js/application-wizard.js',
     'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
     'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css',

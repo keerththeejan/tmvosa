@@ -284,8 +284,15 @@ use App\Helpers\Lang;
                 </button>
             </div>
             <button type="submit" class="btn btn-success btn-lg w-100 bilingual-btn" id="submitBtn" disabled>
-                <span class="label-ta"><i class="bi bi-send"></i> <?= View::escape(Lang::ui('submit')['ta']) ?></span>
-                <span class="label-en"><?= View::escape(Lang::ui('submit')['en']) ?></span>
+                <span class="submit-btn-content">
+                    <span class="label-ta"><i class="bi bi-send"></i> <?= View::escape(Lang::ui('submit')['ta']) ?></span>
+                    <span class="label-en"><?= View::escape(Lang::ui('submit')['en']) ?></span>
+                </span>
+                <span class="submit-btn-loading d-none" aria-hidden="true">
+                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                    <span class="label-ta">சமர்ப்பிக்கிறது…</span>
+                    <span class="label-en">Submitting…</span>
+                </span>
             </button>
         </div>
     </form>

@@ -107,7 +107,10 @@ class MemberController extends Controller
         AuditLog::log('add_member', 'members', $memberId, null, $data);
 
         if (!empty($_FILES['photo']['name'])) {
-            $result = FileUploader::upload($_FILES['photo'], 'photos');
+            $result = FileUploader::upload($_FILES['photo'], 'photos', [
+                'max_bytes' => FileUploader::PROFILE_MAX_BYTES,
+                'thumbnail' => true,
+            ]);
             if (!isset($result['errors'])) {
                 Member::update($memberId, ['photo' => $result['file_path']]);
             }
@@ -180,7 +183,10 @@ class MemberController extends Controller
         AuditLog::log('profile_updated', 'members', $memberId, $oldMember, $data);
 
         if (!empty($_FILES['photo']['name'])) {
-            $result = FileUploader::upload($_FILES['photo'], 'photos');
+            $result = FileUploader::upload($_FILES['photo'], 'photos', [
+                'max_bytes' => FileUploader::PROFILE_MAX_BYTES,
+                'thumbnail' => true,
+            ]);
             if (!isset($result['errors'])) {
                 Member::update($memberId, ['photo' => $result['file_path']]);
             }

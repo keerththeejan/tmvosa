@@ -717,60 +717,105 @@
 
         const $btn = $('#submitBtn');
         const $form = $(this);
-        $btn.prop('disabled', true);
+        setSubmitting(true);
 
         ensureRemoteValidationBeforeSubmit().done(function() {
             if (!validateDeclaration() || !isSubmissionAllowed()) {
+                setSubmitting(false);
                 updateSubmitButtonState();
                 return;
             }
 
-            $.ajax({
-                url: BASE_URL + '/apply',
-                method: 'POST',
-                data: (function() {
-                    const fd = new FormData($form[0]);
-                    const token = $form.find('input[name="_csrf_token"]').val() || CSRF_TOKEN;
-                    if (token && !fd.get('_csrf_token')) {
-                        fd.set('_csrf_token', token);
-                    }
-                    return fd;
-                })(),
-                processData: false,
-                contentType: false,
-                dataType: 'json',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-Token': $form.find('input[name="_csrf_token"]').val() || CSRF_TOKEN
-                },
-                success: function(res) {
-                    if (res.success) {
-                        const redirectUrl = res.redirect
-                            || (BASE_URL + '/apply/success');
-                        window.location.href = redirectUrl;
-                        return;
-                    }
-                    Swal.fire('பிழை / Error', res.message || 'Submission failed.', 'error');
-                },
-                error: function(xhr) {
-                    let msg = 'Submission failed. Please try again.';
-                    if (xhr.responseJSON && xhr.responseJSON.message) {
-                        msg = xhr.responseJSON.message;
-                    } else if (xhr.status === 403) {
-                        msg = 'Your session has expired. Please refresh the page and submit again.';
-                    } else if (xhr.status === 422) {
-                        msg = xhr.responseJSON && xhr.responseJSON.message
-                            ? xhr.responseJSON.message
-                            : 'Please check the form and try again.';
-                    }
-                    Swal.fire('பிழை / Error', msg, 'error');
-                },
-                complete: function() {
-                    updateSubmitButtonState();
+            prepareCompressedFormData($form[0]).then(function(fd) {
+                const token = $form.find('input[name="_csrf_token"]').val() || CSRF_TOKEN;
+                if (token && !fd.get('_csrf_token')) {
+                    fd.set('_csrf_token', token);
                 }
+
+                $.ajax({
+                    url: BASE_URL + '/apply',
+                    method: 'POST',
+                    data: fd,
+                    processData: false,
+                    contentType: false,
+                    dataType: 'json',
+                    timeout: 120000,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-Token': token
+                    },
+                    success: function(res) {
+                        if (res.success) {
+                            window.location.href = res.redirect || (BASE_URL + '/apply/success');
+                            return;
+                        }
+                        setSubmitting(false);
+                        Swal.fire('பிழை / Error', res.message || 'Submission failed.', 'error');
+                    },
+                    error: function(xhr) {
+                        setSubmitting(false);
+                        let msg = 'Submission failed. Please try again.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        } else if (xhr.status === 403) {
+                            msg = 'Your session has expired. Please refresh the page and submit again.';
+                        } else if (xhr.status === 422) {
+                            msg = xhr.responseJSON && xhr.responseJSON.message
+                                ? xhr.responseJSON.message
+                                : 'Please check the form and try again.';
+                        }
+                        Swal.fire('பிழை / Error', msg, 'error');
+                    },
+                    complete: function() {
+                        updateSubmitButtonState();
+                    }
+                });
+            }).catch(function() {
+                setSubmitting(false);
+                Swal.fire('பிழை / Error', 'Could not prepare your files. Please try again.', 'error');
             });
+        }).fail(function() {
+            setSubmitting(false);
+            updateSubmitButtonState();
         });
     });
+
+    function setSubmitting(isSubmitting) {
+        const $btn = $('#submitBtn');
+        $btn.prop('disabled', isSubmitting);
+        $btn.find('.submit-btn-content').toggleClass('d-none', isSubmitting);
+        $btn.find('.submit-btn-loading').toggleClass('d-none', !isSubmitting);
+    }
+
+    function prepareCompressedFormData(form) {
+        const compressMap = {
+            passport_photo: { maxBytes: 307200, maxDimension: 1600 },
+            payment_slip: { maxBytes: 512000, maxDimension: 1920 },
+            nic_copy: { maxBytes: 512000, maxDimension: 1920 }
+        };
+
+        const fd = new FormData(form);
+
+        if (!window.OsaImageCompress) {
+            return Promise.resolve(fd);
+        }
+
+        const tasks = Object.keys(compressMap).map(function(name) {
+            const input = form.querySelector('[name="' + name + '"]');
+            if (!input || !input.files || !input.files[0]) {
+                return Promise.resolve();
+            }
+            const file = input.files[0];
+            if (!file.type || !file.type.startsWith('image/')) {
+                return Promise.resolve();
+            }
+            return OsaImageCompress.compress(file, compressMap[name]).then(function(compressed) {
+                fd.set(name, compressed);
+            });
+        });
+
+        return Promise.all(tasks).then(function() { return fd; });
+    }
 
     $('#trackBtn').on('click', function() {
         const num = $('#trackNumber').val().trim();

@@ -28,7 +28,7 @@ class View
             return;
         }
 
-        $publicTemplates = ['auth/', 'applications/form', 'home/'];
+        $publicTemplates = ['auth/', 'applications/form', 'applications/success', 'home/'];
         $isPublic = false;
         foreach ($publicTemplates as $prefix) {
             if (str_starts_with($template, $prefix)) {
