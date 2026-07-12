@@ -208,10 +208,10 @@ body.osa-dark .osa-section-title { color: #f8fafc; }
     background: linear-gradient(135deg, #2E8B57, #1E6B34);
     color: #fff; font-size: 1.05rem;
 }
-.osa-brand-text { display: flex; flex-direction: column; line-height: 1.15; color: #fff; }
-.osa-brand-text small { font-size: 0.65rem; opacity: 0.8; }
+.osa-brand-text { display: flex; flex-direction: column; line-height: 1.15; color: #FFFFFF; }
+.osa-brand-text small { font-size: 0.65rem; opacity: 0.9; color: #F8FAFC; }
 .osa-nav .nav-link {
-    color: rgba(255, 255, 255, 0.9);
+    color: #FFFFFF;
     font-weight: 500; font-size: 0.82rem; padding: 0.4rem 0.5rem;
     border-radius: 999px;
     transition: color 0.3s ease, background 0.3s ease;
@@ -220,7 +220,12 @@ body.osa-dark .osa-section-title { color: #f8fafc; }
     color: #E8C547;
     background: rgba(255, 255, 255, 0.08);
 }
-.osa-nav .navbar-toggler { color: #fff; padding: 0.35rem 0.5rem; }
+.osa-nav .nav-link.active,
+.osa-nav .nav-link[aria-current="page"],
+.osa-nav .nav-item.show > .nav-link {
+    color: #FFD54F;
+}
+.osa-nav .navbar-toggler { color: #FFFFFF; padding: 0.35rem 0.5rem; }
 .osa-mega {
     border-radius: 1rem;
     padding: 0.5rem;

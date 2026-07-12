@@ -107,8 +107,28 @@ body.osa-home .osa-hero {
 }
 
 .osa-hero-content {
+    position: relative;
+    z-index: 1;
     max-width: 680px;
+    padding: 0.35rem 0.5rem 0.5rem 0;
     animation: osaHeroFadeUp 0.5s ease both;
+}
+
+/* Smooth dark gradient only behind left text — right side stays clear */
+.osa-hero-content::before {
+    content: '';
+    position: absolute;
+    inset: -1.25rem -1.5rem -1.5rem -1.25rem;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: 28px;
+    background: linear-gradient(
+        90deg,
+        rgba(10, 20, 35, 0.82) 0%,
+        rgba(10, 20, 35, 0.65) 40%,
+        rgba(10, 20, 35, 0.30) 70%,
+        rgba(10, 20, 35, 0) 100%
+    );
 }
 
 @keyframes osaHeroFadeUp {
@@ -141,15 +161,26 @@ body.osa-home .osa-hero {
     gap: 0.12rem;
 }
 
-.osa-hero-kicker-line1,
+/* Small label */
+.osa-hero-kicker-line1 {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    line-height: 1.45;
+    color: #FFD54F;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* School name */
 .osa-hero-kicker-line2 {
     display: block;
     font-size: 0.82rem;
     font-weight: 600;
     letter-spacing: 0.04em;
     line-height: 1.45;
-    color: rgba(255, 255, 255, 0.95);
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    color: #FFFFFF;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
 }
 
 .osa-hero-kicker-accent {
@@ -162,23 +193,25 @@ body.osa-home .osa-hero {
     box-shadow: 0 0 16px rgba(232, 197, 71, 0.55);
 }
 
-/* Title */
+/* Title — maximum weight + contrast */
 body.osa-home .osa-hero .osa-hero-title,
 body.osa-home h1.osa-hero-title {
     font-family: 'Poppins', 'Noto Sans Tamil', system-ui, sans-serif;
     font-size: 68px;
-    font-weight: 800;
+    font-weight: 900;
     line-height: 1.12;
     letter-spacing: -0.03em;
     color: #FFFFFF;
     margin: 0 0 1.1rem;
     max-width: 700px;
-    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
 }
 
 .osa-hero-title-osa,
 .osa-hero-title-line {
     display: block;
+    font-weight: 900;
+    color: #FFFFFF;
 }
 
 .osa-hero-title-osa {
@@ -188,17 +221,25 @@ body.osa-home h1.osa-hero-title {
 
 .osa-hero-title-line {
     font-family: 'Noto Sans Tamil', 'Poppins', system-ui, sans-serif;
-    font-weight: 700;
 }
 
+/* Subtitle — premium glass panel for readability on bright entrance */
 .osa-hero-lead {
+    display: inline-block;
     max-width: 650px;
     margin: 0 0 1.5rem;
-    color: rgba(255, 255, 255, 0.94);
-    font-size: 1.05rem;
+    padding: 18px 22px;
+    color: #F8FAFC;
+    font-size: 20px;
     font-weight: 500;
-    line-height: 1.85;
-    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+    line-height: 1.9;
+    letter-spacing: 0.2px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
 }
 
 /* Buttons — 2×2 grid */
@@ -237,61 +278,50 @@ body.osa-home h1.osa-hero-title {
 }
 
 .btn-osa-hero-primary {
-    background: linear-gradient(135deg, #1E6B34, #2E8B57);
+    background: #1E6B34;
     border: 0;
-    color: #fff;
+    color: #FFFFFF;
     box-shadow: 0 16px 34px rgba(30, 107, 52, 0.45);
 }
 
 .btn-osa-hero-primary:hover,
 .btn-osa-hero-primary:focus {
-    color: #fff;
-    filter: brightness(1.08);
-    box-shadow: 0 20px 40px rgba(30, 107, 52, 0.55);
+    color: #FFFFFF;
+    background: #14532D;
+    filter: none;
+    box-shadow: 0 20px 40px rgba(20, 83, 45, 0.55);
 }
 
 .btn-osa-hero-secondary {
-    background: #E8C547;
+    background: #FFD54F;
     border: 0;
-    color: #0F5132;
-    box-shadow: 0 14px 30px rgba(232, 197, 71, 0.35);
+    color: #0F172A;
+    box-shadow: 0 14px 30px rgba(255, 213, 79, 0.35);
 }
 
 .btn-osa-hero-secondary:hover,
 .btn-osa-hero-secondary:focus {
-    color: #0F5132;
-    background: #f0d26a;
+    color: #0F172A;
+    background: #E8C547;
     box-shadow: 0 18px 36px rgba(232, 197, 71, 0.45);
 }
 
-.btn-osa-hero-outline {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1.5px solid rgba(46, 139, 87, 0.9);
-    color: #fff;
+.btn-osa-hero-outline,
+.btn-osa-hero-outline-white {
+    background: transparent;
+    border: 1.5px solid rgba(255, 255, 255, 0.75);
+    color: #FFFFFF;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
 
 .btn-osa-hero-outline:hover,
-.btn-osa-hero-outline:focus {
-    color: #fff;
-    background: rgba(30, 107, 52, 0.35);
-    border-color: #2E8B57;
-}
-
-.btn-osa-hero-outline-white {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1.5px solid rgba(255, 255, 255, 0.8);
-    color: #fff;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
+.btn-osa-hero-outline:focus,
 .btn-osa-hero-outline-white:hover,
 .btn-osa-hero-outline-white:focus {
-    color: #fff;
-    border-color: #fff;
-    background: rgba(255, 255, 255, 0.16);
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.9);
 }
 
 /* Glass stats */
@@ -303,7 +333,7 @@ body.osa-home h1.osa-hero-title {
 }
 
 .osa-hero-stat {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.18);
     border: 1px solid rgba(255, 255, 255, 0.20);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
@@ -316,7 +346,7 @@ body.osa-home h1.osa-hero-title {
 
 .osa-hero-stat:hover {
     transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.24);
     box-shadow: 0 18px 36px rgba(0, 0, 0, 0.22);
 }
 
@@ -327,8 +357,8 @@ body.osa-home h1.osa-hero-title {
     height: 36px;
     margin: 0 auto 0.4rem;
     border-radius: 12px;
-    background: rgba(30, 107, 52, 0.35);
-    color: #7dcea0;
+    background: rgba(46, 139, 87, 0.22);
+    color: #2E8B57;
     font-size: 1.05rem;
 }
 
@@ -337,7 +367,7 @@ body.osa-home h1.osa-hero-title {
     font-size: 1.45rem;
     font-weight: 700;
     line-height: 1.15;
-    color: #E8C547;
+    color: #FFD54F;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
@@ -345,7 +375,7 @@ body.osa-home h1.osa-hero-title {
     margin-top: 0.25rem;
     font-size: 0.72rem;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.9);
+    color: #FFFFFF;
     line-height: 1.3;
 }
 
