@@ -4,7 +4,7 @@ use App\Core\View;
 $pageTitle = 'Password Reset Logs';
 $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 ?>
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <h5 class="mb-0"><i class="bi bi-shield-exclamation"></i> Password Reset Logs</h5>
     <a href="<?= $base ?>/admin/users" class="btn btn-outline-secondary btn-sm">Back to Users</a>
 </div>
@@ -36,6 +36,6 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 
 <script>
 $(document).ready(function() {
-    $('#passwordLogsTable').DataTable({ order: [[0, 'desc']], pageLength: 25 });
+    $('#passwordLogsTable').DataTable({ order: [[0, 'desc']], pageLength: 25, scrollX: true, autoWidth: false });
 });
 </script>

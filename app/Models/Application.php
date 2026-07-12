@@ -9,7 +9,7 @@ class Application
     public static function findById(int $id): ?array
     {
         return Database::fetch(
-            "SELECT a.*, mt.name as membership_type_name, mt.fee, c.name as country_name
+            "SELECT a.*, mt.name as membership_type_name, mt.slug as membership_type_slug, mt.fee, c.name as country_name
              FROM member_applications a
              LEFT JOIN membership_types mt ON a.membership_type_id = mt.id
              LEFT JOIN countries c ON a.country_id = c.id
@@ -35,7 +35,7 @@ class Application
         )['cnt'];
 
         $data = Database::fetchAll(
-            "SELECT a.*, mt.name as membership_type_name
+            "SELECT a.*, mt.name as membership_type_name, mt.slug as membership_type_slug
              FROM member_applications a
              LEFT JOIN membership_types mt ON a.membership_type_id = mt.id
              WHERE {$where}

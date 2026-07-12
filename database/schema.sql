@@ -53,7 +53,7 @@ CREATE TABLE membership_types (
     name VARCHAR(100) NOT NULL,
     slug VARCHAR(50) NOT NULL UNIQUE,
     fee DECIMAL(10,2) NOT NULL DEFAULT 0,
-    duration_years INT UNSIGNED DEFAULT 1,
+    duration_years INT UNSIGNED DEFAULT 1 COMMENT '0 = half-year (180 days via app helper)',
     description TEXT DEFAULT NULL,
     is_active TINYINT(1) DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

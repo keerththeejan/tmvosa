@@ -44,7 +44,7 @@ $hasDuplicates = count($relatedMembers) > 0 || count($relatedApplications) > 0;
 </div>
 <?php endif; ?>
 <div class="card mb-3">
-    <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
         <span><?= View::escape($application['application_number']) ?></span>
         <span class="badge bg-<?= match($application['status']) { 'approved' => 'success', 'rejected' => 'danger', 'pending' => 'warning', default => 'info' } ?>">
             <?= ucfirst(str_replace('_', ' ', $application['status'])) ?>
@@ -56,17 +56,26 @@ $hasDuplicates = count($relatedMembers) > 0 || count($relatedApplications) > 0;
             <?php if ($application['full_name_tamil']): ?>
             <div class="col-12"><strong>பெயர்:</strong> <?= View::escape($application['full_name_tamil']) ?></div>
             <?php endif; ?>
-            <div class="col-6"><strong>NIC:</strong> <?= View::escape($application['nic_number'] ?? '-') ?></div>
-            <div class="col-6"><strong>Mobile:</strong> <?= View::escape($application['mobile']) ?></div>
-            <div class="col-6"><strong>Email:</strong> <?= View::escape($application['email'] ?? '-') ?></div>
-            <div class="col-6"><strong>Country:</strong> <?= View::escape($application['country_name'] ?? '-') ?></div>
-            <div class="col-6"><strong>Batch:</strong> <?= View::escape($application['studied_to_year'] ?? '-') ?></div>
-            <div class="col-6"><strong>Occupation:</strong> <?= View::escape($application['occupation'] ?? '-') ?></div>
-            <?php $membershipDisplay = Lang::membershipDisplayFromName($application['membership_type_name'] ?? ''); ?>
-            <div class="col-6"><strong>Membership Type:</strong> <?= View::escape($membershipDisplay['with_validity_en']) ?></div>
-            <div class="col-6"><strong>Validity Period:</strong> <?= View::escape($membershipDisplay['validity_en']) ?></div>
-            <div class="col-6"><strong>Amount Paid:</strong> Rs. <?= number_format($application['amount_paid'] ?? 0, 2) ?></div>
-            <div class="col-6"><strong>Payment Method:</strong> <?= View::escape(PaymentMethod::display($application['payment_method'] ?? '')) ?></div>
+            <div class="col-12 col-sm-6"><strong>NIC:</strong> <?= View::escape($application['nic_number'] ?? '-') ?></div>
+            <div class="col-12 col-sm-6"><strong>Mobile:</strong> <?= View::escape($application['mobile']) ?></div>
+            <div class="col-12 col-sm-6"><strong>Email:</strong> <?= View::escape($application['email'] ?? '-') ?></div>
+            <div class="col-12 col-sm-6"><strong>Country:</strong> <?= View::escape($application['country_name'] ?? '-') ?></div>
+            <div class="col-12 col-sm-6"><strong>Batch:</strong> <?= View::escape($application['studied_to_year'] ?? '-') ?></div>
+            <div class="col-12 col-sm-6"><strong>Occupation:</strong> <?= View::escape($application['occupation'] ?? '-') ?></div>
+            <?php
+            $membershipDisplay = Lang::membershipDisplayFromName($application['membership_type_name'] ?? '');
+            if (!empty($application['membership_type_slug'])) {
+                $membershipDisplay = Lang::membershipDisplayFromSlug(
+                    $application['membership_type_slug'],
+                    null,
+                    $application['membership_type_name'] ?? null
+                );
+            }
+            ?>
+            <div class="col-12 col-sm-6"><strong>Membership Type:</strong> <?= View::escape($membershipDisplay['bilingual']) ?></div>
+            <div class="col-12 col-sm-6"><strong>Validity Period:</strong> <?= View::escape($membershipDisplay['validity_en']) ?></div>
+            <div class="col-12 col-sm-6"><strong>Amount Paid:</strong> Rs. <?= number_format($application['amount_paid'] ?? 0, 2) ?></div>
+            <div class="col-12 col-sm-6"><strong>Payment Method:</strong> <?= View::escape(PaymentMethod::display($application['payment_method'] ?? '')) ?></div>
         </div>
     </div>
 </div>
@@ -122,9 +131,17 @@ $canReview = in_array($application['status'], ['pending', 'under_review'], true)
      data-can-review="<?= $canReview ? '1' : '0' ?>"></div>
 
 <?php if ($canReview): ?>
-<div class="d-flex gap-2 mb-2">
-    <button class="btn btn-success flex-fill" id="approveBtn"><i class="bi bi-check-lg"></i> Approve</button>
-    <button class="btn btn-danger flex-fill" id="rejectBtn"><i class="bi bi-x-lg"></i> Reject</button>
+<div class="d-flex flex-wrap gap-2 mb-2">
+    <a href="<?= $base ?>/applications/<?= (int) $application['id'] ?>/edit" class="btn btn-outline-secondary flex-grow-1"><i class="bi bi-pencil"></i> Edit</a>
+    <a href="<?= $base ?>/applications/<?= (int) $application['id'] ?>/print" class="btn btn-outline-dark flex-grow-1" target="_blank"><i class="bi bi-printer"></i> Print</a>
+</div>
+<div class="d-flex flex-wrap gap-2 mb-2">
+    <button class="btn btn-success flex-grow-1" id="approveBtn"><i class="bi bi-check-lg"></i> Approve</button>
+    <button class="btn btn-danger flex-grow-1" id="rejectBtn"><i class="bi bi-x-lg"></i> Reject</button>
+</div>
+<?php else: ?>
+<div class="d-grid mb-2">
+    <a href="<?= $base ?>/applications/<?= (int) $application['id'] ?>/print" class="btn btn-outline-dark" target="_blank"><i class="bi bi-printer"></i> Print</a>
 </div>
 <?php endif; ?>
 

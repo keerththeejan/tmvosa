@@ -1,5 +1,5 @@
 <?php $pageTitle = $title; $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'); ?>
-<div class="card"><div class="card-header d-flex justify-content-between"><h6 class="mb-0"><?= \App\Core\View::escape($title) ?></h6>
+<div class="card"><div class="card-header d-flex flex-wrap justify-content-between gap-2"><h6 class="mb-0"><?= \App\Core\View::escape($title) ?></h6>
 <a href="javascript:history.back()" class="btn btn-sm btn-outline-secondary">Back</a></div>
 <div class="card-body p-0">
     <div class="table-responsive d-none d-md-block">

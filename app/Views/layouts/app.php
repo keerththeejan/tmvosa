@@ -1,11 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<?php $uiLocale = \App\Helpers\Lang::locale(); ?>
+<html lang="<?= $uiLocale ?>" class="lang-<?= $uiLocale ?>">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#1a5276">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script>
+    (function () {
+        var m = document.cookie.match(/(?:^|; )osa_lang=([^;]*)/) || document.cookie.match(/(?:^|; )language=([^;]*)/);
+        var lang = (m && decodeURIComponent(m[1]) === 'en') ? 'en' : 'ta';
+        document.documentElement.lang = lang;
+        document.documentElement.classList.remove('lang-ta', 'lang-en');
+        document.documentElement.classList.add('lang-' + lang);
+    })();
+    </script>
     <link rel="manifest" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/manifest.json">
     <link rel="apple-touch-icon" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/img/icon-192.png">
     <title><?= \App\Core\View::escape($pageTitle ?? 'OSA Alumni') ?> - OSA Membership</title>
@@ -51,6 +61,7 @@
         const BASE_URL = '<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>';
         const CSRF_TOKEN = '<?= $csrfToken ?>';
     </script>
+    <script src="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/<?= \App\Core\App::assetVersion('assets/js/locale.js') ?>"></script>
     <script src="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/<?= \App\Core\App::assetVersion('assets/js/app.js') ?>"></script>
     <?php if (isset($pageScript)): ?>
         <script src="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/<?= \App\Core\App::assetVersion('assets/js/' . $pageScript) ?>"></script>

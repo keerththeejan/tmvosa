@@ -1,0 +1,439 @@
+/* OSA Application Form — premium UI (view-scoped) */
+:root {
+    --osa-apply-primary: #0B1F3A;
+    --osa-apply-secondary: #1D4ED8;
+    --osa-apply-accent: #3B82F6;
+    --osa-apply-success: #10B981;
+    --osa-apply-bg: #F8FAFC;
+    --osa-apply-card: #FFFFFF;
+    --osa-apply-radius: 20px;
+    --osa-apply-shadow: 0 18px 44px rgba(11, 31, 58, 0.1);
+}
+
+body.osa-apply-page,
+body.osa-home .osa-apply {
+    background: var(--osa-apply-bg);
+}
+
+.osa-apply-container {
+    max-width: 1000px;
+}
+
+body.osa-home .osa-apply-container {
+    max-width: 1100px;
+}
+
+/* Header */
+.osa-apply-hero {
+    margin: 1rem 0 1.25rem;
+    border-radius: var(--osa-apply-radius);
+    overflow: hidden;
+    background:
+        linear-gradient(135deg, rgba(11, 31, 58, 0.92), rgba(29, 78, 216, 0.78)),
+        linear-gradient(120deg, #0B1F3A, #1D4ED8);
+    color: #fff;
+    box-shadow: var(--osa-apply-shadow);
+}
+.osa-apply-hero-inner {
+    padding: 1.75rem 1.5rem;
+    backdrop-filter: blur(10px);
+}
+.osa-apply-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.85rem;
+}
+.osa-apply-title {
+    font-size: clamp(1.45rem, 3vw, 2rem);
+    font-weight: 800;
+    margin: 0 0 0.4rem;
+    letter-spacing: -0.02em;
+}
+.osa-apply-subtitle {
+    font-size: 1.05rem;
+    font-weight: 500;
+    opacity: 0.95;
+    margin-bottom: 0.65rem;
+}
+.osa-apply-hint {
+    font-size: 0.92rem;
+    opacity: 0.88;
+    max-width: 40rem;
+}
+
+/* Stepper */
+.osa-apply-stepper {
+    margin-bottom: 1.5rem;
+    background: var(--osa-apply-card);
+    border: 1px solid #e2e8f0;
+    border-radius: var(--osa-apply-radius);
+    box-shadow: var(--osa-apply-shadow);
+    padding: 1rem 0.75rem;
+    overflow-x: auto;
+}
+.osa-apply-steps {
+    list-style: none;
+    display: flex;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    min-width: 640px;
+}
+.osa-apply-step {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+    padding: 0.25rem;
+    color: #64748b;
+    transition: color 0.2s ease;
+}
+.osa-apply-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: calc(50% + 22px);
+    width: calc(100% - 44px);
+    height: 2px;
+    background: #e2e8f0;
+}
+.osa-apply-step.is-complete:not(:last-child)::after,
+.osa-apply-step.is-active:not(:last-child)::after {
+    background: linear-gradient(90deg, var(--osa-apply-accent), var(--osa-apply-secondary));
+}
+.osa-apply-step-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    background: #f1f5f9;
+    border: 2px solid #e2e8f0;
+    z-index: 1;
+    transition: all 0.25s ease;
+}
+.osa-apply-step-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.25;
+    max-width: 7.5rem;
+}
+.osa-apply-step.is-active,
+.osa-apply-step.is-complete {
+    color: var(--osa-apply-primary);
+}
+.osa-apply-step.is-active .osa-apply-step-num,
+.osa-apply-step.is-complete .osa-apply-step-num {
+    background: linear-gradient(135deg, var(--osa-apply-accent), var(--osa-apply-secondary));
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(29, 78, 216, 0.3);
+}
+
+/* Panels */
+.osa-apply-panel,
+.osa-apply .form-section-card,
+.osa-apply .official-bank-card,
+.osa-apply-side-card,
+.osa-apply-success-card {
+    border-radius: var(--osa-apply-radius) !important;
+    background: var(--osa-apply-card);
+    box-shadow: var(--osa-apply-shadow);
+    border: 1px solid #e8eef7 !important;
+    overflow: hidden;
+}
+.osa-apply-panel-header,
+.osa-apply .form-section-card-header,
+.osa-apply .official-bank-card-header {
+    background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%) !important;
+    border-bottom: 1px solid #e8eef7 !important;
+    padding: 1rem 1.15rem !important;
+}
+.osa-apply-panel-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.16), rgba(29, 78, 216, 0.14));
+    color: var(--osa-apply-secondary);
+    font-size: 1.15rem;
+}
+.osa-apply .form-control,
+.osa-apply .form-select {
+    border-radius: 12px;
+    border-color: #dbe3f0;
+    min-height: 48px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.osa-apply .form-control:focus,
+.osa-apply .form-select:focus {
+    border-color: var(--osa-apply-accent);
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.18);
+}
+.osa-apply .input-group-text {
+    border-radius: 12px 0 0 12px;
+    background: #f8fafc;
+    border-color: #dbe3f0;
+    color: var(--osa-apply-secondary);
+}
+.osa-apply .input-group .form-control {
+    border-radius: 0 12px 12px 0;
+}
+.osa-apply textarea.form-control {
+    min-height: 88px;
+}
+
+/* Validation feedback animation */
+.osa-apply .field-validation-feedback,
+.osa-apply .invalid-feedback,
+.osa-apply .declaration-invalid-feedback {
+    animation: osaApplyFadeIn 0.25s ease;
+}
+.osa-apply .field-validation-feedback.text-success,
+.osa-apply .is-valid + .field-validation-feedback {
+    color: var(--osa-apply-success) !important;
+}
+@keyframes osaApplyFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* Membership cards */
+.osa-membership-options.membership-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+.osa-membership-options .option-card {
+    border-radius: 16px;
+    border: 2px solid #e2e8f0;
+    padding: 1.1rem;
+    min-height: 100%;
+    background: #fff;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.osa-membership-options .option-card:hover {
+    transform: translateY(-4px);
+    border-color: #93c5fd;
+    box-shadow: 0 14px 30px rgba(29, 78, 216, 0.12);
+}
+.osa-membership-options .membership-option input:checked + .option-card {
+    border-color: var(--osa-apply-secondary);
+    background: linear-gradient(180deg, rgba(59, 130, 246, 0.1), rgba(255, 255, 255, 0.95));
+    box-shadow: 0 16px 36px rgba(29, 78, 216, 0.18);
+}
+.osa-membership-options .option-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, var(--osa-apply-accent), var(--osa-apply-secondary));
+    color: #fff;
+    font-size: 1.25rem;
+}
+.osa-membership-options .option-desc .label-ta,
+.osa-membership-options .option-desc .label-en {
+    display: block;
+    color: #64748b;
+}
+
+/* Uploads */
+.osa-upload-card.upload-area {
+    border-radius: 16px;
+    border: 2px dashed #cbd5e1;
+    background: linear-gradient(180deg, #f8fbff, #ffffff);
+    min-height: 180px;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+.osa-upload-card.upload-area:hover,
+.osa-upload-card.upload-area.is-dragover {
+    border-color: var(--osa-apply-accent);
+    background: rgba(59, 130, 246, 0.06);
+    transform: translateY(-2px);
+}
+.osa-upload-card.upload-area.has-file {
+    border-style: solid;
+    border-color: var(--osa-apply-success);
+}
+
+/* Review */
+.osa-apply-review {
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    padding: 1rem 1.1rem;
+}
+.osa-apply-review-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem 1rem;
+}
+.osa-apply-review-item dt {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin-bottom: 0.15rem;
+}
+.osa-apply-review-item dd {
+    margin: 0;
+    font-weight: 600;
+    color: var(--osa-apply-primary);
+    word-break: break-word;
+}
+
+/* Sticky actions */
+.osa-apply-actions {
+    position: sticky;
+    bottom: 0.75rem;
+    z-index: 30;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    padding: 0.85rem;
+    margin-top: 0.5rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 12px 36px rgba(15, 23, 42, 0.14);
+    backdrop-filter: blur(12px);
+}
+.btn-osa-apply-primary {
+    background: linear-gradient(135deg, var(--osa-apply-accent), var(--osa-apply-secondary));
+    border: 0;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 999px;
+    min-height: 48px;
+    padding: 0.65rem 1.35rem;
+    box-shadow: 0 12px 24px rgba(29, 78, 216, 0.28);
+}
+.btn-osa-apply-primary:hover,
+.btn-osa-apply-primary:focus {
+    color: #fff;
+    filter: brightness(1.05);
+}
+.btn-osa-apply-primary:disabled {
+    opacity: 0.55;
+    filter: none;
+}
+.btn-osa-apply-secondary {
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    color: var(--osa-apply-primary);
+    font-weight: 600;
+    border-radius: 999px;
+    min-height: 48px;
+    padding: 0.65rem 1.2rem;
+}
+.btn-osa-apply-outline {
+    background: transparent;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    font-weight: 600;
+    border-radius: 999px;
+    min-height: 48px;
+    padding: 0.65rem 1.1rem;
+}
+.btn-osa-apply-outline:hover,
+.btn-osa-apply-secondary:hover {
+    background: #f8fafc;
+    color: var(--osa-apply-primary);
+}
+.osa-apply-actions .btn-osa-apply-primary {
+    margin-left: auto;
+}
+
+/* Sidebar */
+.osa-apply-aside {
+    position: sticky;
+    top: 1rem;
+}
+.osa-apply-benefits li {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.45rem 0;
+    font-weight: 500;
+    color: #1e293b;
+    border-bottom: 1px solid #f1f5f9;
+}
+.osa-apply-benefits li:last-child { border-bottom: 0; }
+.osa-apply-benefits i { color: var(--osa-apply-success); }
+.osa-apply-help a { color: var(--osa-apply-secondary); text-decoration: none; font-weight: 600; }
+.osa-apply-help a:hover { text-decoration: underline; }
+
+.osa-apply-track {
+    border-top: 1px solid #e2e8f0;
+    background: var(--osa-apply-card);
+    border-radius: var(--osa-apply-radius);
+    padding: 1.25rem !important;
+    box-shadow: var(--osa-apply-shadow);
+}
+
+/* Success */
+.osa-apply-success-alert {
+    border-radius: var(--osa-apply-radius);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.05));
+}
+.osa-apply-success-icon {
+    font-size: 1.8rem;
+    color: var(--osa-apply-success);
+}
+.osa-apply-success-number {
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--osa-apply-primary);
+}
+.osa-apply-next-steps {
+    max-width: 420px;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 1rem 1.15rem;
+}
+
+/* Hide duplicate contact card visual weight on apply */
+.osa-apply .application-contact-card {
+    border-radius: var(--osa-apply-radius);
+    box-shadow: var(--osa-apply-shadow);
+}
+
+@media (max-width: 991.98px) {
+    .osa-apply-aside { position: static; }
+    .osa-apply-actions .btn-osa-apply-primary { margin-left: 0; width: 100%; }
+    .osa-apply-actions { bottom: 0.35rem; }
+    .osa-apply-review-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 575.98px) {
+    .osa-apply-hero-inner { padding: 1.25rem 1rem; }
+    .osa-apply-actions .btn { flex: 1 1 calc(50% - 0.3rem); }
+    .osa-apply-actions .btn-osa-apply-primary { flex: 1 1 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .osa-membership-options .option-card,
+    .osa-upload-card.upload-area,
+    .osa-apply .field-validation-feedback {
+        transition: none !important;
+        animation: none !important;
+    }
+}

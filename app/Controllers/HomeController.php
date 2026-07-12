@@ -14,7 +14,7 @@ class HomeController extends Controller
     public function index(): void
     {
         $countries = Database::fetchAll("SELECT * FROM countries WHERE is_active = 1 ORDER BY name");
-        $membershipTypes = Database::fetchAll("SELECT * FROM membership_types WHERE is_active = 1");
+        $membershipTypes = \App\Helpers\MembershipType::allActive();
         $validationConfig = [
             'blockDuplicateMobile' => Setting::get('block_duplicate_mobile', '0') === '1',
             'blockDuplicateEmail' => Setting::get('block_duplicate_email', '0') === '1',

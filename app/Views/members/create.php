@@ -29,7 +29,7 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
                 <input type="text" name="full_name_english" class="form-control">
             </div>
             <div class="row g-3 mb-3">
-                <div class="col-6">
+                <div class="col-12 col-md-6">
                     <?php View::label('gender', false); ?>
                     <select name="gender" class="form-select">
                         <option value=""><?= View::escape(Lang::ui('select')['ta']) ?> / <?= View::escape(Lang::ui('select')['en']) ?></option>
@@ -37,7 +37,7 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
                         <option value="female"><?= View::escape(Lang::ui('female')['ta']) ?> / <?= View::escape(Lang::ui('female')['en']) ?></option>
                     </select>
                 </div>
-                <div class="col-6">
+                <div class="col-12 col-md-6">
                     <?php View::label('date_of_birth', false); ?>
                     <input type="date" name="date_of_birth" class="form-control">
                 </div>
@@ -88,11 +88,11 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
         <div class="card-header bilingual-text bilingual-block"><?php View::text('membership_info', 'span', true); ?></div>
         <div class="card-body">
             <div class="row g-3 mb-3">
-                <div class="col-6">
+                <div class="col-12 col-md-6">
                     <?php View::label('studied_from_year', false); ?>
                     <input type="number" name="studied_from_year" class="form-control">
                 </div>
-                <div class="col-6">
+                <div class="col-12 col-md-6">
                     <?php View::label('studied_to_year', false); ?>
                     <input type="number" name="studied_to_year" class="form-control">
                 </div>
@@ -103,7 +103,7 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
                 <?php foreach ($membershipTypes as $t):
                     $fee = Lang::formatFee((float) $t['fee']);
                 ?>
-                <option value="<?= $t['id'] ?>"><?= View::escape($t['name']) ?> — <?= View::escape($fee['ta']) ?> / <?= View::escape($fee['en']) ?></option>
+                <option value="<?= $t['id'] ?>"><?= View::escape(\App\Helpers\MembershipType::optionLabel($t)) ?></option>
                 <?php endforeach; ?>
                 </select>
             </div>

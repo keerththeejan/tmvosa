@@ -40,7 +40,7 @@ class PaymentMethod
     }
 
     /**
-     * Bilingual label for display (supports legacy stored values).
+     * Locale-aware label for display (supports legacy stored values).
      */
     public static function display(?string $value): string
     {
@@ -51,8 +51,8 @@ class PaymentMethod
         $key = strtolower(trim($value));
         $labels = Lang::ui($key);
 
-        if (is_array($labels) && isset($labels['ta'], $labels['en'])) {
-            return $labels['ta'] . ' / ' . $labels['en'];
+        if (is_array($labels)) {
+            return Lang::pick($labels);
         }
 
         return ucwords(str_replace('_', ' ', $key));

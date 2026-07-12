@@ -29,7 +29,7 @@ class MemberController extends Controller
         $page = (int) $this->input('page', 1);
         $members = Member::search($filters, $page);
         $countries = Database::fetchAll("SELECT * FROM countries WHERE is_active = 1 ORDER BY name");
-        $membershipTypes = Database::fetchAll("SELECT * FROM membership_types WHERE is_active = 1");
+        $membershipTypes = \App\Helpers\MembershipType::allActive();
 
         if ($this->isAjax()) {
             $this->json($members);
@@ -44,6 +44,7 @@ class MemberController extends Controller
         $member = Member::findById((int) $id);
         if (!$member) {
             http_response_code(404);
+            \App\Core\View::render('errors/404');
             return;
         }
         $documents = Document::getByMember((int) $id);
@@ -53,7 +54,7 @@ class MemberController extends Controller
     public function createForm(): void
     {
         $countries = Database::fetchAll("SELECT * FROM countries WHERE is_active = 1 ORDER BY name");
-        $membershipTypes = Database::fetchAll("SELECT * FROM membership_types WHERE is_active = 1");
+        $membershipTypes = \App\Helpers\MembershipType::allActive();
         $this->view('members/create', compact('countries', 'membershipTypes') + [
             'pageScript' => 'members-create.js',
         ]);
@@ -70,10 +71,21 @@ class MemberController extends Controller
             $this->json(['success' => false, 'message' => $emailResult['error']], 422);
         }
 
+        $nic = Security::sanitize($this->input('nic_number', ''));
+        if ($nic !== '') {
+            $nicCheck = \App\Helpers\ApplicationValidation::checkNic($nic);
+            if (!empty($nicCheck['block'])) {
+                $this->json(['success' => false, 'message' => $nicCheck['message_en'] ?? 'NIC already exists.'], 422);
+            }
+        }
+
         $membershipNumber = $this->input('membership_number') ?: NumberGenerator::membershipNumber();
+        if (Member::findByNumber($membershipNumber)) {
+            $this->json(['success' => false, 'message' => 'Membership number already exists.'], 422);
+        }
         $typeId = (int) $this->input('membership_type_id');
-        $type = Database::fetch("SELECT duration_years FROM membership_types WHERE id = ?", [$typeId]);
-        $durationYears = $type['duration_years'] ?? 1;
+        $type = \App\Helpers\MembershipType::findById($typeId) ?: ['slug' => 'ordinary', 'duration_years' => 1];
+        $expiryDate = \App\Helpers\MembershipType::calculateExpiryDate($type);
 
         $data = [
             'membership_number' => $membershipNumber,
@@ -97,7 +109,7 @@ class MemberController extends Controller
             'membership_type_id' => $typeId,
             'status' => 'active',
             'membership_start_date' => date('Y-m-d'),
-            'membership_expiry_date' => date('Y-m-d', strtotime("+{$durationYears} years")),
+            'membership_expiry_date' => $expiryDate,
             'created_by' => Auth::id(),
         ];
 
@@ -127,7 +139,7 @@ class MemberController extends Controller
             return;
         }
         $countries = Database::fetchAll("SELECT * FROM countries WHERE is_active = 1 ORDER BY name");
-        $membershipTypes = Database::fetchAll("SELECT * FROM membership_types WHERE is_active = 1");
+        $membershipTypes = \App\Helpers\MembershipType::allActive();
         $this->view('members/edit', compact('member', 'countries', 'membershipTypes') + [
             'pageScript' => 'members-edit.js',
         ]);
@@ -148,6 +160,14 @@ class MemberController extends Controller
         $emailResult = MemberEmail::parse((string) $this->input('email', ''));
         if (isset($emailResult['error'])) {
             $this->json(['success' => false, 'message' => $emailResult['error']], 422);
+        }
+
+        $nic = Security::sanitize($this->input('nic_number', ''));
+        if ($nic !== '' && strcasecmp($nic, (string) ($oldMember['nic_number'] ?? '')) !== 0) {
+            $nicCheck = \App\Helpers\ApplicationValidation::checkNic($nic);
+            if (!empty($nicCheck['block'])) {
+                $this->json(['success' => false, 'message' => $nicCheck['message_en'] ?? 'NIC already exists.'], 422);
+            }
         }
 
         $data = [
@@ -213,6 +233,114 @@ class MemberController extends Controller
             'email' => $saved['email'],
             'email_notice' => $emailNotice,
         ]);
+    }
+
+    public function suspend(string $id): void
+    {
+        $this->changeStatus((int) $id, 'suspended', 'suspend_member');
+    }
+
+    public function activate(string $id): void
+    {
+        $this->changeStatus((int) $id, 'active', 'activate_member');
+    }
+
+    public function deactivate(string $id): void
+    {
+        $this->changeStatus((int) $id, 'expired', 'deactivate_member');
+    }
+
+    public function renew(string $id): void
+    {
+        if (!$this->validateCsrf()) {
+            $this->json(['success' => false, 'message' => 'Invalid request.'], 403);
+        }
+
+        $member = Member::findById((int) $id);
+        if (!$member) {
+            $this->json(['success' => false, 'message' => 'Member not found.'], 404);
+        }
+
+        $type = \App\Helpers\MembershipType::findById((int) $member['membership_type_id'])
+            ?: ['slug' => 'ordinary', 'duration_years' => 1];
+        $newExpiry = \App\Helpers\MembershipType::extendExpiryDate($type, $member['membership_expiry_date'] ?? null);
+
+        Member::update((int) $id, [
+            'status' => 'active',
+            'membership_expiry_date' => $newExpiry,
+        ]);
+
+        AuditLog::log('renew_member', 'members', (int) $id, null, ['membership_expiry_date' => $newExpiry]);
+
+        $this->json(['success' => true, 'message' => 'Membership renewed until ' . $newExpiry, 'expiry' => $newExpiry]);
+    }
+
+    public function printProfile(string $id): void
+    {
+        $member = Member::findById((int) $id);
+        if (!$member) {
+            http_response_code(404);
+            \App\Core\View::render('errors/404');
+            return;
+        }
+        $documents = Document::getByMember((int) $id);
+        $this->view('members/print', compact('member', 'documents'));
+    }
+
+    public function export(): void
+    {
+        $filters = [
+            'search' => $this->input('search', ''),
+            'status' => $this->input('status', ''),
+            'country_id' => $this->input('country_id', ''),
+            'membership_type_id' => $this->input('membership_type_id', ''),
+            'batch' => $this->input('batch', ''),
+        ];
+        $members = Member::search($filters, 1, 5000)['data'];
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $headers = ['Membership No', 'Name', 'NIC', 'Mobile', 'Email', 'Status', 'Country', 'Batch', 'Type', 'Expiry'];
+        $sheet->fromArray($headers, null, 'A1');
+        $row = 2;
+        foreach ($members as $m) {
+            $sheet->fromArray([
+                $m['membership_number'],
+                $m['full_name_english'],
+                $m['nic_number'] ?? '',
+                $m['mobile'],
+                $m['email'] ?? '',
+                $m['status'],
+                $m['country_name'] ?? '',
+                $m['studied_to_year'] ?? '',
+                $m['membership_type_name'] ?? '',
+                $m['membership_expiry_date'] ?? '',
+            ], null, 'A' . $row++);
+        }
+
+        AuditLog::log('export_members', 'members', null, null, ['count' => count($members)]);
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="members_export.xlsx"');
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+    private function changeStatus(int $id, string $status, string $action): void
+    {
+        if (!$this->validateCsrf()) {
+            $this->json(['success' => false, 'message' => 'Invalid request.'], 403);
+        }
+
+        $member = Member::findById($id);
+        if (!$member) {
+            $this->json(['success' => false, 'message' => 'Member not found.'], 404);
+        }
+
+        Member::update($id, ['status' => $status]);
+        AuditLog::log($action, 'members', $id, ['status' => $member['status']], ['status' => $status]);
+        $this->json(['success' => true, 'message' => 'Member status updated to ' . $status . '.']);
     }
 
     private function isAjax(): bool

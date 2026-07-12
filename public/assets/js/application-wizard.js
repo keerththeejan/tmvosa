@@ -712,6 +712,17 @@
             }
         });
 
+        // Optional email: validate format only when a value is entered.
+        const emailInput = $step.find('#emailInput').get(0);
+        if (emailInput) {
+            emailInput.setCustomValidity('');
+            const emailVal = (emailInput.value || '').trim();
+            if (emailVal && !emailInput.checkValidity()) {
+                emailInput.reportValidity();
+                valid = false;
+            }
+        }
+
         if (step === 2) {
             const dobInput = document.getElementById('dateOfBirthInput');
             if (dobInput) {

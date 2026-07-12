@@ -38,6 +38,7 @@ class AuthController extends Controller
             $this->json(['success' => true, 'redirect' => $redirect]);
         }
 
+        \App\Models\AuditLog::log('login_failed', 'users', null, null, ['username' => $username]);
         $this->json(['success' => false, 'message' => 'Invalid credentials.']);
     }
 

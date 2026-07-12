@@ -54,6 +54,14 @@ if (!file_exists($vendorAutoload)) {
 }
 require_once $vendorAutoload;
 
+/**
+ * Translate UI string for the active locale (ta|en).
+ */
+function __(string $key, ?string $default = null): string
+{
+    return \App\Helpers\Lang::get($key, $default);
+}
+
 spl_autoload_register(function (string $class): void {
     $prefix = 'App\\';
     if (!str_starts_with($class, $prefix)) {

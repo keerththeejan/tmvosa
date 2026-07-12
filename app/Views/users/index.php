@@ -4,7 +4,7 @@ use App\Core\View;
 $pageTitle = 'Users';
 $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 ?>
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <h5 class="mb-0"><i class="bi bi-person-gear"></i> User Management</h5>
     <a href="<?= $base ?>/admin/password-logs" class="btn btn-outline-secondary btn-sm">Password Logs</a>
 </div>
@@ -18,7 +18,7 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
     <div class="member-card">
         <div class="card-body-content flex-grow-1">
             <h6 class="mb-0"><?= View::escape($u['full_name']) ?></h6>
-            <small class="text-muted">@<?= View::escape($u['username']) ?></small>
+            <small class="text-muted">@<?= View::escape($u['username']) ?> · <?= View::escape($u['email'] ?? '') ?></small>
             <div class="mt-1">
                 <span class="badge bg-primary"><?= View::escape($u['role_name']) ?></span>
                 <span class="badge bg-<?= $u['is_active'] ? 'success' : 'secondary' ?>"><?= $u['is_active'] ? 'Active' : 'Inactive' ?></span>
@@ -26,11 +26,26 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
                 <span class="badge bg-warning text-dark">Must Change Password</span>
                 <?php endif; ?>
             </div>
+            <small class="text-muted d-block mt-1">
+                Last login: <?= !empty($u['last_login_at']) ? date('d M Y H:i', strtotime($u['last_login_at'])) : 'Never' ?>
+                <?php if (!empty($u['last_login_ip'])): ?> · IP <?= View::escape($u['last_login_ip']) ?><?php endif; ?>
+            </small>
             <?php if (!empty($u['password_changed_at'])): ?>
-            <small class="text-muted d-block mt-1">Password changed: <?= date('d M Y', strtotime($u['password_changed_at'])) ?></small>
+            <small class="text-muted d-block">Password changed: <?= date('d M Y', strtotime($u['password_changed_at'])) ?></small>
             <?php endif; ?>
         </div>
         <div class="d-flex flex-column gap-1">
+            <button type="button" class="btn btn-sm btn-outline-primary edit-user-btn"
+                data-id="<?= (int) $u['id'] ?>"
+                data-name="<?= View::escape($u['full_name']) ?>"
+                data-email="<?= View::escape($u['email'] ?? '') ?>"
+                data-mobile="<?= View::escape($u['mobile'] ?? '') ?>"
+                data-role="<?= (int) $u['role_id'] ?>">
+                Edit
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-<?= $u['is_active'] ? 'secondary' : 'success' ?> toggle-user-btn" data-id="<?= (int) $u['id'] ?>">
+                <?= $u['is_active'] ? 'Disable' : 'Enable' ?>
+            </button>
             <button type="button" class="btn btn-sm btn-outline-warning reset-password-btn" data-id="<?= (int) $u['id'] ?>" data-name="<?= View::escape($u['full_name']) ?>">
                 Reset Password
             </button>
@@ -149,6 +164,47 @@ $('.force-password-btn').on('click', function() {
         } else {
             Swal.fire('Error', res.message, 'error');
         }
+    });
+});
+
+$('.toggle-user-btn').on('click', function() {
+    const userId = $(this).data('id');
+    Swal.fire({ title: 'Change user status?', icon: 'question', showCancelButton: true }).then(r => {
+        if (!r.isConfirmed) return;
+        $.post(BASE_URL + '/admin/users/' + userId + '/toggle', { _csrf_token: CSRF_TOKEN }, function(res) {
+            if (res.success) Swal.fire('Updated', res.message, 'success').then(() => location.reload());
+            else Swal.fire('Error', res.message, 'error');
+        });
+    });
+});
+
+$('.edit-user-btn').on('click', function() {
+    const btn = $(this);
+    const rolesHtml = <?= json_encode(array_map(fn($r) => ['id' => (int)$r['id'], 'name' => $r['name']], $roles)) ?>;
+    let roleOptions = rolesHtml.map(r => `<option value="${r.id}" ${r.id == btn.data('role') ? 'selected' : ''}>${r.name}</option>`).join('');
+    Swal.fire({
+        title: 'Edit User',
+        html: `
+            <input id="eu_name" class="swal2-input" placeholder="Full name" value="${btn.data('name')}">
+            <input id="eu_email" class="swal2-input" placeholder="Email" value="${btn.data('email')}">
+            <input id="eu_mobile" class="swal2-input" placeholder="Mobile" value="${btn.data('mobile') || ''}">
+            <select id="eu_role" class="swal2-select">${roleOptions}</select>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Save',
+        preConfirm: () => ({
+            full_name: document.getElementById('eu_name').value,
+            email: document.getElementById('eu_email').value,
+            mobile: document.getElementById('eu_mobile').value,
+            role_id: document.getElementById('eu_role').value,
+            _csrf_token: CSRF_TOKEN
+        })
+    }).then(r => {
+        if (!r.isConfirmed) return;
+        $.post(BASE_URL + '/admin/users/' + btn.data('id') + '/update', r.value, function(res) {
+            if (res.success) Swal.fire('Saved', res.message, 'success').then(() => location.reload());
+            else Swal.fire('Error', res.message, 'error');
+        });
     });
 });
 </script>

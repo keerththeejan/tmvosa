@@ -85,9 +85,17 @@ class Router
     private function runMiddleware(array $middleware): void
     {
         foreach ($middleware as $mw) {
-            $class = "App\\Middleware\\{$mw}";
+            $roles = [];
+            $name = $mw;
+            if (str_contains($mw, ':')) {
+                [$name, $roleList] = explode(':', $mw, 2);
+                $roles = array_values(array_filter(array_map('trim', explode(',', $roleList))));
+            }
+
+            $class = "App\\Middleware\\{$name}";
             if (class_exists($class)) {
-                (new $class())->handle();
+                $instance = $roles ? new $class($roles) : new $class();
+                $instance->handle();
             }
         }
     }

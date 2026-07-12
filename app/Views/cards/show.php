@@ -22,7 +22,7 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
         <div class="card-body-section text-center">
             <div class="member-photo mx-auto">
                 <?php if ($member['photo']): ?>
-                <img src="<?= $base ?>/../storage/uploads/<?= $member['photo'] ?>" alt="">
+                <img src="<?= $base ?>/files/<?= ltrim(str_replace('\\', '/', $member['photo']), '/') ?>" class="img-fluid" alt="" loading="lazy" decoding="async">
                 <?php else: ?>
                 <div class="avatar-placeholder-lg"><?= strtoupper(substr($member['full_name_english'], 0, 1)) ?></div>
                 <?php endif; ?>
@@ -32,13 +32,23 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
             <p class="text-muted mb-0"><?= View::escape($member['full_name_tamil']) ?></p>
             <?php endif; ?>
             <p class="membership-no"><?= View::escape($member['membership_number']) ?></p>
-            <p class="text-muted small mb-1"><?= View::escape($member['membership_type_name'] ?? '') ?></p>
+            <p class="text-muted small mb-1">
+                <?php
+                $cardType = \App\Helpers\Lang::membershipDisplayFromSlug(
+                    $member['membership_type_slug'] ?? \App\Helpers\MembershipType::slugFromName($member['membership_type_name'] ?? ''),
+                    null,
+                    $member['membership_type_name'] ?? null
+                );
+                ?>
+                <span class="d-block"><?= View::escape($cardType['title_en']) ?></span>
+                <span class="d-block">(<?= View::escape($cardType['title_ta']) ?>)</span>
+            </p>
             <div class="bilingual-text bilingual-block text-muted small">
                 <span class="label-ta"><?= View::escape(\App\Helpers\Lang::ui('valid_until')['ta']) ?>: <?= View::escape($member['membership_expiry_date'] ?? 'N/A') ?></span>
                 <span class="label-en"><?= View::escape(\App\Helpers\Lang::ui('valid_until')['en']) ?>: <?= View::escape($member['membership_expiry_date'] ?? 'N/A') ?></span>
             </div>
             <?php if (!empty($card['qr_code_path'])): ?>
-            <img src="<?= $base ?>/../storage/uploads/<?= $card['qr_code_path'] ?>" class="qr-code" alt="QR Code">
+            <img src="<?= $base ?>/files/<?= ltrim(str_replace('\\', '/', $card['qr_code_path']), '/') ?>" class="qr-code img-fluid" alt="QR Code" loading="lazy" decoding="async">
             <?php endif; ?>
         </div>
     </div>
@@ -50,8 +60,8 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
         <span class="label-en"><?= View::escape(\App\Helpers\Lang::ui('download_pdf')['en']) ?></span>
     </a>
     <a href="<?= $base ?>/card/<?= $member['id'] ?>/image" class="btn btn-outline-primary bilingual-btn">
-        <span class="label-ta"><i class="bi bi-image"></i> <?= View::escape(\App\Helpers\Lang::ui('download_image')['ta']) ?></span>
-        <span class="label-en"><?= View::escape(\App\Helpers\Lang::ui('download_image')['en']) ?></span>
+        <span class="label-ta"><i class="bi bi-qr-code"></i> Download QR Code</span>
+        <span class="label-en">Download QR Code</span>
     </a>
     <a href="https://wa.me/?text=<?= urlencode('OSA Membership Card - ' . $member['membership_number'] . ' - ' . $member['full_name_english']) ?>" class="btn btn-success bilingual-btn" target="_blank">
         <span class="label-ta"><i class="bi bi-whatsapp"></i> <?= View::escape(\App\Helpers\Lang::ui('share_whatsapp')['ta']) ?></span>

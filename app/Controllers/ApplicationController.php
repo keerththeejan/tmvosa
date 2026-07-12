@@ -26,7 +26,7 @@ class ApplicationController extends Controller
     public function form(): void
     {
         $countries = Database::fetchAll("SELECT * FROM countries WHERE is_active = 1 ORDER BY name");
-        $membershipTypes = Database::fetchAll("SELECT * FROM membership_types WHERE is_active = 1");
+        $membershipTypes = \App\Helpers\MembershipType::allActive();
         $validationConfig = [
             'blockDuplicateMobile' => Setting::get('block_duplicate_mobile', '0') === '1',
             'blockDuplicateEmail' => Setting::get('block_duplicate_email', '0') === '1',
@@ -78,6 +78,9 @@ class ApplicationController extends Controller
             $data['application_id'] = $appId;
             $this->handleDocumentUploads($appId);
             Database::commit();
+            AuditLog::log('submit_application', 'member_applications', $appId, null, [
+                'application_number' => $data['application_number'],
+            ]);
         } catch (\PDOException $e) {
             if (Database::getInstance()->inTransaction()) {
                 Database::rollback();
@@ -163,6 +166,7 @@ class ApplicationController extends Controller
         $application = Application::findById((int) $id);
         if (!$application) {
             http_response_code(404);
+            \App\Core\View::render('errors/404');
             return;
         }
         $documents = Document::getByApplication((int) $id);
@@ -190,7 +194,130 @@ class ApplicationController extends Controller
             $details[$row['nic_key']] = ApplicationValidation::findDuplicatesForNic($row['nic_key']);
         }
 
-        $this->view('applications/duplicates', compact('summary', 'details'));
+        $emailDuplicates = ApplicationValidation::getDuplicateEmailSummary();
+        $mobileDuplicates = ApplicationValidation::getDuplicateMobileSummary();
+        $membershipDuplicates = ApplicationValidation::getDuplicateMembershipSummary();
+
+        $this->view('applications/duplicates', compact(
+            'summary',
+            'details',
+            'emailDuplicates',
+            'mobileDuplicates',
+            'membershipDuplicates'
+        ));
+    }
+
+    public function editForm(string $id): void
+    {
+        $application = Application::findById((int) $id);
+        if (!$application) {
+            http_response_code(404);
+            \App\Core\View::render('errors/404');
+            return;
+        }
+        if (in_array($application['status'], ['approved'], true)) {
+            $this->redirect(App::routeUrl('applications/' . $id));
+            return;
+        }
+        $countries = Database::fetchAll("SELECT * FROM countries WHERE is_active = 1 ORDER BY name");
+        $membershipTypes = \App\Helpers\MembershipType::allActive();
+        $this->view('applications/edit', compact('application', 'countries', 'membershipTypes'));
+    }
+
+    public function update(string $id): void
+    {
+        if (!$this->validateCsrf()) {
+            $this->json(['success' => false, 'message' => 'Invalid request.'], 403);
+        }
+
+        $application = Application::findById((int) $id);
+        if (!$application) {
+            $this->json(['success' => false, 'message' => 'Application not found.'], 404);
+        }
+        if ($application['status'] === 'approved') {
+            $this->json(['success' => false, 'message' => 'Approved applications cannot be edited.'], 422);
+        }
+
+        $data = [
+            'full_name_tamil' => Security::sanitize($this->input('full_name_tamil', '')),
+            'full_name_english' => Security::sanitize($this->input('full_name_english', '')),
+            'gender' => $this->input('gender'),
+            'date_of_birth' => $this->input('date_of_birth') ?: null,
+            'nic_number' => Security::sanitize($this->input('nic_number', '')),
+            'current_address' => Security::sanitize($this->input('current_address', '')),
+            'permanent_address' => Security::sanitize($this->input('permanent_address', '')),
+            'country_id' => (int) $this->input('country_id') ?: null,
+            'mobile' => Security::sanitize($this->input('mobile', '')),
+            'whatsapp' => Security::sanitize($this->input('whatsapp', '')),
+            'email' => Security::sanitize($this->input('email', '')),
+            'studied_from_year' => $this->input('studied_from_year') ?: null,
+            'studied_to_year' => $this->input('studied_to_year') ?: null,
+            'occupation' => Security::sanitize($this->input('occupation', '')),
+            'company' => Security::sanitize($this->input('company', '')),
+            'membership_type_id' => (int) $this->input('membership_type_id') ?: null,
+            'amount_paid' => (float) $this->input('amount_paid', 0),
+            'payment_method' => PaymentMethod::normalize((string) $this->input('payment_method', '')) ?? $application['payment_method'],
+            'transaction_number' => Security::sanitize($this->input('transaction_number', '')),
+            'payment_date' => $this->input('payment_date') ?: null,
+            'status' => in_array($this->input('status'), ['pending', 'under_review', 'rejected'], true)
+                ? $this->input('status')
+                : $application['status'],
+        ];
+
+        Application::update((int) $id, $data);
+        AuditLog::log('edit_application', 'member_applications', (int) $id, $application, $data);
+        $this->json(['success' => true, 'message' => 'Application updated.']);
+    }
+
+    public function print(string $id): void
+    {
+        $application = Application::findById((int) $id);
+        if (!$application) {
+            http_response_code(404);
+            \App\Core\View::render('errors/404');
+            return;
+        }
+        $history = Database::fetchAll(
+            "SELECT al.*, u.full_name as user_name
+             FROM audit_logs al
+             LEFT JOIN users u ON u.id = al.user_id
+             WHERE al.entity_type = 'member_applications' AND al.entity_id = ?
+             ORDER BY al.created_at DESC",
+            [(int) $id]
+        );
+        $this->view('applications/print', compact('application', 'history'));
+    }
+
+    public function export(): void
+    {
+        $status = $this->input('status', '');
+        $applications = Application::getAll($status, 1, 5000)['data'];
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->fromArray([
+            'Application No', 'Name', 'NIC', 'Mobile', 'Email', 'Status', 'Amount', 'Submitted',
+        ], null, 'A1');
+        $row = 2;
+        foreach ($applications as $a) {
+            $sheet->fromArray([
+                $a['application_number'],
+                $a['full_name_english'],
+                $a['nic_number'] ?? '',
+                $a['mobile'],
+                $a['email'] ?? '',
+                $a['status'],
+                $a['amount_paid'] ?? 0,
+                $a['created_at'],
+            ], null, 'A' . $row++);
+        }
+
+        AuditLog::log('export_applications', 'member_applications', null, null, ['count' => count($applications)]);
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="applications_export.xlsx"');
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save('php://output');
+        exit;
     }
 
     public function uploadDocument(string $id): void
@@ -252,10 +379,8 @@ class ApplicationController extends Controller
         Database::beginTransaction();
         try {
             $membershipNumber = NumberGenerator::membershipNumber();
-            $type = Database::fetch("SELECT duration_years FROM membership_types WHERE id = ?", [$application['membership_type_id']]);
-            $durationYears = $type['duration_years'] ?? 1;
-
-            $expiryDate = date('Y-m-d', strtotime("+{$durationYears} years"));
+            $type = Database::fetch("SELECT * FROM membership_types WHERE id = ?", [$application['membership_type_id']]);
+            $expiryDate = \App\Helpers\MembershipType::calculateExpiryDate($type ?: ['slug' => 'ordinary', 'duration_years' => 1]);
 
             $memberId = Member::create([
                 'membership_number' => $membershipNumber,
@@ -295,6 +420,9 @@ class ApplicationController extends Controller
                 "UPDATE member_documents SET member_id = ? WHERE application_id = ?",
                 [$memberId, $id]
             );
+
+            // Record application payment into payments table when amount was collected
+            PaymentController::createFromApplication($memberId, $application, (int) $id);
 
             AuditLog::log('approve_application', 'member_applications', (int) $id);
 
@@ -455,7 +583,6 @@ class ApplicationController extends Controller
             'current_address' => 'Current address is required.',
             'country_id' => 'Country is required.',
             'mobile' => 'Mobile number is required.',
-            'email' => 'Email address is required.',
             'studied_from_year' => 'Studied from year is required.',
             'studied_to_year' => 'Studied to year is required.',
             'membership_type_id' => 'Membership category is required.',
@@ -484,9 +611,8 @@ class ApplicationController extends Controller
             $errors[] = 'Invalid payment method. Only Bank Transfer and Cash are accepted.';
         }
 
-        if (empty($data['email'])) {
-            $errors[] = 'Email address is required.';
-        } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+        // Email is optional; validate format only when provided.
+        if (!empty($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
             $errors[] = 'Please enter a valid email address.';
         }
 

@@ -6,7 +6,7 @@ class Lang
 {
     private static array $fields = [
         'full_name_tamil' => ['ta' => 'முழுப்பெயர் (தமிழில்)', 'en' => 'Full Name (Tamil)'],
-        'full_name_english' => ['ta' => 'முழுப்பெயர் (ஆங்கிலத்தில்)', 'en' => 'Full Name (English)'],
+        'full_name_english' => ['ta' => 'முழுப்பெயர்', 'en' => 'Full Name'],
         'gender' => ['ta' => 'பாலினம்', 'en' => 'Gender'],
         'date_of_birth' => ['ta' => 'பிறந்த திகதி', 'en' => 'Date of Birth'],
         'nic_number' => ['ta' => 'தேசிய அடையாள அட்டை இலக்கம்', 'en' => 'National Identity Card Number'],
@@ -116,8 +116,10 @@ class Lang
         'declaration_text_en' => 'I hereby declare that the information provided above is true and accurate.',
         'ordinary_member' => ['ta' => 'சாதாரண உறுப்பினர்', 'en' => 'Ordinary Member'],
         'ten_year_member' => ['ta' => '10 ஆண்டு உறுப்பினர்', 'en' => '10-Year Membership'],
+        'half_year_member' => ['ta' => 'அரை ஆண்டு உறுப்பினர்', 'en' => 'Half-Year Membership'],
         'validity_1_year' => ['ta' => '1 ஆண்டு', 'en' => '1 Year'],
         'validity_10_years' => ['ta' => '10 ஆண்டுகள்', 'en' => '10 Years'],
+        'validity_6_months' => ['ta' => '6 மாதங்கள் (180 நாட்கள்)', 'en' => '6 Months (180 Days)'],
         'fee_label' => ['ta' => 'கட்டணம்', 'en' => 'Fee'],
         'selected_badge' => ['ta' => 'தேர்ந்தெடுக்கப்பட்டது', 'en' => 'Selected'],
         'selected_fee' => ['ta' => 'தேர்ந்தெடுக்கப்பட்ட சந்தா', 'en' => 'Selected Fee'],
@@ -165,6 +167,40 @@ class Lang
         'cheque' => ['ta' => 'காசோலை', 'en' => 'Cheque'],
         'review_submit' => ['ta' => 'சரிபார்த்து சமர்ப்பிக்கவும்', 'en' => 'Review & Submit'],
         'home' => ['ta' => 'முகப்பு', 'en' => 'Home'],
+        'about' => ['ta' => 'எங்களைப் பற்றி', 'en' => 'About'],
+        'membership' => ['ta' => 'உறுப்பினர்', 'en' => 'Membership'],
+        'membership_plans' => ['ta' => 'உறுப்பினர் திட்டங்கள்', 'en' => 'Membership Plans'],
+        'benefits' => ['ta' => 'நன்மைகள்', 'en' => 'Benefits'],
+        'why_join' => ['ta' => 'ஏன் சேர வேண்டும்', 'en' => 'Why Join'],
+        'member_benefits' => ['ta' => 'உறுப்பினர் நன்மைகள்', 'en' => 'Member Benefits'],
+        'gallery' => ['ta' => 'புகைப்படங்கள்', 'en' => 'Gallery'],
+        'events' => ['ta' => 'நிகழ்வுகள்', 'en' => 'Events'],
+        'news' => ['ta' => 'செய்திகள்', 'en' => 'News'],
+        'contact' => ['ta' => 'தொடர்பு', 'en' => 'Contact'],
+        'verify_member' => ['ta' => 'உறுப்பினர் சரிபார்ப்பு', 'en' => 'Verify Member'],
+        'verify_membership' => ['ta' => 'உறுப்பினரைச் சரிபார்', 'en' => 'Verify Membership'],
+        'apply_now' => ['ta' => 'இப்போது விண்ணப்பிக்க', 'en' => 'Apply Now'],
+        'member_login' => ['ta' => 'உறுப்பினர் உள்நுழைவு', 'en' => 'Member Login'],
+        'learn_more' => ['ta' => 'மேலும் அறிய', 'en' => 'Learn More'],
+        'language' => ['ta' => 'மொழி', 'en' => 'Language'],
+        'language_tamil' => ['ta' => 'தமிழ்', 'en' => 'Tamil'],
+        'language_english' => ['ta' => 'ஆங்கிலம்', 'en' => 'English'],
+        'membership_cards' => ['ta' => 'உறுப்பினர் அட்டைகள்', 'en' => 'Membership Cards'],
+        'duplicate_nics' => ['ta' => 'நகல் NIC', 'en' => 'Duplicate NICs'],
+        'email_settings' => ['ta' => 'மின்னஞ்சல் அமைப்புகள்', 'en' => 'Email Settings'],
+        'change_password' => ['ta' => 'கடவுச்சொல்லை மாற்று', 'en' => 'Change Password'],
+        'cards_short' => ['ta' => 'அட்டை', 'en' => 'Cards'],
+        'hero_system_title' => ['ta' => 'OSA பழைய மாணவர் உறுப்பினர் அமைப்பு', 'en' => 'OSA Alumni Membership System'],
+        'hero_lead' => [
+            'ta' => 'உங்கள் வகுப்புத் தோழர்களுடன் மீண்டும் இணையுங்கள், பாடசாலையை ஆதரியுங்கள், உறுப்பினரைப் புதுப்பித்து வளர்ந்து வரும் பழைய மாணவர் சமூகத்தின் பகுதியாகுங்கள்.',
+            'en' => 'Reconnect with your classmates, support your school, renew your membership, and become part of a growing alumni community.',
+        ],
+        'hero_kicker_line1' => ['ta' => 'பழைய மாணவர் சங்கம்', 'en' => 'Old Students\' Association'],
+        'hero_kicker_line2' => ['ta' => 'திருவையாறு மகா வித்தியாலயம்', 'en' => 'Thiruvaiyaru Maha Vidyalayam'],
+        'stat_members' => ['ta' => 'உறுப்பினர்கள்', 'en' => 'Members'],
+        'stat_applications' => ['ta' => 'விண்ணப்பங்கள்', 'en' => 'Applications'],
+        'stat_events' => ['ta' => 'நிகழ்வுகள்', 'en' => 'Events'],
+        'stat_years' => ['ta' => 'ஆண்டுகள்', 'en' => 'Years'],
         'apps_short' => ['ta' => 'விண்ணப்பம்', 'en' => 'Apps'],
         'pay_short' => ['ta' => 'கட்டணம்', 'en' => 'Pay'],
         'bank_account_details' => ['ta' => 'சங்க வங்கி கணக்கு விபரங்கள்', 'en' => 'Association Bank Account Details'],
@@ -266,27 +302,201 @@ class Lang
         'proposer_contact' => ['ta' => 'தொடர்பு இலக்கத்தை உள்ளிடவும்', 'en' => 'Enter Contact Number'],
     ];
 
+    public const LOCALE_COOKIE = 'osa_lang';
+    public const LOCALE_COOKIE_ALT = 'language';
+    public const SESSION_KEY = 'language';
+
+    private static bool $booted = false;
+    private static ?string $cachedLocale = null;
+    /** @var array<string, array<string, string>> */
+    private static array $dictionaries = [];
+
+    public static function boot(): void
+    {
+        if (self::$booted) {
+            return;
+        }
+        self::$booted = true;
+
+        $cookie = self::normalizeLocale(
+            $_COOKIE[self::LOCALE_COOKIE]
+                ?? $_COOKIE[self::LOCALE_COOKIE_ALT]
+                ?? null
+        );
+        $session = self::normalizeLocale($_SESSION[self::SESSION_KEY] ?? null);
+
+        // Cookie wins when present (language switcher writes cookie then reloads).
+        $lang = $cookie ?? $session ?? 'ta';
+
+        self::$cachedLocale = $lang;
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            $_SESSION[self::SESSION_KEY] = $lang;
+        }
+    }
+
+    public static function setLocale(string $lang): void
+    {
+        $lang = self::normalizeLocale($lang) ?? 'ta';
+        self::$cachedLocale = $lang;
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            $_SESSION[self::SESSION_KEY] = $lang;
+        }
+        self::writeCookies($lang);
+    }
+
+    public static function locale(): string
+    {
+        if (!self::$booted) {
+            self::boot();
+        }
+        return self::$cachedLocale ?? 'ta';
+    }
+
+    public static function isEnglish(): bool
+    {
+        return self::locale() === 'en';
+    }
+
+    public static function isTamil(): bool
+    {
+        return self::locale() === 'ta';
+    }
+
+    /**
+     * Translate a key from languages/{locale}.php
+     */
+    public static function get(string $key, ?string $default = null): string
+    {
+        $locale = self::locale();
+        $dict = self::dictionary($locale);
+        if (isset($dict[$key]) && $dict[$key] !== '') {
+            return $dict[$key];
+        }
+
+        $fallbackLocale = $locale === 'en' ? 'ta' : 'en';
+        $fallback = self::dictionary($fallbackLocale);
+        if (isset($fallback[$key]) && $fallback[$key] !== '') {
+            return $fallback[$key];
+        }
+
+        // Legacy in-memory fallbacks
+        if (isset(self::$ui[$key])) {
+            $v = self::$ui[$key];
+            if (is_string($v)) {
+                return $v;
+            }
+            return self::pick($v);
+        }
+        if (isset(self::$fields[$key])) {
+            return self::pick(self::$fields[$key]);
+        }
+
+        return $default ?? $key;
+    }
+
+    /** @param array{ta?:string,en?:string}|string $pair */
+    public static function pick(array|string $pair): string
+    {
+        if (is_string($pair)) {
+            return $pair;
+        }
+        $loc = self::locale();
+        if (!empty($pair[$loc])) {
+            return (string) $pair[$loc];
+        }
+        return (string) ($pair['ta'] ?? $pair['en'] ?? '');
+    }
+
     public static function field(string $key): array
     {
-        return self::$fields[$key] ?? ['ta' => $key, 'en' => $key];
+        $legacy = self::$fields[$key] ?? null;
+        return [
+            'ta' => self::dictionary('ta')['field_' . $key]
+                ?? ($legacy['ta'] ?? $key),
+            'en' => self::dictionary('en')['field_' . $key]
+                ?? ($legacy['en'] ?? $key),
+        ];
     }
 
     public static function ui(string $key): array|string
     {
-        $value = self::$ui[$key] ?? ['ta' => $key, 'en' => $key];
+        $value = self::$ui[$key] ?? null;
         if (is_string($value)) {
+            // declaration_text_ta / payment_notice_ta style legacy keys
             return $value;
         }
-        return $value;
+
+        return [
+            'ta' => self::dictionary('ta')[$key] ?? ($value['ta'] ?? $key),
+            'en' => self::dictionary('en')[$key] ?? ($value['en'] ?? $key),
+        ];
     }
 
     public static function placeholder(string $key): string
     {
-        $p = self::$placeholders[$key] ?? ['ta' => '', 'en' => ''];
-        if ($p['ta'] && $p['en']) {
-            return $p['ta'] . ' / ' . $p['en'];
+        $fromFile = self::get('ph_' . $key, '');
+        if ($fromFile !== '' && $fromFile !== 'ph_' . $key) {
+            return $fromFile;
         }
-        return $p['ta'] ?: $p['en'];
+        $p = self::$placeholders[$key] ?? ['ta' => '', 'en' => ''];
+        return self::pick($p);
+    }
+
+    /** @return array<string, string> */
+    private static function dictionary(string $locale): array
+    {
+        $locale = self::normalizeLocale($locale) ?? 'ta';
+        if (isset(self::$dictionaries[$locale])) {
+            return self::$dictionaries[$locale];
+        }
+
+        $path = dirname(__DIR__, 2) . '/languages/' . $locale . '.php';
+        $loaded = [];
+        if (is_file($path)) {
+            $data = require $path;
+            if (is_array($data)) {
+                foreach ($data as $k => $v) {
+                    $loaded[(string) $k] = (string) $v;
+                }
+            }
+        }
+        self::$dictionaries[$locale] = $loaded;
+        return $loaded;
+    }
+
+    private static function normalizeLocale(mixed $raw): ?string
+    {
+        if (!is_string($raw) || $raw === '') {
+            return null;
+        }
+        $raw = strtolower(trim($raw));
+        if ($raw === 'en' || $raw === 'english') {
+            return 'en';
+        }
+        if ($raw === 'ta' || $raw === 'tamil' || $raw === 'tam') {
+            return 'ta';
+        }
+        return null;
+    }
+
+    private static function writeCookies(string $lang): void
+    {
+        if (headers_sent()) {
+            return;
+        }
+        $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+        $opts = [
+            'expires' => time() + (365 * 24 * 60 * 60),
+            'path' => '/',
+            'secure' => $isSecure,
+            'httponly' => false,
+            'samesite' => 'Lax',
+        ];
+        setcookie(self::LOCALE_COOKIE, $lang, $opts);
+        setcookie(self::LOCALE_COOKIE_ALT, $lang, $opts);
+        $_COOKIE[self::LOCALE_COOKIE] = $lang;
+        $_COOKIE[self::LOCALE_COOKIE_ALT] = $lang;
     }
 
     public static function bank(): array
@@ -312,8 +522,11 @@ class Lang
         ];
     }
 
-    public static function membershipValidityLabel(int $years): array
+    public static function membershipValidityLabel(int $years, ?string $slug = null): array
     {
+        if ($slug === 'half_year' || $years === 0) {
+            return self::ui('validity_6_months');
+        }
         if ($years === 1) {
             return self::ui('validity_1_year');
         }
@@ -326,19 +539,44 @@ class Lang
         ];
     }
 
-    public static function membershipDisplayFromSlug(string $slug, ?int $durationYears = null): array
+    public static function membershipDisplayFromSlug(string $slug, ?int $durationYears = null, ?string $fallbackName = null): array
     {
-        $isTenYear = $slug === 'ten_year';
-        $title = self::ui($isTenYear ? 'ten_year_member' : 'ordinary_member');
-        $years = $durationYears ?? ($isTenYear ? 10 : 1);
-        $validity = self::membershipValidityLabel($years);
+        $titleKey = match ($slug) {
+            'ten_year' => 'ten_year_member',
+            'half_year' => 'half_year_member',
+            default => 'ordinary_member',
+        };
+        $title = self::ui($titleKey);
+
+        // Prefer explicit English DB name when provided for ordinary/ten_year consistency
+        if ($fallbackName && $slug === 'ordinary' && stripos($fallbackName, 'Ordinary') !== false) {
+            $title['en'] = $fallbackName;
+        }
+        if ($fallbackName && $slug === 'ten_year' && stripos($fallbackName, '10') !== false) {
+            $title['en'] = $fallbackName;
+        }
+        if ($fallbackName && $slug === 'half_year') {
+            $title['en'] = 'Half-Year Membership';
+        }
+
+        $years = $durationYears;
+        if ($years === null) {
+            $years = match ($slug) {
+                'ten_year' => 10,
+                'half_year' => 0,
+                default => 1,
+            };
+        }
+        $validity = self::membershipValidityLabel((int) $years, $slug);
         $feeLabel = self::ui('fee_label');
+        $bilingual = $title['en'] . ' (' . $title['ta'] . ')';
 
         return [
             'slug' => $slug,
-            'years' => $years,
+            'years' => (int) $years,
             'title_ta' => $title['ta'],
             'title_en' => $title['en'],
+            'bilingual' => $bilingual,
             'validity_ta' => $validity['ta'],
             'validity_en' => $validity['en'],
             'with_validity_ta' => $title['ta'] . ' (' . $validity['ta'] . ')',
@@ -350,7 +588,7 @@ class Lang
 
     public static function membershipDisplayFromName(string $typeName): array
     {
-        $slug = (stripos($typeName, '10') !== false) ? 'ten_year' : 'ordinary';
-        return self::membershipDisplayFromSlug($slug);
+        $slug = \App\Helpers\MembershipType::slugFromName($typeName);
+        return self::membershipDisplayFromSlug($slug, null, $typeName);
     }
 }

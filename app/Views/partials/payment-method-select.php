@@ -17,13 +17,13 @@ $cssClass = $cssClass ?? 'form-select';
     <?= $required ? 'required' : '' ?>
 >
     <?php if ($includeEmpty): ?>
-    <option value=""><?= View::escape(Lang::ui('select')['ta']) ?> / <?= View::escape(Lang::ui('select')['en']) ?></option>
+    <option value=""><?= View::escape(__('select')) ?></option>
     <?php endif; ?>
     <?php foreach (PaymentMethod::options() as $option):
         $labels = Lang::ui($option['key']);
     ?>
     <option value="<?= View::escape($option['value']) ?>"<?= $selected === $option['value'] ? ' selected' : '' ?>>
-        <?= View::escape($labels['ta']) ?> / <?= View::escape($labels['en']) ?>
+        <?= View::escape(is_array($labels) ? Lang::pick($labels) : (string) $labels) ?>
     </option>
     <?php endforeach; ?>
 </select>

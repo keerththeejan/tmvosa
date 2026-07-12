@@ -15,4 +15,4 @@
         </tbody>
     </table>
 </div>
-<script>$(document).ready(function() { $('#auditTable').DataTable({ order: [[0,'desc']], pageLength: 25 }); });</script>
+<script>$(document).ready(function() { $('#auditTable').DataTable({ order: [[0,'desc']], pageLength: 25, scrollX: true, autoWidth: false }); });</script>

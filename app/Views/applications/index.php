@@ -13,7 +13,7 @@ $statuses = [
 ?>
 <h5 class="mb-3"><i class="bi bi-file-earmark-text"></i> Application Management</h5>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <div class="btn-group btn-group-sm flex-wrap">
         <?php foreach ($statuses as $val => $label): ?>
         <a href="?status=<?= $val ?>" class="btn btn-outline-primary <?= ($currentStatus ?? '') === $val ? 'active' : '' ?>">
@@ -21,6 +21,7 @@ $statuses = [
         </a>
         <?php endforeach; ?>
     </div>
+    <a href="<?= $base ?>/applications/export?status=<?= urlencode($currentStatus ?? '') ?>" class="btn btn-sm btn-outline-success"><i class="bi bi-file-earmark-excel"></i> Export</a>
 </div>
 
 <div class="member-cards">
@@ -52,7 +53,7 @@ $statuses = [
         <p class="text-primary small mb-1"><?= View::escape($app['application_number']) ?></p>
         <div class="card-meta">
             <span><i class="bi bi-telephone"></i> <?= View::escape($app['mobile']) ?></span>
-            <span><i class="bi bi-card-checklist"></i> <?= View::escape($app['membership_type_name'] ?? '') ?></span>
+            <span><i class="bi bi-card-checklist"></i> <?= View::escape(\App\Helpers\MembershipType::bilingualLabel($app['membership_type_name'] ?? '')) ?></span>
         </div>
         </a>
     </div>

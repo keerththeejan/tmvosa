@@ -5,7 +5,7 @@ $pageTitle = 'Email Settings';
 $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 $s = $emailSettings ?? [];
 ?>
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <h5 class="mb-0"><i class="bi bi-envelope-at"></i> Email Settings</h5>
     <a href="<?= $base ?>/admin/email-templates" class="btn btn-outline-primary btn-sm">Email Templates</a>
 </div>
@@ -39,28 +39,28 @@ $s = $emailSettings ?? [];
     <div class="card-body">
         <input type="hidden" name="_csrf_token" value="<?= $csrfToken ?>">
         <div class="row g-3">
-            <div class="col-md-6">
+            <div class="col-12 col-md-6">
                 <label class="form-label">SMTP Host</label>
                 <input type="text" name="smtp_host" class="form-control" value="<?= View::escape($s['smtp_host'] ?? 'mail.vkitnet.info') ?>" required>
                 <div class="form-text">Use <strong>mail.vkitnet.info</strong> or on cPanel try <strong>localhost</strong> with port <strong>587</strong> (TLS).</div>
             </div>
-            <div class="col-md-3">
+            <div class="col-12 col-md-3">
                 <label class="form-label">SMTP Port</label>
                 <input type="number" name="smtp_port" class="form-control" value="<?= View::escape((string) ($s['smtp_port'] ?? 465)) ?>" required>
             </div>
-            <div class="col-md-3">
+            <div class="col-12 col-md-3">
                 <label class="form-label">Encryption</label>
                 <select name="smtp_encryption" class="form-select">
                     <option value="ssl" <?= ($s['smtp_encryption'] ?? 'ssl') === 'ssl' ? 'selected' : '' ?>>SSL (465)</option>
                     <option value="tls" <?= ($s['smtp_encryption'] ?? '') === 'tls' ? 'selected' : '' ?>>TLS (587)</option>
                 </select>
             </div>
-            <div class="col-md-6">
+            <div class="col-12 col-md-6">
                 <label class="form-label">SMTP Username</label>
                 <input type="email" name="smtp_username" class="form-control" value="<?= View::escape($s['smtp_username'] ?? 'tmvosa@vkitnet.info') ?>">
                 <div class="form-text">Usually the full email address. Password is read from .env.</div>
             </div>
-            <div class="col-md-6">
+            <div class="col-12 col-md-6">
                 <label class="form-label">SMTP Password</label>
                 <input type="password" class="form-control" value="••••••••" disabled>
                 <div class="form-text">Set <code>SMTP_PASSWORD</code> in your <code>.env</code> file.</div>
@@ -99,11 +99,11 @@ $s = $emailSettings ?? [];
     <div class="card-header bg-white"><h6 class="mb-0">Test Email Configuration</h6></div>
     <div class="card-body">
         <div class="row g-2 align-items-end">
-            <div class="col-md-8">
+            <div class="col-12 col-md-8">
                 <label class="form-label">Send test email to</label>
                 <input type="email" id="testEmailAddress" class="form-control" placeholder="tmvosa@vkitnet.info" value="<?= View::escape($user['email'] ?? '') ?>">
             </div>
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <button type="button" class="btn btn-outline-success w-100" id="sendTestEmailBtn">
                     <i class="bi bi-send"></i> Send Test Email
                 </button>
@@ -117,11 +117,11 @@ $s = $emailSettings ?? [];
     <div class="card-body">
         <p class="text-muted small">Send expiry reminder emails to active members expiring within the selected period.</p>
         <div class="row g-2 align-items-end">
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <label class="form-label">Days ahead</label>
                 <input type="number" id="expiryReminderDays" class="form-control" value="30" min="1" max="365">
             </div>
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <button type="button" class="btn btn-outline-warning w-100" id="sendExpiryRemindersBtn">Send Expiry Reminders</button>
             </div>
         </div>

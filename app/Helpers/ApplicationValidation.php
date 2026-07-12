@@ -239,6 +239,51 @@ class ApplicationValidation
         );
     }
 
+    public static function getDuplicateEmailSummary(): array
+    {
+        return Database::fetchAll(
+            "SELECT email_key, COUNT(*) AS record_count
+             FROM (
+                 SELECT LOWER(TRIM(email)) AS email_key FROM members WHERE email IS NOT NULL AND email != ''
+                 UNION ALL
+                 SELECT LOWER(TRIM(email)) AS email_key FROM member_applications
+                 WHERE email IS NOT NULL AND email != '' AND status NOT IN ('rejected')
+             ) combined
+             GROUP BY email_key
+             HAVING COUNT(*) > 1
+             ORDER BY record_count DESC"
+        );
+    }
+
+    public static function getDuplicateMobileSummary(): array
+    {
+        return Database::fetchAll(
+            "SELECT mobile_key, COUNT(*) AS record_count
+             FROM (
+                 SELECT REGEXP_REPLACE(mobile, '[^0-9]', '') AS mobile_key FROM members WHERE mobile IS NOT NULL AND mobile != ''
+                 UNION ALL
+                 SELECT REGEXP_REPLACE(mobile, '[^0-9]', '') AS mobile_key FROM member_applications
+                 WHERE mobile IS NOT NULL AND mobile != '' AND status NOT IN ('rejected')
+             ) combined
+             WHERE mobile_key IS NOT NULL AND mobile_key != ''
+             GROUP BY mobile_key
+             HAVING COUNT(*) > 1
+             ORDER BY record_count DESC"
+        );
+    }
+
+    public static function getDuplicateMembershipSummary(): array
+    {
+        return Database::fetchAll(
+            "SELECT membership_number, COUNT(*) AS record_count
+             FROM members
+             WHERE membership_number IS NOT NULL AND membership_number != ''
+             GROUP BY membership_number
+             HAVING COUNT(*) > 1
+             ORDER BY record_count DESC"
+        );
+    }
+
     private static function matchNormalizedMobile(string $table, string $normalized, bool $excludeRejected = false): bool
     {
         $variants = self::mobileDigitVariants($normalized);

@@ -28,6 +28,17 @@ class View
             return;
         }
 
+        $standalone = [
+            'members/print',
+            'applications/print',
+            'cards/bulk-print',
+            'cards/verify',
+        ];
+        if (in_array($template, $standalone, true)) {
+            echo $content;
+            return;
+        }
+
         $publicTemplates = ['auth/', 'applications/form', 'applications/success', 'home/'];
         $isPublic = false;
         foreach ($publicTemplates as $prefix) {

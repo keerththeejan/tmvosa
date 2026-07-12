@@ -42,6 +42,56 @@ class AdminController extends Controller
         $this->json(['success' => true, 'message' => 'User created.']);
     }
 
+    public function updateUser(string $id): void
+    {
+        if (!$this->validateCsrf()) {
+            $this->json(['success' => false, 'message' => 'Invalid request.'], 403);
+        }
+
+        $userId = (int) $id;
+        $target = User::findById($userId);
+        if (!$target) {
+            $this->json(['success' => false, 'message' => 'User not found.'], 404);
+        }
+
+        $data = [
+            'full_name' => Security::sanitize($this->input('full_name', $target['full_name'])),
+            'email' => filter_var($this->input('email', $target['email']), FILTER_SANITIZE_EMAIL),
+            'role_id' => (int) $this->input('role_id', $target['role_id']),
+            'mobile' => Security::sanitize($this->input('mobile', $target['mobile'] ?? '')),
+        ];
+
+        User::update($userId, $data);
+        AuditLog::log('update_user', 'users', $userId, $target, $data);
+        $this->json(['success' => true, 'message' => 'User updated.']);
+    }
+
+    public function toggleUser(string $id): void
+    {
+        if (!$this->validateCsrf()) {
+            $this->json(['success' => false, 'message' => 'Invalid request.'], 403);
+        }
+
+        $userId = (int) $id;
+        $target = User::findById($userId);
+        if (!$target) {
+            $this->json(['success' => false, 'message' => 'User not found.'], 404);
+        }
+
+        if ($userId === (int) Auth::id()) {
+            $this->json(['success' => false, 'message' => 'You cannot disable your own account.'], 422);
+        }
+
+        $newStatus = empty($target['is_active']) ? 1 : 0;
+        User::update($userId, ['is_active' => $newStatus]);
+        AuditLog::log($newStatus ? 'enable_user' : 'disable_user', 'users', $userId);
+        $this->json([
+            'success' => true,
+            'message' => $newStatus ? 'User enabled.' : 'User disabled.',
+            'is_active' => $newStatus,
+        ]);
+    }
+
     public function resetPassword(string $id): void
     {
         if (!$this->validateCsrf()) {

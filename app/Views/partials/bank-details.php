@@ -1,10 +1,11 @@
 <?php
 use App\Helpers\Lang;
+use App\Core\View;
 $bank = Lang::bank();
 ?>
 <div class="bank-details-card card mb-4">
     <div class="card-body">
-        <?php \App\Core\View::heading('bank_account_details', 'h6', 'bank'); ?>
+        <?php View::heading('bank_account_details', 'h6', 'bank'); ?>
         <?php
         $rows = [
             ['bank_name', $bank['bank_name']],
@@ -13,25 +14,21 @@ $bank = Lang::bank();
             ['account_number', $bank['account_number']],
         ];
         foreach ($rows as [$key, $value]):
-            $label = Lang::field($key);
+            $label = Lang::pick(Lang::field($key));
         ?>
         <div class="info-row-bilingual mb-2">
-            <div class="info-label bilingual-text bilingual-block">
-                <span class="label-ta"><?= \App\Core\View::escape($label['ta']) ?></span>
-                <span class="label-en"><?= \App\Core\View::escape($label['en']) ?></span>
+            <div class="info-label">
+                <?= View::escape($label) ?>
             </div>
-            <div class="info-value fw-semibold"><?= \App\Core\View::escape($value) ?></div>
+            <div class="info-value fw-semibold"><?= View::escape($value) ?></div>
         </div>
         <?php endforeach; ?>
         <div class="info-row-bilingual">
-            <div class="info-label bilingual-text bilingual-block">
-                <?php $addr = Lang::field('address'); ?>
-                <span class="label-ta"><?= \App\Core\View::escape($addr['ta']) ?></span>
-                <span class="label-en"><?= \App\Core\View::escape($addr['en']) ?></span>
+            <div class="info-label">
+                <?= View::escape(Lang::pick(Lang::field('address'))) ?>
             </div>
-            <div class="info-value">
-                <div class="label-ta fw-semibold"><?= \App\Core\View::escape($bank['address_ta']) ?></div>
-                <div class="label-en small text-muted"><?= \App\Core\View::escape($bank['address_en']) ?></div>
+            <div class="info-value fw-semibold">
+                <?= View::escape(Lang::pick(['ta' => $bank['address_ta'], 'en' => $bank['address_en']])) ?>
             </div>
         </div>
     </div>

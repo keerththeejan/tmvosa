@@ -9,7 +9,7 @@ class Member
     public static function findById(int $id): ?array
     {
         return Database::fetch(
-            "SELECT m.*, mt.name as membership_type_name, mt.fee, c.name as country_name
+            "SELECT m.*, mt.name as membership_type_name, mt.slug as membership_type_slug, mt.fee, c.name as country_name
              FROM members m
              LEFT JOIN membership_types mt ON m.membership_type_id = mt.id
              LEFT JOIN countries c ON m.country_id = c.id
@@ -20,7 +20,33 @@ class Member
 
     public static function findByNumber(string $number): ?array
     {
-        return Database::fetch("SELECT * FROM members WHERE membership_number = ?", [$number]);
+        return Database::fetch(
+            "SELECT m.*,
+                    mt.name AS membership_type_name,
+                    mt.slug AS membership_type_slug,
+                    mt.fee,
+                    c.name AS country_name,
+                    (
+                        SELECT a.application_number
+                        FROM member_applications a
+                        WHERE a.member_id = m.id
+                        ORDER BY a.id DESC
+                        LIMIT 1
+                    ) AS application_number,
+                    (
+                        SELECT mc.issued_at
+                        FROM membership_cards mc
+                        WHERE mc.member_id = m.id AND mc.is_active = 1
+                        ORDER BY mc.issued_at DESC
+                        LIMIT 1
+                    ) AS qr_generated_at
+             FROM members m
+             LEFT JOIN membership_types mt ON m.membership_type_id = mt.id
+             LEFT JOIN countries c ON m.country_id = c.id
+             WHERE m.membership_number = ?
+             LIMIT 1",
+            [$number]
+        );
     }
 
     public static function search(array $filters = [], int $page = 1, int $perPage = 20): array
@@ -29,9 +55,10 @@ class Member
         $params = [];
 
         if (!empty($filters['search'])) {
-            $where[] = "(m.full_name_english LIKE ? OR m.full_name_tamil LIKE ? OR m.membership_number LIKE ? OR m.nic_number LIKE ? OR m.mobile LIKE ?)";
+            $where[] = "(m.full_name_english LIKE ? OR m.full_name_tamil LIKE ? OR m.membership_number LIKE ? OR m.nic_number LIKE ? OR m.mobile LIKE ?
+                        OR mt.name LIKE ? OR mt.description LIKE ? OR mt.slug LIKE ?)";
             $term = '%' . $filters['search'] . '%';
-            array_push($params, $term, $term, $term, $term, $term);
+            array_push($params, $term, $term, $term, $term, $term, $term, $term, $term);
         }
         if (!empty($filters['status'])) {
             $where[] = "m.status = ?";
@@ -58,12 +85,14 @@ class Member
         $offset = ($page - 1) * $perPage;
 
         $total = Database::fetch(
-            "SELECT COUNT(*) as cnt FROM members m WHERE {$whereClause}",
+            "SELECT COUNT(*) as cnt FROM members m
+             LEFT JOIN membership_types mt ON m.membership_type_id = mt.id
+             WHERE {$whereClause}",
             $params
         )['cnt'];
 
         $members = Database::fetchAll(
-            "SELECT m.*, mt.name as membership_type_name, c.name as country_name
+            "SELECT m.*, mt.name as membership_type_name, mt.slug as membership_type_slug, c.name as country_name
              FROM members m
              LEFT JOIN membership_types mt ON m.membership_type_id = mt.id
              LEFT JOIN countries c ON m.country_id = c.id
@@ -146,6 +175,38 @@ class Member
             "SELECT mt.name as type, COUNT(m.id) as count
              FROM members m JOIN membership_types mt ON m.membership_type_id = mt.id
              WHERE m.status = 'active' GROUP BY mt.name"
+        );
+    }
+
+    public static function getGenderDistribution(): array
+    {
+        return Database::fetchAll(
+            "SELECT COALESCE(NULLIF(gender, ''), 'unspecified') as gender, COUNT(*) as count
+             FROM members
+             GROUP BY COALESCE(NULLIF(gender, ''), 'unspecified')
+             ORDER BY count DESC"
+        );
+    }
+
+    public static function getBatchDistribution(int $limit = 12): array
+    {
+        return Database::fetchAll(
+            "SELECT studied_to_year as batch, COUNT(*) as count
+             FROM members
+             WHERE studied_to_year IS NOT NULL
+             GROUP BY studied_to_year
+             ORDER BY studied_to_year DESC
+             LIMIT ?",
+            [$limit]
+        );
+    }
+
+    public static function getRecent(int $limit = 5): array
+    {
+        return Database::fetchAll(
+            "SELECT id, membership_number, full_name_english, status, created_at
+             FROM members ORDER BY created_at DESC LIMIT ?",
+            [$limit]
         );
     }
 }

@@ -18,4 +18,9 @@ class MembershipCard
     {
         return Database::insert('membership_cards', $data);
     }
+
+    public static function update(int $id, array $data): int
+    {
+        return Database::update('membership_cards', $data, 'id = ?', [$id]);
+    }
 }

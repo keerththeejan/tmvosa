@@ -12,10 +12,11 @@ INSERT INTO roles (name, slug, description, permissions) VALUES
 INSERT INTO users (role_id, username, email, password, full_name, mobile, is_active) VALUES
 (1, 'admin', 'admin@osa-alumni.org', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'System Administrator', '0770000000', 1);
 
--- Membership Types
+-- Membership Types (sort: half_year, ordinary, ten_year via application ORDER BY)
 INSERT INTO membership_types (name, slug, fee, duration_years, description) VALUES
-('Ordinary Member', 'ordinary', 1000.00, 1, 'Annual membership - Rs. 1,000'),
-('10-Year Membership', 'ten_year', 10000.00, 10, '10-Year membership - Rs. 10,000');
+('Half-Year Membership', 'half_year', 500.00, 0, 'Half-Year Membership (அரை ஆண்டு உறுப்பினர்) — Rs. 500.00 | 6 Months (180 Days)'),
+('Ordinary Member', 'ordinary', 1000.00, 1, 'Ordinary Member (சாதாரண உறுப்பினர்) — Rs. 1,000.00 | 1 Year'),
+('10-Year Membership', 'ten_year', 10000.00, 10, '10-Year Membership (10 ஆண்டு உறுப்பினர்) — Rs. 10,000.00 | 10 Years');
 
 -- Countries (sample)
 INSERT INTO countries (name, code, phone_code) VALUES

@@ -6,6 +6,9 @@ $pageTitle = 'Login';
 ?>
 <div class="auth-page">
     <div class="auth-container">
+        <div class="d-flex justify-content-end mb-2">
+            <?php View::partial('language-switcher', ['variant' => 'dark']); ?>
+        </div>
         <?php View::partial('osa-hero-banner', ['heroCompact' => true, 'heroEager' => true]); ?>
         <div class="card auth-card shadow-sm mt-3">
             <div class="card-body p-4">
@@ -27,18 +30,16 @@ $pageTitle = 'Login';
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary btn-lg w-100 bilingual-btn" id="loginBtn">
-                        <span class="label-ta"><?= View::escape(Lang::ui('sign_in')['ta']) ?></span>
-                        <span class="label-en"><?= View::escape(Lang::ui('sign_in')['en']) ?></span>
+                        <?= View::escape(__('sign_in')) ?>
                         <span class="spinner-border spinner-border-sm d-none" role="status"></span>
                     </button>
                 </form>
             </div>
         </div>
         <div class="text-center mt-4">
-            <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/apply" class="text-decoration-none text-white bilingual-text bilingual-block">
+            <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/apply" class="text-decoration-none text-white">
                 <i class="bi bi-file-earmark-plus"></i>
-                <span class="label-ta"><?= View::escape(Lang::ui('apply_membership')['ta']) ?></span>
-                <span class="label-en"><?= View::escape(Lang::ui('apply_membership')['en']) ?></span>
+                <?= View::escape(__('apply_membership')) ?>
             </a>
         </div>
     </div>

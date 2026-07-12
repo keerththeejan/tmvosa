@@ -49,6 +49,7 @@ class App
         }
 
         Session::checkTimeout();
+        \App\Helpers\Lang::boot();
     }
 
     public static function sessionCookiePath(): string
