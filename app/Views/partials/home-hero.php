@@ -21,9 +21,9 @@ $logoUrl = ($assetBase ?? View::assetBase()) . '/assets/img/osa-school-logo.png'
     <div class="osa-hero-overlay" aria-hidden="true"></div>
     <div class="osa-hero-vignette" aria-hidden="true"></div>
 
-    <div class="container-xl position-relative osa-hero-inner">
-        <div class="row align-items-center osa-hero-row g-4 g-xl-5">
-            <div class="col-lg-6 col-xl-7" data-aos="fade-up" data-aos-duration="500">
+    <div class="container-xxl position-relative osa-hero-inner">
+        <div class="row align-items-center osa-hero-row g-4 gy-4 gx-4">
+            <div class="col-lg-6 col-xl-7" data-aos="fade-up" data-aos-duration="800">
                 <div class="osa-hero-content">
                     <div class="osa-hero-brand">
                         <img
@@ -68,22 +68,22 @@ $logoUrl = ($assetBase ?? View::assetBase()) . '/assets/img/osa-school-logo.png'
                     </div>
 
                     <div class="osa-hero-stats" id="stats" aria-label="Live statistics">
-                        <div class="osa-hero-stat" data-aos="zoom-in" data-aos-delay="0" data-aos-duration="500">
+                        <div class="osa-hero-stat" data-aos="zoom-in" data-aos-delay="0" data-aos-duration="700">
                             <span class="osa-hero-stat-icon" aria-hidden="true"><i class="bi bi-people-fill"></i></span>
                             <div class="osa-hero-stat-value"><span data-counter="<?= (int) $heroMembers ?>" data-suffix="+">0</span></div>
                             <div class="osa-hero-stat-label"><?= View::escape(__('stat_members')) ?></div>
                         </div>
-                        <div class="osa-hero-stat" data-aos="zoom-in" data-aos-delay="80" data-aos-duration="500">
+                        <div class="osa-hero-stat" data-aos="zoom-in" data-aos-delay="80" data-aos-duration="700">
                             <span class="osa-hero-stat-icon" aria-hidden="true"><i class="bi bi-clipboard2-check-fill"></i></span>
                             <div class="osa-hero-stat-value"><span data-counter="<?= (int) $heroApps ?>" data-suffix="+">0</span></div>
                             <div class="osa-hero-stat-label"><?= View::escape(__('stat_applications')) ?></div>
                         </div>
-                        <div class="osa-hero-stat" data-aos="zoom-in" data-aos-delay="160" data-aos-duration="500">
+                        <div class="osa-hero-stat" data-aos="zoom-in" data-aos-delay="160" data-aos-duration="700">
                             <span class="osa-hero-stat-icon" aria-hidden="true"><i class="bi bi-calendar-event-fill"></i></span>
                             <div class="osa-hero-stat-value"><span data-counter="35">0</span></div>
                             <div class="osa-hero-stat-label"><?= View::escape(__('stat_events')) ?></div>
                         </div>
-                        <div class="osa-hero-stat" data-aos="zoom-in" data-aos-delay="240" data-aos-duration="500">
+                        <div class="osa-hero-stat" data-aos="zoom-in" data-aos-delay="240" data-aos-duration="700">
                             <span class="osa-hero-stat-icon" aria-hidden="true"><i class="bi bi-trophy-fill"></i></span>
                             <div class="osa-hero-stat-value"><span data-counter="50" data-suffix="+">0</span></div>
                             <div class="osa-hero-stat-label"><?= View::escape(__('stat_years')) ?></div>
@@ -92,13 +92,13 @@ $logoUrl = ($assetBase ?? View::assetBase()) . '/assets/img/osa-school-logo.png'
                 </div>
             </div>
 
-            <div class="col-lg-6 col-xl-5 d-flex justify-content-center justify-content-lg-end" data-aos="fade-left" data-aos-duration="500">
+            <div class="col-lg-6 col-xl-5 d-flex justify-content-center justify-content-lg-end" data-aos="fade-left" data-aos-duration="800">
                 <div class="osa-hero-visual">
                     <div class="osa-hero-visual-glow" aria-hidden="true"></div>
                     <article class="osa-member-card-mock osa-hero-float" aria-label="Digital OSA membership card preview">
                         <div class="osa-member-card-mock__shine" aria-hidden="true"></div>
                         <div class="osa-member-card-mock__header">
-                            <img class="osa-member-card-mock__crest" src="<?= View::escape($logoUrl) ?>" alt="" width="48" height="48" decoding="async">
+                            <img class="osa-member-card-mock__crest" src="<?= View::escape($logoUrl) ?>" alt="" width="64" height="64" decoding="async">
                             <div class="osa-member-card-mock__org">
                                 <strong>OSA Alumni</strong>
                                 <small><?= View::escape(__('card_org_name')) ?></small>
@@ -110,14 +110,16 @@ $logoUrl = ($assetBase ?? View::assetBase()) . '/assets/img/osa-school-logo.png'
                         </div>
 
                         <div class="osa-member-card-mock__main">
-                            <div class="osa-member-card-mock__profile">
-                                <div class="osa-member-card-mock__avatar" aria-hidden="true">
-                                    <i class="bi bi-person-fill"></i>
-                                </div>
-                                <div class="osa-member-card-mock__details">
-                                    <span class="osa-member-card-mock__name"><?= View::escape(__('demo_member_name')) ?></span>
+                            <div class="osa-member-card-mock__avatar" aria-hidden="true">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div class="osa-member-card-mock__details">
+                                <span class="osa-member-card-mock__name"><?= View::escape(__('demo_member_name')) ?></span>
+                                <div class="osa-member-card-mock__field">
                                     <span class="osa-member-card-mock__meta-label"><?= View::escape(__('member_id')) ?></span>
                                     <span class="osa-member-card-mock__meta-value"><?= View::escape(__('demo_member_id')) ?></span>
+                                </div>
+                                <div class="osa-member-card-mock__field">
                                     <span class="osa-member-card-mock__meta-label"><?= View::escape(__('membership_type_label')) ?></span>
                                     <span class="osa-member-card-mock__meta-value"><?= View::escape(__('lifetime_member')) ?></span>
                                 </div>

@@ -1,10 +1,10 @@
-<?php
+﻿<?php
 use App\Core\View;
 use App\Helpers\Lang;
 use App\Models\Application;
 use App\Models\Member;
 
-$pageTitle = 'OSA Alumni | Premium Membership Portal — Thiruvaiyaru Maha Vidyalayam';
+$pageTitle = 'OSA Alumni | Premium Membership Portal â€” Thiruvaiyaru Maha Vidyalayam';
 $bodyClass = 'osa-home';
 $loadAos = true;
 $extraCss = ['assets/css/home.css', 'assets/css/hero.css', 'assets/css/hero-responsive.css', 'assets/css/apply-form.css'];
@@ -115,24 +115,29 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
 <div class="osa-home" id="osaHomeRoot">
     <a class="visually-hidden-focusable btn btn-light position-absolute top-0 start-0 m-2 z-3" href="#mainContent"><?= View::escape(__('skip_to_content')) ?></a>
 
-    <header class="osa-nav navbar navbar-expand-xl fixed-top" id="osaNav">
-        <div class="container">
+    <header class="osa-nav navbar navbar-expand-lg sticky-top" id="osaNav">
+        <div class="container-xxl">
             <a class="navbar-brand d-flex align-items-center gap-2" href="#home" aria-label="OSA Alumni home">
-                <img class="osa-nav-logo" src="<?= View::escape($assetBase) ?>/assets/img/osa-school-logo.png" alt="OSA Alumni" width="60" height="60" decoding="async">
+                <img class="osa-nav-logo" src="<?= View::escape($assetBase) ?>/assets/img/osa-school-logo.png" alt="OSA Alumni" width="72" height="72" decoding="async">
                 <span class="osa-brand-text">
                     <strong>OSA Alumni</strong>
                     <small>Thiruvaiyaru MV</small>
                 </span>
             </a>
-            <div class="d-flex align-items-center gap-2 d-xl-none">
+            <div class="d-flex align-items-center gap-2 d-lg-none">
                 <?php View::partial('language-switcher', ['variant' => 'nav']); ?>
                 <button type="button" class="btn btn-osa-icon" id="osaThemeToggleMobile" aria-label="Toggle dark mode"><i class="bi bi-moon-stars"></i></button>
-                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#osaNavMenu" aria-controls="osaNavMenu" aria-expanded="false" aria-label="Toggle navigation">
-                    <i class="bi bi-list fs-3"></i>
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#osaNavOffcanvas" aria-controls="osaNavOffcanvas" aria-label="Open navigation menu">
+                    <i class="bi bi-list fs-3" aria-hidden="true"></i>
                 </button>
             </div>
-            <div class="collapse navbar-collapse" id="osaNavMenu">
-                <ul class="navbar-nav mx-xl-auto mb-2 mb-xl-0 align-items-xl-center i18n-nav">
+            <div class="offcanvas-lg offcanvas-end osa-nav-offcanvas" tabindex="-1" id="osaNavOffcanvas" aria-labelledby="osaNavOffcanvasLabel">
+                <div class="offcanvas-header d-lg-none">
+                    <h5 class="offcanvas-title text-white" id="osaNavOffcanvasLabel">OSA Alumni</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" data-bs-target="#osaNavOffcanvas" aria-label="Close menu"></button>
+                </div>
+                <div class="offcanvas-body d-flex flex-column flex-lg-row align-items-lg-center w-100">
+                <ul class="navbar-nav mx-lg-auto mb-3 mb-lg-0 align-items-lg-center i18n-nav">
                     <?php
                     $homeNav = [
                         ['#home', 'home'],
@@ -141,7 +146,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
                     foreach ($homeNav as [$href, $key]):
                     ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= $href ?>"><?= View::escape(__($key)) ?></a>
+                        <a class="nav-link" href="<?= $href ?>" data-bs-dismiss="offcanvas" data-bs-target="#osaNavOffcanvas"><?= View::escape(__($key)) ?></a>
                     </li>
                     <?php endforeach; ?>
                     <li class="nav-item dropdown">
@@ -149,12 +154,12 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
                             <?= View::escape(__('membership')) ?>
                         </a>
                         <ul class="dropdown-menu osa-mega shadow border-0">
-                            <li><a class="dropdown-item" href="#membership"><?= View::escape(__('membership_plans')) ?></a></li>
-                            <li><a class="dropdown-item" href="#benefits"><?= View::escape(__('why_join')) ?></a></li>
-                            <li><a class="dropdown-item" href="#member-benefits"><?= View::escape(__('member_benefits')) ?></a></li>
-                            <li><a class="dropdown-item" href="#verify"><?= View::escape(__('verify_member')) ?></a></li>
+                            <li><a class="dropdown-item" href="#membership" data-bs-dismiss="offcanvas" data-bs-target="#osaNavOffcanvas"><?= View::escape(__('membership_plans')) ?></a></li>
+                            <li><a class="dropdown-item" href="#benefits" data-bs-dismiss="offcanvas" data-bs-target="#osaNavOffcanvas"><?= View::escape(__('why_join')) ?></a></li>
+                            <li><a class="dropdown-item" href="#member-benefits" data-bs-dismiss="offcanvas" data-bs-target="#osaNavOffcanvas"><?= View::escape(__('member_benefits')) ?></a></li>
+                            <li><a class="dropdown-item" href="#verify" data-bs-dismiss="offcanvas" data-bs-target="#osaNavOffcanvas"><?= View::escape(__('verify_member')) ?></a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#apply"><?= View::escape(__('apply_now')) ?></a></li>
+                            <li><a class="dropdown-item" href="#apply" data-bs-dismiss="offcanvas" data-bs-target="#osaNavOffcanvas"><?= View::escape(__('apply_now')) ?></a></li>
                         </ul>
                     </li>
                     <?php
@@ -167,22 +172,22 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
                         ['#verify', 'verify_member'],
                     ];
                     foreach ($homeNav2 as [$href, $key]):
-                        $hideClass = in_array($key, ['gallery', 'news', 'verify_member'], true) ? ' d-none d-xxl-block' : '';
                     ?>
-                    <li class="nav-item<?= $hideClass ?>">
-                        <a class="nav-link" href="<?= $href ?>"><?= View::escape(__($key)) ?></a>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= $href ?>" data-bs-dismiss="offcanvas" data-bs-target="#osaNavOffcanvas"><?= View::escape(__($key)) ?></a>
                     </li>
                     <?php endforeach; ?>
                 </ul>
-                <div class="d-flex flex-column flex-xl-row align-items-xl-center gap-2 mt-2 mt-xl-0">
-                    <div class="osa-nav-lang d-none d-xl-inline-flex align-items-center"><?php View::partial('language-switcher', ['variant' => 'nav']); ?></div>
-                    <button type="button" class="btn btn-osa-icon d-none d-xl-inline-flex" id="osaThemeToggle" aria-label="Toggle dark mode"><i class="bi bi-moon-stars"></i></button>
+                <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 mt-2 mt-lg-0">
+                    <div class="osa-nav-lang d-none d-lg-inline-flex align-items-center"><?php View::partial('language-switcher', ['variant' => 'nav']); ?></div>
+                    <button type="button" class="btn btn-osa-icon d-none d-lg-inline-flex" id="osaThemeToggle" aria-label="Toggle dark mode"><i class="bi bi-moon-stars"></i></button>
                     <a class="btn btn-osa-ghost btn-sm bilingual-btn" href="<?= View::escape($loginUrl) ?>">
                         <?= View::escape(__('member_login')) ?>
                     </a>
-                    <a class="btn btn-osa-primary btn-sm bilingual-btn" href="#apply">
+                    <a class="btn btn-osa-primary btn-sm bilingual-btn" href="#apply" data-bs-dismiss="offcanvas" data-bs-target="#osaNavOffcanvas">
                         <?= View::escape(__('apply_now')) ?>
                     </a>
+                </div>
                 </div>
             </div>
         </div>
@@ -192,7 +197,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
         <?php View::partial('home-hero', compact('heroBg', 'loginUrl', 'heroMembers', 'heroApps', 'assetBase')); ?>
 
         <section class="osa-section" id="about">
-            <div class="container">
+            <div class="container-xxl">
                 <div class="row g-4 g-xl-5 align-items-center">
                     <div class="col-lg-5" data-aos="fade-right">
                         <div class="osa-about-media">
@@ -235,7 +240,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
         </section>
 
         <section class="osa-section osa-section-alt" id="membership">
-            <div class="container">
+            <div class="container-xxl">
                 <div class="text-center col-lg-8 mx-auto mb-4 mb-lg-5" data-aos="fade-up">
                     <p class="osa-eyebrow"><?= View::escape(__('membership_eyebrow')) ?></p>
                     <h2 class="osa-section-title"><?= View::escape(__('membership_title')) ?></h2>
@@ -271,7 +276,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
         </section>
 
         <section class="osa-section" id="benefits">
-            <div class="container">
+            <div class="container-xxl">
                 <div class="text-center col-lg-8 mx-auto mb-4 mb-lg-5" data-aos="fade-up">
                     <p class="osa-eyebrow"><?= View::escape(__('why_join_eyebrow')) ?></p>
                     <h2 class="osa-section-title"><?= View::escape(__('why_join_title')) ?></h2>
@@ -291,7 +296,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
         </section>
 
         <section class="osa-section osa-section-alt" id="member-benefits">
-            <div class="container">
+            <div class="container-xxl">
                 <div class="text-center col-lg-8 mx-auto mb-4 mb-lg-5" data-aos="fade-up">
                     <p class="osa-eyebrow"><?= View::escape(__('journey_eyebrow')) ?></p>
                     <h2 class="osa-section-title"><?= View::escape(__('journey_title')) ?></h2>
@@ -311,7 +316,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
         </section>
 
         <section class="osa-section" id="news">
-            <div class="container">
+            <div class="container-xxl">
                 <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4" data-aos="fade-up">
                     <div>
                         <p class="osa-eyebrow mb-1"><?= View::escape(__('news_eyebrow')) ?></p>
@@ -340,7 +345,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
         </section>
 
         <section class="osa-section osa-section-alt" id="events">
-            <div class="container">
+            <div class="container-xxl">
                 <div class="text-center col-lg-8 mx-auto mb-4 mb-lg-5" data-aos="fade-up">
                     <p class="osa-eyebrow"><?= View::escape(__('events_eyebrow')) ?></p>
                     <h2 class="osa-section-title"><?= View::escape(__('events')) ?></h2>
@@ -372,7 +377,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
         </section>
 
         <section class="osa-section" id="gallery">
-            <div class="container">
+            <div class="container-xxl">
                 <div class="text-center col-lg-8 mx-auto mb-4" data-aos="fade-up">
                     <p class="osa-eyebrow"><?= View::escape(__('gallery_eyebrow')) ?></p>
                     <h2 class="osa-section-title"><?= View::escape(__('gallery_title')) ?></h2>
@@ -383,7 +388,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
                     foreach ($positions as $g => $pos):
                     ?>
                     <button type="button" class="osa-gallery-item" data-bs-toggle="modal" data-bs-target="#osaLightbox" data-image="<?= View::escape($heroImg) ?>" data-caption="OSA Alumni gallery <?= $g + 1 ?>" aria-label="Open gallery image <?= $g + 1 ?>" data-aos="zoom-in" data-aos-delay="<?= ($g % 4) * 50 ?>">
-                        <img src="<?= View::escape($heroImg) ?>" alt="OSA alumni gallery image <?= $g + 1 ?>" loading="lazy" decoding="async" width="600" height="400" style="object-position:<?= View::escape($pos) ?>">
+                        <img src="<?= View::escape($heroImg) ?>" class="img-fluid w-100 h-auto" alt="OSA alumni gallery image <?= $g + 1 ?>" loading="lazy" decoding="async" width="600" height="400" style="object-fit:cover;object-position:<?= View::escape($pos) ?>">
                         <span class="osa-gallery-zoom" aria-hidden="true"><i class="bi bi-zoom-in"></i></span>
                     </button>
                     <?php endforeach; ?>
@@ -392,7 +397,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
         </section>
 
         <section class="osa-section osa-section-alt" id="video">
-            <div class="container">
+            <div class="container-xxl">
                 <div class="row align-items-center g-4 g-xl-5">
                     <div class="col-lg-6" data-aos="fade-right">
                         <p class="osa-eyebrow"><?= View::escape(__('video_eyebrow')) ?></p>
@@ -410,7 +415,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
         </section>
 
         <section class="osa-section" id="stories">
-            <div class="container">
+            <div class="container-xxl">
                 <div class="text-center mb-4" data-aos="fade-up">
                     <p class="osa-eyebrow"><?= View::escape(__('stories_eyebrow')) ?></p>
                     <h2 class="osa-section-title"><?= View::escape(__('stories_title')) ?></h2>
@@ -424,7 +429,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
                                 <div class="osa-stars mb-3" aria-label="<?= (int) $t['rating'] ?> star rating">
                                     <?php for ($s = 0; $s < (int) $t['rating']; $s++): ?><i class="bi bi-star-fill"></i><?php endfor; ?>
                                 </div>
-                                <blockquote class="mb-3">“<?= View::escape($t['quote']) ?>”</blockquote>
+                                <blockquote class="mb-3">â€œ<?= View::escape($t['quote']) ?>â€</blockquote>
                                 <figcaption>
                                     <strong><?= View::escape($t['name']) ?></strong>
                                     <span class="d-block small text-muted"><?= View::escape($t['batch']) ?> · <?= View::escape($t['role']) ?></span>
@@ -440,7 +445,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
         </section>
 
         <section class="osa-partners py-4" aria-label="Partner organizations">
-            <div class="container">
+            <div class="container-xxl">
                 <p class="text-center small text-uppercase text-muted mb-3"><?= View::escape(__('partners_eyebrow')) ?></p>
                 <div class="osa-logo-marquee" aria-hidden="true">
                     <div class="osa-logo-track">
@@ -456,7 +461,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
         </section>
 
         <section class="osa-section osa-section-alt" id="verify">
-            <div class="container">
+            <div class="container-xxl">
                 <div class="row justify-content-center">
                     <div class="col-lg-8" data-aos="fade-up">
                         <div class="osa-verify-card text-center">
@@ -499,7 +504,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
         </section>
 
         <section class="osa-cta" data-aos="zoom-in">
-            <div class="container text-center py-5">
+            <div class="container-xxl text-center py-5">
                 <h2 class="osa-section-title text-white mb-3"><?= View::escape(__('cta_title')) ?></h2>
                 <p class="text-white-50 mb-4 col-lg-7 mx-auto"><?= View::escape(__('cta_lead')) ?></p>
                 <a href="#apply" class="btn btn-osa-light btn-lg"><?= View::escape(__('apply_now')) ?></a>
@@ -507,7 +512,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
         </section>
 
         <section class="osa-section" id="contact">
-            <div class="container">
+            <div class="container-xxl">
                 <div class="text-center col-lg-8 mx-auto mb-4 mb-lg-5" data-aos="fade-up">
                     <p class="osa-eyebrow"><?= View::escape(__('contact_eyebrow')) ?></p>
                     <h2 class="osa-section-title"><?= View::escape(__('contact_title')) ?></h2>
@@ -525,7 +530,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
                     <div class="col-lg-7" data-aos="fade-right">
                         <div class="osa-map-embed">
                             <iframe
-                                title="Thiruvaiyaru Maha Vidyalayam — 9C4H+4C8, Kilinochchi, Sri Lanka"
+                                title="Thiruvaiyaru Maha Vidyalayam â€” 9C4H+4C8, Kilinochchi, Sri Lanka"
                                 src="<?= View::escape($mapsEmbed) ?>"
                                 width="100%"
                                 height="450"
@@ -542,8 +547,8 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
                                 <div>
                                     <h3 class="osa-contact-label"><?= View::escape(__('contact_address_label')) ?></h3>
                                     <p class="osa-contact-address-ta mb-1">
-                                        திருவையாறு மகா வித்தியாலயம்<br>
-                                        கிளிநொச்சி, இலங்கை
+                                        à®¤à®¿à®°à¯à®µà¯ˆà®¯à®¾à®±à¯ à®®à®•à®¾ à®µà®¿à®¤à¯à®¤à®¿à®¯à®¾à®²à®¯à®®à¯<br>
+                                        à®•à®¿à®³à®¿à®¨à¯Šà®šà¯à®šà®¿, à®‡à®²à®™à¯à®•à¯ˆ
                                     </p>
                                     <p class="osa-contact-address-en mb-0">
                                         Thiruvaiyaru Maha Vidyalayam<br>
@@ -634,7 +639,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
         </section>
 
         <section class="osa-section osa-section-alt" id="apply">
-            <div class="container">
+            <div class="container-xxl">
                 <div class="text-center col-lg-8 mx-auto mb-4" data-aos="fade-up">
                     <p class="osa-eyebrow"><?= View::escape(__('applications')) ?></p>
                     <h2 class="osa-section-title"><?= View::escape(__('begin_application')) ?></h2>
@@ -655,9 +660,9 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
     </main>
 
     <footer class="osa-footer" id="osaFooter">
-        <div class="container py-5">
-            <div class="row g-4">
-                <div class="col-lg-4">
+        <div class="container-xxl py-5">
+            <div class="row g-4 gy-4 gx-4">
+                <div class="col-12 col-md-6 col-lg-3">
                     <div class="d-flex align-items-center gap-2 mb-3">
                         <span class="osa-brand-mark"><i class="bi bi-mortarboard-fill"></i></span>
                         <strong>OSA Alumni</strong>
@@ -671,7 +676,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
                         </div>
                     </form>
                 </div>
-                <div class="col-6 col-md-3 col-lg-2">
+                <div class="col-6 col-md-3 col-lg-3">
                     <h3 class="h6"><?= View::escape(__('footer_quick_links')) ?></h3>
                     <ul class="list-unstyled small mb-0">
                         <li><a href="#about"><?= View::escape(__('about')) ?></a></li>
@@ -680,7 +685,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
                         <li><a href="#gallery"><?= View::escape(__('gallery')) ?></a></li>
                     </ul>
                 </div>
-                <div class="col-6 col-md-3 col-lg-2">
+                <div class="col-6 col-md-3 col-lg-3">
                     <h3 class="h6"><?= View::escape(__('membership')) ?></h3>
                     <ul class="list-unstyled small mb-0">
                         <li><a href="#membership"><?= View::escape(__('membership_plans')) ?></a></li>
@@ -689,7 +694,7 @@ window.APP_VALIDATION_CONFIG = <?= json_encode($validationConfig ?? [
                         <li><a href="<?= View::escape($loginUrl) ?>"><?= View::escape(__('login')) ?></a></li>
                     </ul>
                 </div>
-                <div class="col-md-6 col-lg-4">
+                <div class="col-12 col-md-6 col-lg-3">
                     <h3 class="h6"><?= View::escape(__('footer_contact')) ?></h3>
                     <p class="small mb-1"><?= View::escape($contact['phone_display']) ?></p>
                     <p class="small mb-3"><?= View::escape($contact['email']) ?></p>

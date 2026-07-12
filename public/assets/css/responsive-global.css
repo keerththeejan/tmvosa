@@ -1,0 +1,155 @@
+/* =========================================================
+   OSA Global Responsive — Bootstrap 5 mobile-first
+   No PHP / backend changes. Prevents horizontal scroll.
+   ========================================================= */
+
+html {
+    scroll-behavior: smooth;
+}
+
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+img,
+svg,
+video,
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+img.img-fluid,
+.img-fluid {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Forms — full width */
+.form-control,
+.form-select,
+.input-group,
+textarea.form-control {
+    max-width: 100%;
+    width: 100%;
+}
+
+.invalid-feedback,
+.valid-feedback {
+    max-width: 100%;
+    word-wrap: break-word;
+}
+
+/* Tables — sticky header + premium borders */
+.table-responsive {
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 14px;
+}
+
+.table-responsive > .table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border-bottom-width: 2px;
+}
+
+/* Form floating label consistency */
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label,
+.form-floating > .form-select ~ label {
+    color: #1E6B34;
+}
+
+/* Section images lazy-friendly */
+img[loading="lazy"] {
+    content-visibility: auto;
+}
+
+/* Modals */
+.modal-dialog {
+    width: 90%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (min-width: 576px) {
+    .modal-dialog {
+        max-width: 600px;
+    }
+}
+
+/* Focus — WCAG visible */
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible,
+.nav-link:focus-visible,
+.form-control:focus-visible,
+.form-select:focus-visible {
+    outline: 2px solid #FFD54F;
+    outline-offset: 2px;
+}
+
+/* Typography scale */
+body {
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+@media (max-width: 991.98px) {
+    body { font-size: 15px; }
+}
+
+@media (max-width: 575.98px) {
+    body { font-size: 14px; }
+}
+
+/* Cards equal padding rhythm */
+.card {
+    max-width: 100%;
+}
+
+/* Hide duplicate global footer on marketing home (has .osa-footer) */
+body.osa-home .site-footer {
+    display: none;
+}
+
+/* Site footer responsive */
+.site-footer .container-lg,
+.site-footer .container-xxl {
+    max-width: 1320px;
+}
+
+/* Auth / narrow forms stay fluid */
+.auth-container {
+    width: 100%;
+    max-width: 480px;
+    margin-inline: auto;
+    padding-inline: 1rem;
+}
+
+/* Utility: never force horizontal overflow from fixed panels */
+.osa-hero-content,
+.osa-member-card-mock,
+.osa-hero-visual,
+.osa-apply-container {
+    max-width: 100% !important;
+}
+
+/* Pagination wrap */
+.pagination {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+}
+
+/* Alert text wrap */
+.alert {
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+}

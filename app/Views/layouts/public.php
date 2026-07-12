@@ -46,6 +46,8 @@
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
     <?php endif; ?>
     <link href="<?= $pub ?>/<?= \App\Core\App::assetVersion('assets/css/app.css') ?>" rel="stylesheet">
+    <link href="<?= $pub ?>/<?= \App\Core\App::assetVersion('assets/css/responsive-global.css') ?>" rel="stylesheet">
+    <link href="<?= $pub ?>/<?= \App\Core\App::assetVersion('assets/css/premium-university.css') ?>" rel="stylesheet">
     <?php foreach (($extraCss ?? []) as $cssFile): ?>
     <link href="<?= $pub ?>/<?= \App\Core\App::assetVersion($cssFile) ?>" rel="stylesheet">
     <?php endforeach; ?>

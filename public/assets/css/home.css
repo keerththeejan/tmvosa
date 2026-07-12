@@ -25,7 +25,7 @@ body.osa-home.osa-dark {
 body.osa-home {
     background: var(--osa-bg);
     color: var(--osa-text);
-    font-family: 'Noto Sans Tamil', 'Poppins', 'DM Sans', system-ui, sans-serif;
+    font-family: 'Poppins', 'Noto Sans Tamil', system-ui, sans-serif;
     overflow-x: hidden;
 }
 html:has(body.osa-home) {
@@ -33,7 +33,11 @@ html:has(body.osa-home) {
 }
 
 html.lang-en body.osa-home {
-    font-family: 'Poppins', 'DM Sans', 'Noto Sans Tamil', system-ui, sans-serif;
+    font-family: 'Poppins', 'Noto Sans Tamil', system-ui, sans-serif;
+}
+
+html.lang-ta body.osa-home {
+    font-family: 'Noto Sans Tamil', 'Poppins', system-ui, sans-serif;
 }
 
 .osa-hero-title .label-ta,
@@ -51,14 +55,19 @@ html.lang-en body.osa-home {
 
 body.osa-home .site-footer { display: none !important; }
 
-.osa-home h1, .osa-home h2 {
-    font-family: 'Cormorant Garamond', Georgia, serif;
+body.osa-home .osa-home h1,
+body.osa-home h1,
+body.osa-home h2,
+.osa-home h1,
+.osa-home h2 {
+    font-family: 'Poppins', 'Noto Sans Tamil', system-ui, sans-serif;
     letter-spacing: -0.02em;
     color: var(--osa-primary);
+    font-weight: 700;
 }
 html.lang-ta body.osa-home h1,
 html.lang-ta body.osa-home h2 {
-    font-family: 'Noto Sans Tamil', 'Cormorant Garamond', Georgia, serif;
+    font-family: 'Noto Sans Tamil', 'Poppins', system-ui, sans-serif;
 }
 
 body.osa-dark .osa-home h1,
@@ -114,29 +123,32 @@ body.osa-dark .osa-section-title { color: #f8fafc; }
     50% { transform: scale(1.06); }
 }
 
-/* Nav — transparent glass (official green theme) */
+/* Nav — sticky glass (84px desktop / 68px mobile) */
 .osa-nav {
-    background: rgba(15, 81, 50, 0.18);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    min-height: 84px;
+    display: flex;
+    align-items: center;
+    background: rgba(15, 81, 50, 0.14);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
     transition: background 0.3s ease, backdrop-filter 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
-    padding-block: 0.45rem;
+    padding-block: 8px;
     z-index: 1040;
 }
-.osa-nav .navbar-brand { align-items: center; gap: 0.65rem; }
+.osa-nav .navbar-brand { align-items: center; gap: 12px; }
 .osa-nav .osa-nav-logo {
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
     object-fit: contain;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.95);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(232, 197, 71, 0.55);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(255, 213, 79, 0.55);
 }
 .osa-nav .osa-brand-mark {
     display: none;
 }
 .osa-nav .osa-nav-lang {
-    align-self: flex-start;
+    align-self: center;
 }
 .osa-nav .osa-lang-switch {
     position: relative;
@@ -196,11 +208,70 @@ body.osa-dark .osa-section-title { color: #f8fafc; }
 }
 .osa-nav.is-scrolled {
     background: rgba(15, 81, 50, 0.72);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
     box-shadow: 0 12px 40px rgba(15, 81, 50, 0.28);
-    border-bottom: 1px solid rgba(232, 197, 71, 0.18);
-    padding-block: 0.3rem;
+    border-bottom: 1px solid rgba(255, 213, 79, 0.18);
+    padding-block: 4px;
+    min-height: 72px;
+}
+.osa-nav.is-scrolled .osa-nav-logo {
+    width: 56px;
+    height: 56px;
+}
+
+/* Offcanvas nav (mobile / tablet) */
+.osa-nav-offcanvas {
+    --bs-offcanvas-width: min(320px, 88vw);
+}
+@media (max-width: 991.98px) {
+    .osa-nav {
+        min-height: 68px;
+        padding-block: 6px;
+    }
+    .osa-nav .osa-nav-logo {
+        width: 48px;
+        height: 48px;
+    }
+    .osa-nav.is-scrolled {
+        min-height: 64px;
+    }
+    .osa-nav.is-scrolled .osa-nav-logo {
+        width: 44px;
+        height: 44px;
+    }
+    .osa-nav-offcanvas.offcanvas {
+        background: linear-gradient(180deg, #0F5132 0%, #1E6B34 100%);
+        color: #fff;
+    }
+    .osa-nav-offcanvas .nav-link {
+        color: rgba(255, 255, 255, 0.92) !important;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .osa-nav-offcanvas .nav-link:hover,
+    .osa-nav-offcanvas .nav-link:focus {
+        color: #FFD54F !important;
+    }
+    .osa-nav-offcanvas .dropdown-menu {
+        background: rgba(255, 255, 255, 0.08);
+        border: 0;
+    }
+    .osa-nav-offcanvas .dropdown-item {
+        color: #fff;
+    }
+    .osa-nav-offcanvas .dropdown-item:hover {
+        background: rgba(255, 213, 79, 0.15);
+        color: #FFD54F;
+    }
+    .osa-brand-text small { display: none; }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .osa-nav .osa-nav-logo {
+        width: 60px;
+        height: 60px;
+    }
 }
 .osa-brand-mark {
     width: 38px; height: 38px; border-radius: 12px;
@@ -211,14 +282,36 @@ body.osa-dark .osa-section-title { color: #f8fafc; }
 .osa-brand-text { display: flex; flex-direction: column; line-height: 1.15; color: #FFFFFF; }
 .osa-brand-text small { font-size: 0.65rem; opacity: 0.9; color: #F8FAFC; }
 .osa-nav .nav-link {
+    position: relative;
     color: #FFFFFF;
-    font-weight: 500; font-size: 0.82rem; padding: 0.4rem 0.5rem;
-    border-radius: 999px;
-    transition: color 0.3s ease, background 0.3s ease;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0;
+    transition: color 0.3s ease;
+}
+.osa-nav .nav-link:not(.dropdown-toggle)::before {
+    content: '';
+    position: absolute;
+    left: 0.65rem;
+    right: 0.65rem;
+    bottom: 0.15rem;
+    height: 2px;
+    border-radius: 2px;
+    background: #FFD54F;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.osa-nav .nav-link:not(.dropdown-toggle):hover::before,
+.osa-nav .nav-link:not(.dropdown-toggle):focus::before,
+.osa-nav .nav-link:not(.dropdown-toggle).active::before,
+.osa-nav .nav-link:not(.dropdown-toggle)[aria-current="page"]::before {
+    transform: scaleX(1);
 }
 .osa-nav .nav-link:hover, .osa-nav .nav-link:focus {
     color: #E8C547;
-    background: rgba(255, 255, 255, 0.08);
+    background: transparent;
 }
 .osa-nav .nav-link.active,
 .osa-nav .nav-link[aria-current="page"],
@@ -647,10 +740,7 @@ body.osa-dark .osa-quote blockquote { color: #f8fafc; }
 .osa-home .btn-osa-primary.is-rippling::after { opacity: 1; }
 
 @media (max-width: 1199.98px) {
-    .osa-nav .navbar-collapse {
-        background: rgba(11, 31, 58, 0.96);
-        border-radius: 1rem; padding: 1rem; margin-top: 0.75rem;
-    }
+    /* legacy collapse styles unused — offcanvas handles mobile nav */
 }
 @media (max-width: 991.98px) {
     #osaTestimonialCarousel .carousel-control-prev,
@@ -658,7 +748,15 @@ body.osa-dark .osa-quote blockquote { color: #f8fafc; }
     .osa-cta { background-attachment: scroll; }
     .osa-map-embed { height: 380px; }
     #about.osa-section { padding-top: 2rem; }
-    .osa-about-media { max-width: 360px; }
+    .osa-about-media { max-width: 100%; }
+    .osa-newsletter .input-group {
+        flex-direction: column;
+    }
+    .osa-newsletter .form-control,
+    .osa-newsletter .btn {
+        width: 100%;
+        border-radius: 0.8rem !important;
+    }
 }
 @media (max-width: 575.98px) {
     .osa-section { padding: 2.75rem 0; }

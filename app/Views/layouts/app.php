@@ -24,6 +24,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/<?= \App\Core\App::assetVersion('assets/css/app.css') ?>" rel="stylesheet">
+    <link href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/<?= \App\Core\App::assetVersion('assets/css/responsive-global.css') ?>" rel="stylesheet">
+    <link href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/<?= \App\Core\App::assetVersion('assets/css/premium-university.css') ?>" rel="stylesheet">
 </head>
 <body class="admin-panel">
     <?php if ($user): ?>

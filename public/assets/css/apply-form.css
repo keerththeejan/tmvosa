@@ -16,7 +16,10 @@ body.osa-home .osa-apply {
 }
 
 .osa-apply-container {
+    width: 100%;
     max-width: 1000px;
+    margin-inline: auto;
+    padding-inline: 0;
 }
 
 body.osa-home .osa-apply-container {
@@ -82,13 +85,16 @@ body.osa-home .osa-apply-container {
 .osa-apply-steps {
     list-style: none;
     display: flex;
-    gap: 0.35rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
     margin: 0;
     padding: 0;
-    min-width: 640px;
+    min-width: 0;
+    width: 100%;
 }
 .osa-apply-step {
-    flex: 1;
+    flex: 1 1 0;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -99,6 +105,38 @@ body.osa-home .osa-apply-container {
     padding: 0.25rem;
     color: #64748b;
     transition: color 0.2s ease;
+}
+
+@media (max-width: 767.98px) {
+    .osa-apply-stepper {
+        overflow-x: visible;
+        padding: 0.75rem 0.5rem;
+    }
+    .osa-apply-steps {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+        min-width: 0;
+    }
+    .osa-apply-step {
+        flex: none;
+        width: 100%;
+    }
+    .osa-apply-step:not(:last-child)::after {
+        display: none;
+    }
+    .osa-apply-step-label {
+        font-size: 0.7rem;
+        line-height: 1.3;
+        max-width: 100%;
+        word-wrap: break-word;
+    }
+}
+
+@media (max-width: 379.98px) {
+    .osa-apply-steps {
+        grid-template-columns: 1fr;
+    }
 }
 .osa-apply-step:not(:last-child)::after {
     content: '';

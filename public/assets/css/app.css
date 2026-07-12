@@ -2100,8 +2100,9 @@ img,
     }
 
     .modal-dialog {
-        margin: 0.5rem;
-        max-width: calc(100% - 1rem);
+        margin: 0.5rem auto;
+        max-width: min(600px, calc(100% - 1rem));
+        width: calc(100% - 1rem);
     }
 
     .modal-body {
@@ -2113,6 +2114,14 @@ img,
         width: calc(100% - 1.5rem) !important;
         max-width: 28rem !important;
     }
+}
+
+/* Modals — responsive 90% / max 600px */
+.modal-dialog {
+    width: 90%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Phones: single-column density */

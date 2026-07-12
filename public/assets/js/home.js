@@ -64,12 +64,13 @@
     });
   }
 
-  // Close mobile menu on link click
-  document.querySelectorAll('#osaNavMenu .nav-link:not(.dropdown-toggle), #osaNavMenu .dropdown-item, #osaNavMenu .btn').forEach(function (el) {
+  // Close mobile offcanvas on link click
+  document.querySelectorAll('#osaNavOffcanvas .nav-link:not(.dropdown-toggle), #osaNavOffcanvas .dropdown-item, #osaNavOffcanvas .btn').forEach(function (el) {
     el.addEventListener('click', function () {
-      var collapse = document.getElementById('osaNavMenu');
-      if (collapse && collapse.classList.contains('show') && window.bootstrap) {
-        bootstrap.Collapse.getOrCreateInstance(collapse).hide();
+      var panel = document.getElementById('osaNavOffcanvas');
+      if (panel && window.bootstrap && window.matchMedia('(max-width: 991.98px)').matches) {
+        var inst = bootstrap.Offcanvas.getInstance(panel);
+        if (inst) inst.hide();
       }
     });
   });
